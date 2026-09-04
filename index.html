@@ -482,10 +482,13 @@
       background: var(--c-accent);
       display: inline-block;
       line-height: 0.78;
-      vertical-align: -0.1em;
+      vertical-align: -0.13em;
       padding: 0.06em 0.08em;
-      box-shadow: 0 0 0 4px var(--c-text);
-      margin-right: 8px;
+      /* neo-brutalist: crisp border + hard offset shadow */
+      box-shadow:
+        0 0 0 3px var(--c-text),
+        5px 5px 0 0 var(--c-text);
+      margin-right: 14px;
     }
 
     .hero-sub {
