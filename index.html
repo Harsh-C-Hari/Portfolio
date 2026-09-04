@@ -204,6 +204,56 @@
   }
   .nav-links a:hover { border-bottom-color: var(--c-text); }
 
+  /* ---------- hamburger button ---------- */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px; height: 40px;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-toggle span {
+    display: block;
+    width: 100%; height: 1px;
+    background: var(--c-text);
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  /* X state */
+  .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* ---------- mobile menu panel ---------- */
+  .nav-mobile {
+    display: none;
+    max-height: 0;
+    overflow: hidden;
+    background: var(--c-bg);
+    border-bottom: 1px solid var(--c-border);
+    transition: max-height .3s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+    opacity: 0;
+  }
+  .nav-mobile.is-open {
+    max-height: 400px;
+    opacity: 1;
+  }
+  .nav-mobile a {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--c-text);
+    padding: 14px var(--s-6);
+    border-bottom: 1px solid var(--c-border);
+  }
+  .nav-mobile a:last-child { border-bottom: 0; }
+  .nav-mobile a:hover { background: var(--c-cream); }
+
   /* ============================================================
      HERO
      ============================================================ */
@@ -455,6 +505,8 @@
     .timeline__row { grid-template-columns: 1fr; gap: var(--s-2); }
     .timeline__meta { text-align: left; }
     .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    .nav-mobile { display: block; }
     .container { padding: 0 var(--s-4); }
     section { padding: var(--s-12) 0; }
     .hero { padding: var(--s-16) 0 var(--s-12); }
@@ -478,6 +530,17 @@
       <a href="#about">About</a>
       <a href="#contact" class="link-underline">Contact</a>
     </nav>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-mobile">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="nav-mobile" id="nav-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="#work">Work</a>
+    <a href="#experiments">Experiments</a>
+    <a href="#skills">Skills</a>
+    <a href="#timeline">Journey</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
   </div>
 </header>
 
@@ -967,6 +1030,28 @@
       document.querySelectorAll('section, article, .skill-row, .timeline__row').forEach(function (el) {
         el.classList.add('reveal');
         io.observe(el);
+      });
+    }
+
+    // hamburger toggle
+    var toggle = document.querySelector('.nav-toggle');
+    var mobileNav = document.getElementById('nav-mobile');
+    if (toggle && mobileNav) {
+      toggle.addEventListener('click', function () {
+        var open = mobileNav.classList.toggle('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+      });
+      mobileNav.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          mobileNav.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        });
+      });
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.nav') && mobileNav.classList.contains('is-open')) {
+          mobileNav.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
       });
     }
   })();
