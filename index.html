@@ -358,10 +358,15 @@
 
     .nav-brand {
       font-family: var(--f-display);
-      font-size: 22px;
-      letter-spacing: .04em;
+      font-size: 24px;
+      letter-spacing: 0.15em;
       text-transform: uppercase;
       text-decoration: none;
+      transition: letter-spacing 0.4s ease;
+    }
+
+    .nav-brand:hover {
+      letter-spacing: 0.22em;
     }
 
     .nav-links {
