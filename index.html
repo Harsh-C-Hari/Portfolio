@@ -287,13 +287,18 @@
       transition: all .3s cubic-bezier(.4, 0, .2, 1);
     }
 
-    .btn:hover,
+    /* scale on hover only for pointer devices — prevents sticky transform on touch */
+    @media (hover: hover) {
+      .btn:hover {
+        transform: scale(1.04);
+        text-decoration: none;
+      }
+    }
+
+    /* focus ring always works on every device */
     .btn:focus-visible {
       transform: scale(1.04);
       text-decoration: none;
-    }
-
-    .btn:focus-visible {
       outline: 2px solid var(--c-text);
       outline-offset: 2px;
     }
@@ -303,9 +308,11 @@
       color: var(--c-bg);
     }
 
-    .btn-primary:hover {
-      background: var(--c-accent);
-      color: var(--c-text);
+    @media (hover: hover) {
+      .btn-primary:hover {
+        background: var(--c-accent);
+        color: var(--c-text);
+      }
     }
 
     .btn-ghost {
@@ -396,13 +403,10 @@
       transition: border-bottom-color 0.3s ease, letter-spacing 0.3s ease;
     }
 
-    .nav-links a:hover {
-      border-bottom-color: var(--c-text);
-    }
-
-    /* only expand on devices with real hover (mouse); prevents sticky hover on touch screens */
+    /* nav underline + letter-spacing on hover: both guarded to prevent sticky state on touch */
     @media (hover: hover) {
       .nav-links a:hover {
+        border-bottom-color: var(--c-text);
         letter-spacing: 0.1em;
       }
     }
@@ -475,8 +479,10 @@
       border-bottom: 0;
     }
 
-    .nav-mobile a:hover {
-      background: var(--c-cream);
+    @media (hover: hover) {
+      .nav-mobile a:hover {
+        background: var(--c-cream);
+      }
     }
 
     /* ============================================================
@@ -976,9 +982,11 @@
       transition: color 0.2s ease;
     }
 
-    .foot a:hover {
-      color: var(--c-text);
-      text-decoration: underline;
+    @media (hover: hover) {
+      .foot a:hover {
+        color: var(--c-text);
+        text-decoration: underline;
+      }
     }
 
     /* ============================================================
