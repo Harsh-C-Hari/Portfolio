@@ -107,6 +107,13 @@
       color: var(--c-text);
     }
 
+    /* keyboard focus ring — uses accent pink so it's visible and on-brand */
+    :focus-visible {
+      outline: 2px solid var(--c-accent);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
     button {
       font: inherit;
       cursor: pointer;
@@ -169,6 +176,7 @@
       letter-spacing: -0.005em;
       margin: 0;
       text-transform: uppercase;
+      text-wrap: balance;
     }
 
     h3,
@@ -819,7 +827,7 @@
 
     .timeline__row {
       display: grid;
-      grid-template-columns: 120px 1fr 160px;
+      grid-template-columns: 120px 1fr auto;
       gap: var(--s-6);
       padding: calc(var(--s-5) + 2px) 0 var(--s-5) 0;
       border-top: 1px solid var(--c-border);
@@ -850,6 +858,7 @@
       font-size: 12px;
       color: var(--c-muted);
       text-align: right;
+      white-space: nowrap;
     }
 
     .timeline__row.is-empty .timeline__title {
@@ -964,6 +973,7 @@
     .foot a {
       color: var(--c-muted);
       text-decoration: none;
+      transition: color 0.2s ease;
     }
 
     .foot a:hover {
