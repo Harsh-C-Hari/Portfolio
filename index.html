@@ -48,7 +48,7 @@
   /* ---------- reset / base ---------- */
   *, *::before, *::after { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
   body {
     font-family: var(--f-body);
     font-size: 16px;
@@ -509,8 +509,23 @@
     .nav-mobile { display: block; }
     .container { padding: 0 var(--s-4); }
     section { padding: var(--s-12) 0; }
-    .hero { padding: var(--s-16) 0 var(--s-12); }
+    .hero { padding: var(--s-10) 0 var(--s-8); }
     .project--hero { padding: var(--s-8); }
+
+    /* --- mobile typography fixes --- */
+    .hero-h1            { font-size: clamp(48px, 13vw, 72px); }
+    .hero-sub           { font-size: clamp(18px, 4.5vw, 24px); max-width: 100%; }
+    .about h2           { font-size: clamp(40px, 10vw, 56px); }
+    .exp__title         { font-size: clamp(20px, 5vw, 28px); }
+
+    /* --- contact lede width reset --- */
+    .contact .lede      { max-width: 100%; }
+
+    /* --- project hero image inline-offset reset --- */
+    .project--hero .project__cover img { padding-top: 0 !important; margin-left: 0 !important; }
+
+    /* --- section heading row spacing on narrow screens --- */
+    .between            { margin-bottom: var(--s-6) !important; }
   }
 </style>
 </head>
