@@ -485,6 +485,7 @@
       vertical-align: -0.1em;
       padding: 0.06em 0.08em;
       box-shadow: 0 0 0 4px var(--c-text);
+      margin-right: 8px;
     }
 
     .hero-sub {
@@ -1044,7 +1045,8 @@
         padding: var(--s-8);
       }
 
-      /* --- mobile typography fixes --- */
+      /* --- mobile hero line-height fix (prevents EXPERIMENT colliding with accent box-shadow) --- */
+      .hero-h1 { line-height: .95; }
       .hero-h1 {
         font-size: clamp(48px, 13vw, 72px);
       }
