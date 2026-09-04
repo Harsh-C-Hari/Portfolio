@@ -1058,9 +1058,18 @@
         toggle.setAttribute('aria-expanded', String(open));
       });
       mobileNav.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          var href = this.getAttribute('href');
+          // close menu first, then scroll after transition (300ms) finishes
           mobileNav.classList.remove('is-open');
           toggle.setAttribute('aria-expanded', 'false');
+          setTimeout(function () {
+            var target = href === '#top' ? document.getElementById('top') : document.querySelector(href);
+            if (!target) return;
+            var offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 64;
+            window.scrollTo({ top: offsetTop < 0 ? 0 : offsetTop, behavior: 'smooth' });
+          }, 310); // wait for menu max-height transition (300ms) + tiny buffer
         });
       });
       document.addEventListener('click', function (e) {
