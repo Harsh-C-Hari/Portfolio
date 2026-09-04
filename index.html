@@ -658,8 +658,8 @@
 
     .project__cover .badge {
       position: absolute;
-      top: 12px;
-      left: 12px;
+      top: 38px;   /* 12px base + 26px to land inside image (image has padding-top:33px on desktop) */
+      left: 18px;  /* 12px base + 6px nudge */
       z-index: 2;
     }
 
@@ -1078,6 +1078,12 @@
         margin-left: 0 !important;
       }
 
+      /* --- featured badge: reset to top-left on mobile (image has no padding-top) --- */
+      .project__cover .badge {
+        top: 12px;
+        left: 12px;
+      }
+
       /* --- section heading row spacing on narrow screens --- */
       .between {
         margin-bottom: var(--s-6) !important;
@@ -1236,7 +1242,7 @@
 
           <div class="project__cover">
             <span class="badge chip chip--accent mono"
-              style="transform: translate(6px, 26px); padding-right: 10px; margin-right: 0px; margin-left: -4px;">Featured</span>
+              style="padding-right: 10px; margin-right: 0px; margin-left: -4px;">Featured</span>
             <img src="admin_home_page.png" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1600"
               height="900" loading="lazy" decoding="async"
               style="display: block; width: 100%; height: 100%; object-fit: cover; padding-top: 33px; padding-right: 0px; padding-left: 0px; margin-right: 0px; margin-left: 10px;">
