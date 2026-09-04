@@ -365,8 +365,11 @@
       transition: letter-spacing 0.4s ease;
     }
 
-    .nav-brand:hover {
-      letter-spacing: 0.22em;
+    /* only expand on devices with real hover (mouse); prevents sticky hover on touch screens */
+    @media (hover: hover) {
+      .nav-brand:hover {
+        letter-spacing: 0.22em;
+      }
     }
 
     .nav-links {
@@ -387,7 +390,13 @@
 
     .nav-links a:hover {
       border-bottom-color: var(--c-text);
-      letter-spacing: 0.1em;
+    }
+
+    /* only expand on devices with real hover (mouse); prevents sticky hover on touch screens */
+    @media (hover: hover) {
+      .nav-links a:hover {
+        letter-spacing: 0.1em;
+      }
     }
 
     /* ---------- hamburger button ---------- */
