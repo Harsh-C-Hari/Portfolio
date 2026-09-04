@@ -377,14 +377,17 @@
     .nav-links a {
       font-family: var(--f-mono);
       font-size: 13px;
+      letter-spacing: 0.06em;
       text-decoration: none;
       color: var(--c-text);
       padding: 6px 2px;
       border-bottom: 1px solid transparent;
+      transition: border-bottom-color 0.3s ease, letter-spacing 0.3s ease;
     }
 
     .nav-links a:hover {
       border-bottom-color: var(--c-text);
+      letter-spacing: 0.1em;
     }
 
     /* ---------- hamburger button ---------- */
@@ -444,6 +447,7 @@
       display: block;
       font-family: var(--f-mono);
       font-size: 13px;
+      letter-spacing: 0.06em;
       text-decoration: none;
       color: var(--c-text);
       padding: 14px var(--s-6);
