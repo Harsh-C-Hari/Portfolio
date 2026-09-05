@@ -2,8 +2,6 @@
 <html lang="en">
 
 <head>
-  <script type="application/json"
-    data-od-external-dependencies="">["/api/projects/b950a161-c1d9-484f-b4fc-09bb00de6282/raw/admin_home_page.png?workspaceId=iccg2px3nlk3xs6z4bea0jg0&workspaceMemberId=ca0i28w0gqtc2xrbh2qial3l","/api/projects/b950a161-c1d9-484f-b4fc-09bb00de6282/raw/image-1.png?workspaceId=iccg2px3nlk3xs6z4bea0jg0&workspaceMemberId=ca0i28w0gqtc2xrbh2qial3l"]</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Harsh C Hari — Full-Stack Developer &amp; CSE Student</title>
@@ -152,31 +150,6 @@
     ::selection {
       background: var(--c-accent);
       color: var(--c-text);
-    }
-
-    /* placeholder image (used for project cover etc.) */
-    .ph-img {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      border: 1px dashed var(--c-border);
-      background:
-        repeating-linear-gradient(45deg,
-          var(--c-cream) 0 12px, var(--c-bg) 12px 24px);
-      position: relative;
-    }
-
-    .ph-img::after {
-      content: attr(data-label);
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      font-family: var(--f-mono);
-      font-size: 12px;
-      color: var(--c-muted);
-      letter-spacing: .04em;
-      text-transform: uppercase;
     }
 
     /* ---------- type scale (Anton headings, Instrument Serif body) ---------- */
@@ -622,10 +595,6 @@
       background: var(--c-accent);
     }
 
-    .marquee--cream {
-      background: var(--c-cream);
-    }
-
     .marquee--surface {
       background: var(--c-surface);
     }
@@ -715,8 +684,8 @@
 
     .project__cover .badge {
       position: absolute;
-      top: 38px;   /* 12px base + 26px to land inside image (image has padding-top:33px on desktop) */
-      left: 18px;  /* 12px base + 6px nudge */
+      top: 12px;   /* 12px base + 26px to land inside image (image has padding-top:33px on desktop) */
+      left: 12px;  /* 12px base + 6px nudge */
       z-index: 2;
     }
 
@@ -766,10 +735,6 @@
       display: flex;
       flex-direction: column;
       gap: var(--s-4);
-    }
-
-    .exp--surface {
-      background: var(--c-surface);
     }
 
     .exp--cream {
@@ -945,6 +910,26 @@
 
     .about__side dd:last-child {
       margin-bottom: 0;
+    }
+
+    .about__photo {
+      display: block;
+      width: 100%;
+      max-width: 260px;
+      margin-top: var(--s-8);
+      border: 1px solid var(--c-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--c-cream);
+      box-shadow: 6px 6px 0 0 var(--c-accent);
+    }
+
+    .about__photo img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
     }
 
     /* ============================================================
@@ -1124,6 +1109,13 @@
         font-size: clamp(40px, 10vw, 56px);
       }
 
+      .about__photo {
+        max-width: 200px;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 4px 4px 0 0 var(--c-accent);
+      }
+
       .exp__title {
         font-size: clamp(20px, 5vw, 28px);
       }
@@ -1131,18 +1123,6 @@
       /* --- contact lede width reset --- */
       .contact .lede {
         max-width: 100%;
-      }
-
-      /* --- project hero image inline-offset reset --- */
-      .project--hero .project__cover img {
-        padding-top: 0 !important;
-        margin-left: 0 !important;
-      }
-
-      /* --- featured badge: reset to top-left on mobile (image has no padding-top) --- */
-      .project__cover .badge {
-        top: 12px;
-        left: 12px;
       }
 
       /* --- section heading row spacing on narrow screens --- */
@@ -1163,11 +1143,11 @@
     <div class="nav-inner">
       <a href="#top" class="nav-brand">Harsh&nbsp;C&nbsp;Hari</a>
       <nav class="nav-links" aria-label="Primary">
+        <a href="#about">About</a>
         <a href="#skills">Skills</a>
         <a href="#work">Work</a>
         <a href="#experiments">Experiments</a>
         <a href="#timeline">Journey</a>
-        <a href="#about">About</a>
         <a href="#contact" class="link-underline">Contact</a>
       </nav>
       <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-mobile">
@@ -1175,11 +1155,11 @@
       </button>
     </div>
     <div class="nav-mobile" id="nav-mobile" role="navigation" aria-label="Mobile navigation">
+      <a href="#about">About</a>
       <a href="#skills">Skills</a>
       <a href="#work">Work</a>
       <a href="#experiments">Experiments</a>
       <a href="#timeline">Journey</a>
-      <a href="#about">About</a>
       <a href="#contact">Contact</a>
     </div>
   </header>
@@ -1198,7 +1178,7 @@
 
         <div class="hero-grid">
           <h1 class="hero-h1">
-            I build <span class="accent" style="transform: translate(5px, -1px);">software</span>,<br>
+            I build <span class="accent">software</span>,<br>
             experiment<br>
             with ideas,<br>
             and turn ambitious<br>
@@ -1247,6 +1227,43 @@
       </div>
     </div>
 
+    <!-- ============================================================
+       ABOUT
+       ============================================================ -->
+    <section data-od-id="about" id="about">
+      <div class="container">
+        <div class="about">
+          <div>
+            <h2>About</h2>
+            <div class="about__photo">
+              <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy" decoding="async">
+            </div>
+          </div>
+          <div>
+            <p>I'm a second-year CSE student who treats personal projects like real systems.
+              I care about how things feel to use and how they behave when they fail. I prefer
+              boring, well-understood tools over novel ones — and reach for new tech only when
+              it actually solves a problem I have.</p>
+            <p>
+              Outside of code: I follow motorsport, run small experiments on the side, and
+              spend more time than I'd like to admit getting the small details right.
+            </p>
+
+            <dl class="about__side" style="margin-top: var(--s-6);">
+              <dt>Based in</dt>
+              <dd>Kerala, India</dd>
+              <dt>Studying</dt>
+              <dd>B.Tech CSE, College of Engineering Chengannur (2025–2029)</dd>
+              <dt>Currently</dt>
+              <dd>Building CEC platform &amp; Cloud Gaming Orchestrator; looking for internships and collabs.</dd>
+              <dt>Open to</dt>
+              <dd>Internships · OSS collabs · Hackathons · Side projects that need an extra engineer</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </section>
+    
     <!-- ============================================================
        SKILLS — only what projects evidence
        ============================================================ -->
@@ -1380,8 +1397,8 @@
           </div>
 
           <div class="project__cover">
-            <span class="badge chip chip--accent mono"
-              style="padding-right: 10px; margin-right: 0px; margin-left: -4px;">Featured</span>
+                        <span class="badge chip chip--accent mono"
+              style="margin-top: 25px; padding-right: 10px; margin-right: 0px; margin-left: 0px;">Featured</span>
             <img src="admin_home_page.png" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1600"
               height="900" loading="lazy" decoding="async"
               style="display: block; width: 100%; height: 100%; object-fit: cover; padding-top: 33px; padding-right: 0px; padding-left: 0px; margin-right: 0px; margin-left: 10px;">
@@ -1389,7 +1406,7 @@
         </article>
 
         <!-- Project 2 -->
-        <article class="project" data-od-id="project-2" style="transform: translate(0px, 11px);">
+        <article class="project" data-od-id="project-2">
           <div>
             <span class="project__index">02 / Platform</span>
             <h3 class="project__title">Future of CEC</h3>
@@ -1431,8 +1448,8 @@
           </div>
 
           <div class="project__cover">
-            <img src="image-2.png" alt="Smart Campus Platform" width="1600" height="900" loading="lazy" decoding="async"
-              style="display: block; width: 100%; height: 100%; object-fit: cover; padding-top: 0px; margin-top: 4px;">
+            <img src="image-2.webp" alt="Smart Campus Platform" width="1600" height="900" loading="lazy" decoding="async"
+              style="display: block; width: 100%; height: 100%; object-fit: cover;">
           </div>
         </article>
 
@@ -1492,7 +1509,7 @@
         <div class="between" style="margin-bottom: var(--s-10);">
           <div>
             <h2>Live<br>experiments</h2>
-            <p class="muted mono" style="margin-top: var(--s-3);">Deployed · Public URLs · Real users</p>
+            <p class="muted mono" style="margin-top: var(--s-3);">Deployed · Public URL</p>
           </div>
           <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari" rel="noopener" target="_blank">All on GitHub
             ↗</a>
@@ -1565,7 +1582,7 @@
           <div class="timeline__row">
             <span class="timeline__date">2025 →</span>
             <span class="timeline__title">B.Tech CSE, College of Engineering Chengannur</span>
-            <span class="timeline__meta">2024–2028 · In progress</span>
+            <span class="timeline__meta">2025–2029 · In progress</span>
           </div>
 
           <div class="timeline__row">
@@ -1592,40 +1609,6 @@
     </section>
 
     <!-- ============================================================
-       ABOUT
-       ============================================================ -->
-    <section data-od-id="about" id="about">
-      <div class="container">
-        <div class="about">
-          <div>
-            <h2>About</h2>
-          </div>
-          <div>
-            <p>I'm a second-year CSE student who treats personal projects like real systems.
-              I care about how things feel to use and how they behave when they fail. I prefer
-              boring, well-understood tools over novel ones — and reach for new tech only when
-              it actually solves a problem I have.</p>
-            <p>
-              Outside of code: I follow motorsport, run small experiments on the side, and
-              spend more time than I'd like to admit getting the small details right.
-            </p>
-
-            <dl class="about__side" style="margin-top: var(--s-6);">
-              <dt>Based in</dt>
-              <dd>Kerala, India</dd>
-              <dt>Studying</dt>
-              <dd>B.Tech CSE, College of Engineering Chengannur (2025–2029)</dd>
-              <dt>Currently</dt>
-              <dd>Building CEC platform &amp; Cloud Gaming Orchestrator; looking for internships and collabs.</dd>
-              <dt>Open to</dt>
-              <dd>Internships · OSS collabs · Hackathons · Side projects that need an extra engineer</dd>
-            </dl>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
        CONTACT
        ============================================================ -->
     <section class="contact" data-od-id="contact" id="contact">
@@ -1644,9 +1627,9 @@
             <div class="row" style="margin-top: var(--s-8);">
               <a class="btn btn-primary" href="mailto:harshchari808@gmail.com">Email me</a>
               <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari" rel="noopener" target="_blank"
-                style="color: rgb(0, 0, 0); border-color: var(--c-bg);">GitHub ↗</a>
+                style="color: var(--c-text); border-color: var(--c-bg);">GitHub ↗</a>
               <a class="btn btn-ghost" href="https://www.linkedin.com/in/harsh-c-hari" rel="noopener" target="_blank"
-                style="color: rgb(0, 0, 0); border-color: var(--c-bg);">LinkedIn ↗</a>
+                style="color: var(--c-text); border-color: var(--c-bg);">LinkedIn ↗</a>
             </div>
           </div>
 
