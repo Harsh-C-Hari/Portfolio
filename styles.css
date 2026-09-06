@@ -451,12 +451,24 @@ section[data-od-id="work"] {
 }
 
 /* ---------- mobile menu panel ---------- */
+/* Positioned absolutely (relative to the sticky, positioned `.nav`
+   header) and overlaid on top of the page instead of sitting in
+   normal flow. Previously it was a flow element that grew via
+   `max-height`, so opening it pushed all page content downward —
+   and by an inconsistent amount depending on scroll position and
+   how the sticky header behaved, which felt janky. As an overlay,
+   opening/closing it never shifts the page underneath. */
 .nav-mobile {
   display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   max-height: 0;
   overflow: hidden;
   background: var(--c-bg);
   border-bottom: 1px solid var(--c-border);
+  box-shadow: 0 16px 24px -12px rgba(0, 0, 0, .18);
   transition: max-height .3s cubic-bezier(.4, 0, .2, 1), opacity .3s ease;
   opacity: 0;
 }
@@ -1420,11 +1432,16 @@ footer {
 }
 
 @keyframes img-skeleton-sweep {
-  0% { background-position: 160% 0; }
-  100% { background-position: -60% 0; }
+  0% {
+    background-position: 160% 0;
+  }
+
+  100% {
+    background-position: -60% 0;
+  }
 }
 
-.img-skeleton > img {
+.img-skeleton>img {
   position: relative;
   z-index: 1;
   opacity: 0;
@@ -1438,7 +1455,7 @@ footer {
   pointer-events: none;
 }
 
-.img-skeleton.is-loaded > img {
+.img-skeleton.is-loaded>img {
   opacity: 1;
 }
 
@@ -1453,7 +1470,7 @@ footer {
   margin-bottom: var(--s-5);
 }
 
-.project-deck__card .img-skeleton > img {
+.project-deck__card .img-skeleton>img {
   width: 100%;
   height: 100%;
   object-fit: cover;
