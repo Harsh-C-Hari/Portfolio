@@ -1723,10 +1723,15 @@
       }
 
       // scroll-spy: highlight the nav link for whichever section is in view.
-      // The hero counts as "home" — while it's in view, the brand name
-      // highlights and no section link stays active (fixes the bug where
-      // scrolling back to the top left the last-visited section highlighted).
-      if ('IntersectionObserver' in window) {
+      // Recomputed on every scroll frame from actual current geometry (rather
+      // than relying on IntersectionObserver enter/exit events for a thin
+      // trigger band) so it can't get stuck on a stale section — this matters
+      // most on mobile, where Contact is the last section and the page can't
+      // scroll much past it, so a fixed trigger band could stay satisfied by
+      // Contact even after scrolling back up. The hero counts as "home" —
+      // while it's closest to center, the brand name highlights and no
+      // section link stays active.
+      (function () {
         var navBrand = document.querySelector('.nav-brand');
         var spyZones = [];
         var heroEl = document.getElementById('hero');
@@ -1737,6 +1742,7 @@
           var target = document.querySelector(href);
           if (target) spyZones.push({ el: target, href: href });
         });
+        if (!spyZones.length) return;
 
         function setActiveHref(href) {
           document.querySelectorAll('.nav-links a, .nav-mobile a').forEach(function (a) {
@@ -1745,16 +1751,36 @@
           if (navBrand) navBrand.classList.toggle('is-active', href === '#top');
         }
 
-        var spyIo = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            var zone = spyZones.find(function (z) { return z.el === entry.target; });
-            if (zone) setActiveHref(zone.href);
+        function updateActiveSection() {
+          var viewportMid = window.innerHeight * 0.5;
+          var current = null;
+          var currentDist = Infinity;
+          spyZones.forEach(function (z) {
+            var rect = z.el.getBoundingClientRect();
+            if (rect.bottom <= 0 || rect.top >= window.innerHeight) return; // off-screen, skip
+            var mid = (rect.top + rect.bottom) / 2;
+            var dist = Math.abs(mid - viewportMid);
+            if (dist < currentDist) {
+              currentDist = dist;
+              current = z;
+            }
           });
-        }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+          if (current) setActiveHref(current.href);
+        }
 
-        spyZones.forEach(function (z) { spyIo.observe(z.el); });
-      }
+        var ticking = false;
+        window.addEventListener('scroll', function () {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(function () {
+            updateActiveSection();
+            ticking = false;
+          });
+        }, { passive: true });
+        window.addEventListener('resize', updateActiveSection);
+
+        updateActiveSection();
+      })();
 
       // hamburger toggle
       var toggle = document.querySelector('.nav-toggle');
