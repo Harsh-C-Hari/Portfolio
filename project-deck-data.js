@@ -6,6 +6,8 @@ window.PROJECT_DECK_DATA = [
   {
     id: 'pcgo',
     image: 'admin_home_page.png',
+    imageWidth: 1919,
+    imageHeight: 942,
     alt: 'Personal Cloud Gaming Orchestrator control plane UI',
     indexLabel: '01 / Featured',
     title: 'Personal Cloud Gaming Orchestrator',
@@ -16,6 +18,8 @@ window.PROJECT_DECK_DATA = [
   {
     id: 'cec',
     image: 'image-2.webp',
+    imageWidth: 1919,
+    imageHeight: 938,
     alt: 'Smart Campus Platform',
     indexLabel: '02 / Platform',
     title: 'Future of CEC',
@@ -26,6 +30,8 @@ window.PROJECT_DECK_DATA = [
   {
     id: 'farming',
     image: 'image-1.png',
+    imageWidth: 1280,
+    imageHeight: 668,
     alt: 'Smart Farming Dashboard analytics view',
     indexLabel: '03 / Hackathon build',
     title: 'Smart Farming Dashboard',

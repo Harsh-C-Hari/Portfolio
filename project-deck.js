@@ -30,9 +30,12 @@
 
   function renderCard(index) {
     var p = data[index];
+    var ratio = (p.imageWidth && p.imageHeight) ? (p.imageWidth + ' / ' + p.imageHeight) : '16 / 9';
     card.innerHTML =
       '<span class="project__index">' + escapeHtml(p.indexLabel) + '</span>' +
+      '<div class="img-skeleton" style="aspect-ratio: ' + ratio + ';">' +
       '<img src="' + escapeHtml(p.image) + '" alt="' + escapeHtml(p.alt) + '" loading="eager" decoding="async">' +
+      '</div>' +
       '<h3>' + escapeHtml(p.title) + '</h3>' +
       '<p>' + escapeHtml(p.blurb) + '</p>' +
       '<div class="project__chips">' +
@@ -42,6 +45,8 @@
     counter.textContent = (index + 1) + ' / ' + data.length;
     card.scrollTop = 0;
     updateArrows(index);
+    var deckImg = card.querySelector('.img-skeleton > img');
+    if (deckImg && window.wireImageSkeleton) window.wireImageSkeleton(deckImg);
   }
 
   // Disable/"block" the prev arrow on the first project and the next arrow

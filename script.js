@@ -3,6 +3,25 @@
       var y = document.getElementById('year');
       if (y) y.textContent = new Date().getFullYear();
 
+      // image skeletons: any <img> sitting inside a `.img-skeleton`
+      // wrapper shows the pink shimmer placeholder until the image has
+      // actually finished loading (or fails), then fades it out. Exposed
+      // on window so project-deck.js can call it for images it injects
+      // after this initial pass has already run.
+      function wireImageSkeleton(img) {
+        var wrap = img.closest('.img-skeleton');
+        if (!wrap) return;
+        var reveal = function () { wrap.classList.add('is-loaded'); };
+        if (img.complete && img.naturalWidth > 0) {
+          reveal();
+        } else {
+          img.addEventListener('load', reveal, { once: true });
+          img.addEventListener('error', reveal, { once: true });
+        }
+      }
+      window.wireImageSkeleton = wireImageSkeleton;
+      document.querySelectorAll('.img-skeleton > img').forEach(wireImageSkeleton);
+
       // gentle reveal on scroll
       if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (entries) {

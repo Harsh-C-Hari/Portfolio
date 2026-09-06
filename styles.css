@@ -1381,6 +1381,93 @@ footer {
   margin-top: var(--s-10);
 }
 
+/* ============================================================
+   IMAGE SKELETONS
+   Pink-tinted shimmer placeholder shown in place of any <img>
+   while it's still loading. A container gets `.img-skeleton`
+   (plus an inline `aspect-ratio` matching the real image's
+   width/height so nothing jumps once it loads), and script.js
+   flips `.is-loaded` on once the image fires `load`/`error`
+   or turns out to already be cached.
+   ============================================================ */
+.img-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--c-surface) 0%, #fbe6ff 50%, var(--c-cream) 100%);
+}
+
+.img-skeleton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='10' fill='none' stroke='%23f79cff' stroke-width='2'/%3E%3Ccircle cx='23' cy='21' r='6' fill='none' stroke='%23f79cff' stroke-width='2'/%3E%3Cpath d='M6 47 L23 30 L33 40 L44 25 L59 47' fill='none' stroke='%23f79cff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 25% auto;
+  opacity: .7;
+  transition: opacity .4s ease;
+  z-index: 0;
+}
+
+.img-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 35%, rgba(247, 156, 255, .45) 50%, transparent 65%);
+  background-size: 200% 100%;
+  animation: img-skeleton-sweep 1.6s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes img-skeleton-sweep {
+  0% { background-position: 160% 0; }
+  100% { background-position: -60% 0; }
+}
+
+.img-skeleton > img {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+
+.img-skeleton.is-loaded::before,
+.img-skeleton.is-loaded::after {
+  opacity: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+.img-skeleton.is-loaded > img {
+  opacity: 1;
+}
+
+/* Deck overlay images are injected by project-deck.js without the
+   card's usual border/radius/spacing, so give the skeleton wrapper
+   those instead of the <img> itself. */
+.project-deck__card .img-skeleton {
+  display: block;
+  width: 100%;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid var(--c-border);
+  margin-bottom: var(--s-5);
+}
+
+.project-deck__card .img-skeleton > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  border-radius: inherit;
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img-skeleton::after {
+    animation: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .project-deck,
