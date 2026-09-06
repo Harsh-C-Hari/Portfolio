@@ -396,7 +396,7 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       text-decoration: none;
-      transition: letter-spacing 0.4s ease;
+      transition: letter-spacing 0.4s ease, color 0.35s ease;
     }
 
     /* only expand on devices with real hover (mouse); prevents sticky hover on touch screens */
@@ -419,7 +419,7 @@
       color: var(--c-text);
       padding: 6px 2px;
       border-bottom: 1px solid transparent;
-      transition: border-bottom-color 0.3s ease, letter-spacing 0.3s ease;
+      transition: border-bottom-color 0.3s ease, letter-spacing 0.3s ease, color 0.35s ease;
     }
 
     /* nav underline + letter-spacing on hover: both guarded to prevent sticky state on touch */
@@ -511,6 +511,7 @@
       color: var(--c-text);
       padding: 14px var(--s-6);
       border-bottom: 1px solid var(--c-border);
+      transition: color 0.35s ease, text-decoration-color 0.35s ease;
     }
 
     .nav-mobile a:last-child {
