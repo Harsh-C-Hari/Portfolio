@@ -604,7 +604,6 @@
 
     .marquee__track {
       display: flex;
-      gap: 21px;
       width: max-content;
       animation: marquee-slide 28s linear infinite;
     }
@@ -623,6 +622,7 @@
       display: inline-flex;
       align-items: center;
       gap: 21px;
+      margin-right: 21px;
     }
 
     .marquee__item .dot {
@@ -1266,12 +1266,6 @@
         <span class="marquee__item"><span class="dot"></span>Break</span>
         <span class="marquee__item"><span class="dot dot--accent"></span>Fix</span>
         <span class="marquee__item"><span class="dot"></span>Learn</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>Build</span>
-        <span class="marquee__item"><span class="dot"></span>Ship</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>Iterate</span>
-        <span class="marquee__item"><span class="dot"></span>Break</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>Fix</span>
-        <span class="marquee__item"><span class="dot"></span>Learn</span>
       </div>
     </div>
 
@@ -1604,14 +1598,6 @@
         <span class="marquee__item"><span class="dot"></span>Prisma</span>
         <span class="marquee__item"><span class="dot dot--accent"></span>WebSockets</span>
         <span class="marquee__item"><span class="dot"></span>Ollama</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>React</span>
-        <span class="marquee__item"><span class="dot"></span>FastAPI</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>Postgres</span>
-        <span class="marquee__item"><span class="dot"></span>Python</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>TypeScript</span>
-        <span class="marquee__item"><span class="dot"></span>Prisma</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>WebSockets</span>
-        <span class="marquee__item"><span class="dot"></span>Ollama</span>
       </div>
     </div>
 
@@ -1813,6 +1799,60 @@
           }
         });
       }
+
+      // ------------------------------------------------------------
+      // MARQUEE — infinite-loop safety
+      //
+      // The seamless-loop trick (duplicate the content once, animate
+      // translateX 0 -> -50%) only works if a single copy is at least
+      // as wide as the marquee itself. On any screen wider than one
+      // copy (which, at this font's clamped max size, is well under
+      // most laptop/desktop widths) the animation runs out of
+      // duplicated content before it reaches the loop point, so a
+      // blank gap opens up on the right edge and the next words only
+      // "catch up" once the track snaps back to 0%.
+      //
+      // Fix: keep a single canonical set of words in the HTML, then
+      // repeat it in script — as many times as needed to comfortably
+      // out-width the marquee — before duplicating that block once
+      // for the loop. Recomputed on resize so it stays correct at
+      // any viewport size. Animation duration scales with the repeat
+      // count so playback speed (px/sec) stays constant.
+      function initMarquee(marqueeEl) {
+        var track = marqueeEl.querySelector('.marquee__track');
+        if (!track || !track.children.length) return;
+
+        var baseHTML = Array.prototype.map.call(track.children, function (el) {
+          return el.outerHTML;
+        }).join('');
+        var baseDuration = parseFloat(getComputedStyle(track).animationDuration) || 28;
+
+        function rebuild() {
+          track.innerHTML = baseHTML;
+          var unitWidth = track.getBoundingClientRect().width;
+          if (!unitWidth) return;
+          var viewportWidth = marqueeEl.clientWidth || window.innerWidth;
+          // +1 extra repeat as a safety margin beyond the bare minimum
+          var repeats = Math.max(1, Math.ceil(viewportWidth / unitWidth) + 1);
+          var half = new Array(repeats + 1).join(baseHTML);
+          track.innerHTML = half + half;
+          track.style.animationDuration = (baseDuration * repeats) + 's';
+        }
+
+        rebuild();
+
+        var resizeTimer;
+        window.addEventListener('resize', function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(rebuild, 200);
+        });
+
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(rebuild);
+        }
+      }
+
+      document.querySelectorAll('.marquee').forEach(initMarquee);
     })();
   </script>
 
