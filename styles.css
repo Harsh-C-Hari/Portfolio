@@ -58,6 +58,17 @@
   box-sizing: border-box;
 }
 
+/* Mobile browsers draw their own tap-highlight box on any <a>/<button>
+   press (the blue/gray rectangle you get on tap, same effect as a
+   long-press text-selection highlight) — kill it everywhere and give
+   every button its own explicit, intentional :active press state
+   instead (see `.btn:active` below) so tapping still feels responsive,
+   it just isn't the browser's default styling. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 html,
 body {
   margin: 0;
@@ -271,7 +282,7 @@ section[data-od-id="work"] {
 }
 
 /* scale on hover only for pointer devices — prevents sticky transform on touch */
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .btn:hover {
     transform: scale(1.04);
     text-decoration: none;
@@ -286,12 +297,19 @@ section[data-od-id="work"] {
   outline-offset: 2px;
 }
 
+/* deliberate tap/press feedback — works on touch too, since :active
+   isn't gated by a hover media query. Replaces the tap-highlight box
+   we removed above with something intentional. */
+.btn:active {
+  transform: scale(0.97);
+}
+
 .btn-primary {
   background: var(--c-text);
   color: var(--c-bg);
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .btn-primary:hover {
     background: var(--c-accent);
     color: var(--c-text);
@@ -364,7 +382,7 @@ section[data-od-id="work"] {
 }
 
 /* only expand on devices with real hover (mouse); prevents sticky hover on touch screens */
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .nav-brand:hover {
     letter-spacing: 0.22em;
   }
@@ -387,7 +405,7 @@ section[data-od-id="work"] {
 }
 
 /* nav underline + letter-spacing on hover: both guarded to prevent sticky state on touch */
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .nav-links a:hover {
     border-bottom-color: var(--c-text);
     letter-spacing: 0.1em;
@@ -494,7 +512,7 @@ section[data-od-id="work"] {
   border-bottom: 0;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .nav-mobile a:hover {
     background: var(--c-cream);
   }
@@ -1014,7 +1032,7 @@ footer {
   transition: color 0.2s ease;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .foot a:hover {
     color: var(--c-text);
     text-decoration: underline;
@@ -1346,7 +1364,7 @@ footer {
 }
 
 /* enlarge + solidify on hover, same feel as the site's other buttons */
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .project-deck__arrow:not(:disabled):hover {
     transform: scale(1.1);
     background: rgba(246, 246, 238, .92);
