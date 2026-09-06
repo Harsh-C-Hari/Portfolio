@@ -1466,6 +1466,15 @@ footer {
   opacity: 1;
 }
 
+/* second+ view of an image already seen this session: skip the fade
+   and shimmer-fade transitions entirely so it just appears, instead of
+   re-running a (very fast) version of the same reveal animation. */
+.img-skeleton.is-loaded-instant::before,
+.img-skeleton.is-loaded-instant::after,
+.img-skeleton.is-loaded-instant>img {
+  transition: none;
+}
+
 /* Deck overlay images are injected by project-deck.js without the
    card's usual border/radius/spacing, so give the skeleton wrapper
    those instead of the <img> itself. */
