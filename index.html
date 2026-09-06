@@ -13,23 +13,25 @@
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000000'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='22' font-weight='900' font-family='Arial Black%2C sans-serif' fill='%23f79cff'%3EH%3C/text%3E%3C/svg%3E">
 
   <!-- ── Open Graph — LinkedIn, WhatsApp, Facebook, Slack previews ──────── -->
-  <meta property="og:type"        content="website">
-  <meta property="og:site_name"   content="Harsh C Hari">
-  <meta property="og:title"       content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
-  <meta property="og:description" content="CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
-  <meta property="og:url"         content="https://harshchari.vercel.app/">
-  <meta property="og:image"       content="https://harshchari.vercel.app/og-image.jpg">
-  <meta property="og:image:width"  content="1200">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
+  <meta property="og:description"
+    content="CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
+  <meta property="og:url" content="https://harshchari.vercel.app/">
+  <meta property="og:image" content="https://harshchari.vercel.app/og-image.jpg">
+  <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt"   content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
-  <meta property="og:locale"      content="en_IN">
+  <meta property="og:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
+  <meta property="og:locale" content="en_IN">
 
   <!-- ── Twitter / X Card ─────────────────────────────────────────────── -->
-  <meta name="twitter:card"        content="summary_large_image">
-  <meta name="twitter:title"       content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
-  <meta name="twitter:description" content="CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
-  <meta name="twitter:image"       content="https://harshchari.vercel.app/og-image.jpg">
-  <meta name="twitter:image:alt"   content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
+  <meta name="twitter:description"
+    content="CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/og-image.jpg">
+  <meta name="twitter:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
 
   <style>
     /* ============================================================
@@ -134,6 +136,26 @@
       outline: 2px solid var(--c-accent);
       outline-offset: 3px;
       border-radius: 2px;
+    }
+
+    /* skip-to-content — invisible until keyboard-focused */
+    .skip-link {
+      position: fixed;
+      top: -60px;
+      left: var(--s-4);
+      z-index: 100;
+      background: var(--c-text);
+      color: var(--c-bg);
+      font-family: var(--f-mono);
+      font-size: 14px;
+      padding: var(--s-3) var(--s-5);
+      border-radius: var(--radius);
+      transition: top .15s ease;
+    }
+
+    .skip-link:focus-visible {
+      top: var(--s-4);
+      outline-offset: 0;
     }
 
     button {
@@ -406,6 +428,25 @@
         border-bottom-color: var(--c-text);
         letter-spacing: 0.1em;
       }
+    }
+
+    /* scroll-spy: highlights the nav link for the section currently in view.
+       While on the hero ("home"), no section link is active — the brand
+       name highlights instead, so nothing stays stuck on the last section. */
+    .nav-links a.is-active {
+      color: var(--c-accent);
+      border-bottom-color: var(--c-accent);
+    }
+
+    .nav-mobile a.is-active {
+      color: var(--c-accent);
+      text-decoration: underline;
+      text-decoration-color: var(--c-accent);
+      text-underline-offset: 4px;
+    }
+
+    .nav-brand.is-active {
+      color: var(--c-accent);
     }
 
     /* ---------- hamburger button ---------- */
@@ -684,8 +725,10 @@
 
     .project__cover .badge {
       position: absolute;
-      top: 12px;   /* 12px base + 26px to land inside image (image has padding-top:33px on desktop) */
-      left: 12px;  /* 12px base + 6px nudge */
+      top: 12px;
+      /* 12px base + 26px to land inside image (image has padding-top:33px on desktop) */
+      left: 12px;
+      /* 12px base + 6px nudge */
       z-index: 2;
     }
 
@@ -1095,7 +1138,10 @@
       }
 
       /* --- mobile hero line-height fix (prevents EXPERIMENT colliding with accent box-shadow) --- */
-      .hero-h1 { line-height: .95; }
+      .hero-h1 {
+        line-height: .95;
+      }
+
       .hero-h1 {
         font-size: clamp(48px, 13vw, 72px);
       }
@@ -1136,6 +1182,7 @@
 <body>
 
   <span id="top" aria-hidden="true" style="position:absolute;top:0;left:0;"></span>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <!-- ============================================================
      NAV
      ============================================================ -->
@@ -1164,12 +1211,12 @@
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
 
     <!-- ============================================================
        HERO
        ============================================================ -->
-    <section class="hero" data-od-id="hero">
+    <section class="hero" id="hero" data-od-id="hero">
       <div class="container">
         <div class="row" style="margin-bottom: var(--s-6);">
           <span class="chip">CSE · 2025–2029</span>
@@ -1236,7 +1283,8 @@
           <div>
             <h2>About</h2>
             <div class="about__photo">
-              <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy" decoding="async">
+              <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy"
+                decoding="async">
             </div>
           </div>
           <div>
@@ -1263,7 +1311,7 @@
         </div>
       </div>
     </section>
-    
+
     <!-- ============================================================
        SKILLS — only what projects evidence
        ============================================================ -->
@@ -1397,7 +1445,7 @@
           </div>
 
           <div class="project__cover">
-                        <span class="badge chip chip--accent mono"
+            <span class="badge chip chip--accent mono"
               style="margin-top: 25px; padding-right: 10px; margin-right: 0px; margin-left: 0px;">Featured</span>
             <img src="admin_home_page.png" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1600"
               height="900" loading="lazy" decoding="async"
@@ -1448,8 +1496,8 @@
           </div>
 
           <div class="project__cover">
-            <img src="image-2.webp" alt="Smart Campus Platform" width="1600" height="900" loading="lazy" decoding="async"
-              style="display: block; width: 100%; height: 100%; object-fit: cover;">
+            <img src="image-2.webp" alt="Smart Campus Platform" width="1600" height="900" loading="lazy"
+              decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover;">
           </div>
         </article>
 
@@ -1672,6 +1720,40 @@
           el.classList.add('reveal');
           io.observe(el);
         });
+      }
+
+      // scroll-spy: highlight the nav link for whichever section is in view.
+      // The hero counts as "home" — while it's in view, the brand name
+      // highlights and no section link stays active (fixes the bug where
+      // scrolling back to the top left the last-visited section highlighted).
+      if ('IntersectionObserver' in window) {
+        var navBrand = document.querySelector('.nav-brand');
+        var spyZones = [];
+        var heroEl = document.getElementById('hero');
+        if (heroEl) spyZones.push({ el: heroEl, href: '#top' });
+        document.querySelectorAll('.nav-links a[href^="#"]').forEach(function (a) {
+          var href = a.getAttribute('href');
+          if (spyZones.some(function (z) { return z.href === href; })) return;
+          var target = document.querySelector(href);
+          if (target) spyZones.push({ el: target, href: href });
+        });
+
+        function setActiveHref(href) {
+          document.querySelectorAll('.nav-links a, .nav-mobile a').forEach(function (a) {
+            a.classList.toggle('is-active', a.getAttribute('href') === href);
+          });
+          if (navBrand) navBrand.classList.toggle('is-active', href === '#top');
+        }
+
+        var spyIo = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var zone = spyZones.find(function (z) { return z.el === entry.target; });
+            if (zone) setActiveHref(zone.href);
+          });
+        }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+
+        spyZones.forEach(function (z) { spyIo.observe(z.el); });
       }
 
       // hamburger toggle
