@@ -1147,6 +1147,15 @@
         font-size: clamp(48px, 13vw, 72px);
       }
 
+      /* the accent box's hard-offset box-shadow paints 5px below its border
+         box, but box-shadow reserves no layout space of its own — so on
+         tight mobile line-height that shadow can visually crash into the
+         next line. Give the box itself a bit of real margin so the gap
+         after it matches the breathing room every other line gets. */
+      .hero-h1 .accent {
+        margin-bottom: 0.16em;
+      }
+
       .hero-sub {
         font-size: clamp(18px, 4.5vw, 24px);
         max-width: 100%;
