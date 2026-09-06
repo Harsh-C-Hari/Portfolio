@@ -462,15 +462,18 @@
   <div class="project-deck__panel" role="dialog" aria-modal="true" aria-label="All projects">
     <button class="project-deck__close" type="button" aria-label="Close" data-deck-close>&times;</button>
 
-    <button class="project-deck__arrow project-deck__arrow--prev" type="button" aria-label="Previous project" data-deck-prev>&larr;</button>
-
     <div class="project-deck__card" id="project-deck-card">
       <!-- filled by project-deck.js per current index -->
     </div>
 
-    <button class="project-deck__arrow project-deck__arrow--next" type="button" aria-label="Next project" data-deck-next>&rarr;</button>
-
-    <span class="project-deck__counter mono" id="project-deck-counter" aria-live="polite"></span>
+    <!-- prev/next + counter live together so they can be laid out as one
+         row under the card on mobile, while sitting at the panel's left/
+         right edges on desktop (see .project-deck__nav in styles.css) -->
+    <div class="project-deck__nav">
+      <button class="project-deck__arrow project-deck__arrow--prev" type="button" aria-label="Previous project" data-deck-prev>&larr;</button>
+      <span class="project-deck__counter mono" id="project-deck-counter" aria-live="polite"></span>
+      <button class="project-deck__arrow project-deck__arrow--next" type="button" aria-label="Next project" data-deck-next>&rarr;</button>
+    </div>
   </div>
 </div>
 

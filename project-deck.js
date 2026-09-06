@@ -9,6 +9,8 @@
   var counter = document.getElementById('project-deck-counter');
   var openBtn = document.getElementById('project-deck-open');
   var countLabel = document.getElementById('project-deck-count');
+  var prevBtn = deck && deck.querySelector('[data-deck-prev]');
+  var nextBtn = deck && deck.querySelector('[data-deck-next]');
   if (!deck || !card || !openBtn) return;
 
   if (countLabel) countLabel.textContent = String(data.length);
@@ -38,6 +40,15 @@
       '</div>' +
       '<a class="btn btn-primary" href="' + escapeHtml(p.githubUrl) + '" rel="noopener" target="_blank">View on GitHub &#8599;</a>';
     counter.textContent = (index + 1) + ' / ' + data.length;
+    card.scrollTop = 0;
+    updateArrows(index);
+  }
+
+  // Disable/"block" the prev arrow on the first project and the next arrow
+  // on the last project, instead of letting them wrap or close the deck.
+  function updateArrows(index) {
+    if (prevBtn) prevBtn.disabled = index <= 0;
+    if (nextBtn) nextBtn.disabled = index >= data.length - 1;
   }
 
   function open() {
@@ -75,10 +86,9 @@
   function goTo(direction) {
     var next = state.index + direction;
 
-    if (next >= data.length) { close(); return; }     // forward past last -> close
-    if (next < 0) { close(); return; }                // backward past first -> close
-    // ^ to clamp instead of closing on the backward case, replace the line
-    //   above with: `next = 0; }` and remove the `return;`
+    // Blocked at the edges: first project has no prev, last has no next.
+    // (Use the close/X button, Escape, or the backdrop to exit instead.)
+    if (next < 0 || next >= data.length) return;
 
     state.index = next;
     card.classList.add('is-leaving');
@@ -111,11 +121,21 @@
   deck.querySelector('[data-deck-next]').addEventListener('click', function () { goTo(1); });
   deck.querySelector('[data-deck-prev]').addEventListener('click', function () { goTo(-1); });
 
+  // Only treat the wheel gesture as "next/prev project" once the card's
+  // own scroll has hit its top/bottom edge — otherwise let the browser
+  // scroll the (possibly tall) card content normally.
+  function cardAtScrollBoundary(deltaY) {
+    if (card.scrollHeight <= card.clientHeight + 1) return true; // nothing to scroll
+    if (deltaY < 0) return card.scrollTop <= 0;
+    return card.scrollTop + card.clientHeight >= card.scrollHeight - 1;
+  }
+
   deck.querySelector('.project-deck__panel').addEventListener('wheel', function (e) {
+    if (!cardAtScrollBoundary(e.deltaY)) return; // let the card scroll natively
+    if (Math.abs(e.deltaY) < WHEEL_THRESHOLD) return;
     e.preventDefault();
     e.stopPropagation();
     if (wheelLock) return;
-    if (Math.abs(e.deltaY) < WHEEL_THRESHOLD) return;
     wheelLock = true;
     goTo(e.deltaY > 0 ? 1 : -1);
     setTimeout(function () { wheelLock = false; }, 350);

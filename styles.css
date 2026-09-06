@@ -1200,7 +1200,33 @@ footer {
   padding: var(--s-8);
   max-height: 88vh;
   overflow-y: auto;
+  /* Reserve the scrollbar's gutter on every card, whether or not it needs
+     to scroll, so the content column is the same width across projects —
+     a project with more text (and therefore a visible scrollbar) no longer
+     reflows narrower than the others and pushes its GitHub button/chips
+     out of alignment. */
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-gray-3) transparent;
   transition: transform .3s cubic-bezier(.4, 0, .2, 1), opacity .3s ease;
+}
+
+.project-deck__card::-webkit-scrollbar {
+  width: 8px;
+}
+
+.project-deck__card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-deck__card::-webkit-scrollbar-thumb {
+  background: var(--c-gray-3);
+  border-radius: 999px;
+  border: 2px solid var(--c-cream);
+}
+
+.project-deck__card::-webkit-scrollbar-thumb:hover {
+  background: var(--c-gray-2);
 }
 
 .project-deck__card.is-leaving {
@@ -1260,12 +1286,22 @@ footer {
   cursor: pointer;
 }
 
+/* Wraps prev-arrow / counter / next-arrow. On desktop it's `display: contents`
+   so the three children keep resolving their `position: absolute` against
+   `.project-deck__panel` exactly as before (arrows pinned outside the card,
+   counter centered underneath). On mobile it becomes the actual flex row
+   that lays them out together at the bottom of the panel. */
+.project-deck__nav {
+  display: contents;
+}
+
 .project-deck__arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   width: 44px;
   height: 44px;
+  flex: none;
   border-radius: 999px;
   border: 1px solid var(--c-border);
   background: var(--c-bg);
@@ -1273,14 +1309,32 @@ footer {
   font-size: 18px;
   cursor: pointer;
   z-index: 3;
+  transition: transform .3s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, background .3s ease;
 }
 
 .project-deck__arrow--prev { left: -60px; }
 .project-deck__arrow--next { right: -60px; }
 
-@media (max-width: 860px) {
-  .project-deck__arrow--prev { left: var(--s-2); }
-  .project-deck__arrow--next { right: var(--s-2); }
+/* enlarge on hover, same feel as the site's other (white) buttons —
+   scale is layered on top of the centering translateY so it doesn't
+   jump position when hovered */
+@media (hover: hover) {
+  .project-deck__arrow:not(:disabled):hover {
+    transform: translateY(-50%) scale(1.1);
+  }
+}
+
+.project-deck__arrow:focus-visible {
+  transform: translateY(-50%) scale(1.1);
+  outline: 2px solid var(--c-text);
+  outline-offset: 2px;
+}
+
+/* blocked at the ends of the deck: first project has no prev,
+   last project has no next */
+.project-deck__arrow:disabled {
+  opacity: .35;
+  cursor: not-allowed;
 }
 
 .project-deck__counter {
@@ -1291,6 +1345,50 @@ footer {
   font-size: 12px;
   color: var(--c-gray-3);
   letter-spacing: .08em;
+}
+
+@media (max-width: 860px) {
+  /* On narrow screens the side arrows used to float over the top of the
+     card's image/title. Instead, lay prev-arrow / counter / next-arrow
+     out as one row underneath the card, mirroring "1 / 3" in the middle. */
+  .project-deck__card {
+    max-height: calc(88vh - 64px);
+  }
+
+  .project-deck__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-1 * var(--s-14));
+  }
+
+  .project-deck__nav .project-deck__arrow {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+  }
+
+  .project-deck__nav .project-deck__arrow:focus-visible {
+    transform: scale(1.1);
+  }
+
+  .project-deck__nav .project-deck__counter {
+    position: static;
+    bottom: auto;
+    left: auto;
+    transform: none;
+  }
+}
+
+@media (max-width: 860px) and (hover: hover) {
+  .project-deck__nav .project-deck__arrow:not(:disabled):hover {
+    transform: scale(1.1);
+  }
 }
 
 .project-deck-trigger {
