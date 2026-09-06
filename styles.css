@@ -1169,6 +1169,10 @@ footer {
   visibility: hidden;
   opacity: 0;
   transition: opacity .3s cubic-bezier(.4, 0, .2, 1), visibility .3s;
+  /* Keep the panel clear of notches/home-indicators on mobile so its nav
+     row never sits flush against the physical edge of the screen. */
+  padding: max(var(--s-4), env(safe-area-inset-top)) max(var(--s-4), env(safe-area-inset-right)) max(var(--s-4), env(safe-area-inset-bottom)) max(var(--s-4), env(safe-area-inset-left));
+  box-sizing: border-box;
 }
 
 .project-deck.is-open {
@@ -1186,9 +1190,10 @@ footer {
   position: relative;
   width: min(720px, 92vw);
   max-height: 88vh;
-  /* overflow stays visible here so the prev/next arrows (positioned outside
-     this box at left:-60px / right:-60px) aren't clipped and remain
-     clickable; the card itself scrolls internally when its content is tall. */
+  max-height: 88dvh;
+  /* accounts for mobile browser toolbars vh doesn't */
+  /* overflow stays visible so the card's accent box-shadow (offset 6px,
+     bottom-right) isn't clipped. */
   overflow: visible;
 }
 
@@ -1198,7 +1203,13 @@ footer {
   border-radius: var(--radius);
   box-shadow: 6px 6px 0 0 var(--c-accent);
   padding: var(--s-8);
+  /* extra bottom padding reserves room so the floating nav pills (see
+     .project-deck__arrow / .project-deck__counter below) never sit on top
+     of the last line of text or the GitHub button when the card is
+     scrolled all the way down. */
+  padding-bottom: calc(var(--s-8) + var(--s-10));
   max-height: 88vh;
+  max-height: 88dvh;
   overflow-y: auto;
   /* Reserve the scrollbar's gutter on every card, whether or not it needs
      to scroll, so the content column is the same width across projects —
@@ -1274,7 +1285,7 @@ footer {
   position: absolute;
   top: var(--s-4);
   right: var(--s-4);
-  z-index: 3;
+  z-index: 5;
   width: 36px;
   height: 36px;
   border-radius: 999px;
@@ -1286,46 +1297,53 @@ footer {
   cursor: pointer;
 }
 
-/* Wraps prev-arrow / counter / next-arrow. On desktop it's `display: contents`
-   so the three children keep resolving their `position: absolute` against
-   `.project-deck__panel` exactly as before (arrows pinned outside the card,
-   counter centered underneath). On mobile it becomes the actual flex row
-   that lays them out together at the bottom of the panel. */
+/* Wraps prev-arrow / counter / next-arrow. `display: contents` keeps all
+   three resolving their `position: absolute` against `.project-deck__panel`
+   (which is exactly the size of the card), so they render as a floating,
+   translucent strip pinned to the card's own bottom-left/center/right
+   corners — on top of the card rather than in extra space around it — the
+   same way on both mobile and desktop. */
 .project-deck__nav {
   display: contents;
 }
 
 .project-deck__arrow {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  flex: none;
+  bottom: var(--s-4);
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
-  border: 1px solid var(--c-border);
-  background: var(--c-bg);
+  border: 1px solid rgba(46, 46, 46, .3);
+  background: rgba(246, 246, 238, .6);
+  backdrop-filter: blur(6px) saturate(1.4);
+  -webkit-backdrop-filter: blur(6px) saturate(1.4);
+  color: var(--c-text);
   font-family: var(--f-mono);
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
-  z-index: 3;
+  z-index: 4;
   transition: transform .3s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, background .3s ease;
 }
 
-.project-deck__arrow--prev { left: -60px; }
-.project-deck__arrow--next { right: -60px; }
+.project-deck__arrow--prev {
+  left: var(--s-4);
+}
 
-/* enlarge on hover, same feel as the site's other (white) buttons —
-   scale is layered on top of the centering translateY so it doesn't
-   jump position when hovered */
+.project-deck__arrow--next {
+  right: var(--s-4);
+}
+
+/* enlarge + solidify on hover, same feel as the site's other buttons */
 @media (hover: hover) {
   .project-deck__arrow:not(:disabled):hover {
-    transform: translateY(-50%) scale(1.1);
+    transform: scale(1.1);
+    background: rgba(246, 246, 238, .92);
   }
 }
 
 .project-deck__arrow:focus-visible {
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
+  background: rgba(246, 246, 238, .92);
   outline: 2px solid var(--c-text);
   outline-offset: 2px;
 }
@@ -1333,62 +1351,28 @@ footer {
 /* blocked at the ends of the deck: first project has no prev,
    last project has no next */
 .project-deck__arrow:disabled {
-  opacity: .35;
+  opacity: .3;
   cursor: not-allowed;
 }
 
 .project-deck__counter {
   position: absolute;
-  bottom: calc(-1 * var(--s-8));
   left: 50%;
+  bottom: var(--s-4);
   transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 var(--s-3);
+  border-radius: 999px;
+  border: 1px solid rgba(46, 46, 46, .3);
+  background: rgba(246, 246, 238, .6);
+  backdrop-filter: blur(6px) saturate(1.4);
+  -webkit-backdrop-filter: blur(6px) saturate(1.4);
   font-size: 12px;
-  color: var(--c-gray-3);
+  color: var(--c-text);
   letter-spacing: .08em;
-}
-
-@media (max-width: 860px) {
-  /* On narrow screens the side arrows used to float over the top of the
-     card's image/title. Instead, lay prev-arrow / counter / next-arrow
-     out as one row underneath the card, mirroring "1 / 3" in the middle. */
-  .project-deck__card {
-    max-height: calc(88vh - 64px);
-  }
-
-  .project-deck__nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(-1 * var(--s-14));
-  }
-
-  .project-deck__nav .project-deck__arrow {
-    position: static;
-    top: auto;
-    left: auto;
-    right: auto;
-    transform: none;
-  }
-
-  .project-deck__nav .project-deck__arrow:focus-visible {
-    transform: scale(1.1);
-  }
-
-  .project-deck__nav .project-deck__counter {
-    position: static;
-    bottom: auto;
-    left: auto;
-    transform: none;
-  }
-}
-
-@media (max-width: 860px) and (hover: hover) {
-  .project-deck__nav .project-deck__arrow:not(:disabled):hover {
-    transform: scale(1.1);
-  }
+  z-index: 4;
 }
 
 .project-deck-trigger {
@@ -1398,6 +1382,7 @@ footer {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .project-deck,
   .project-deck__card {
     transition-duration: .01ms !important;
