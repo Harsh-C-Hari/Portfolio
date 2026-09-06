@@ -1,0 +1,37 @@
+// project-deck-data.js
+// Single source of truth for the project deck overlay.
+// Add a new project by appending one object here — nothing else needs to change.
+
+window.PROJECT_DECK_DATA = [
+  {
+    id: 'pcgo',
+    image: 'admin_home_page.png',
+    alt: 'Personal Cloud Gaming Orchestrator control plane UI',
+    indexLabel: '01 / Featured',
+    title: 'Personal Cloud Gaming Orchestrator',
+    blurb: 'A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI control plane, React on the front, JWT-secured WebSockets for live telemetry, and Sunshine + Tailscale for low-latency streaming.',
+    chips: ['React', 'FastAPI', 'Python', 'WebSockets', 'JWT', 'Sunshine', 'Tailscale'],
+    githubUrl: 'https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator'
+  },
+  {
+    id: 'cec',
+    image: 'image-2.webp',
+    alt: 'Smart Campus Platform',
+    indexLabel: '02 / Platform',
+    title: 'Future of CEC',
+    blurb: 'A campus platform for the College of Engineering Chengannur community — Google auth, role-based access for students and lift operators, and an integrated AI assistant (local Gemma via Ollama) for student queries.',
+    chips: ['PostgreSQL', 'Prisma', 'Express', 'FastAPI', 'Ollama', 'Gemma', 'Google OAuth'],
+    githubUrl: 'https://github.com/Harsh-C-Hari/Minions--Future_of_CEC'
+  },
+  {
+    id: 'farming',
+    image: 'image-1.png',
+    alt: 'Smart Farming Dashboard analytics view',
+    indexLabel: '03 / Hackathon build',
+    title: 'Smart Farming Dashboard',
+    blurb: 'Built during a hackathon: a dashboard that ingests soil and weather sensor data, surfaces trends with Chart.js, and uses an AI agronomy layer to suggest next actions.',
+    chips: ['FastAPI', 'Chart.js', 'Python', 'Sensors', 'AI Agronomy'],
+    githubUrl: 'https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz'
+  }
+  // ,{ id: 'next-project', image: '...', alt: '...', indexLabel: '04 / ...', title: '...', blurb: '...', chips: [...], githubUrl: '...' }
+];
