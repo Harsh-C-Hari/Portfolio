@@ -129,10 +129,19 @@
   // Only treat the wheel gesture as "next/prev project" once the card's
   // own scroll has hit its top/bottom edge — otherwise let the browser
   // scroll the (possibly tall) card content normally.
+  // Tolerance (px) for treating the card as "at the bottom." At certain
+  // browser zoom levels, Chrome rounds scrollHeight/clientHeight to integer
+  // CSS pixels independently, and the two can drift apart by a couple of
+  // pixels even when the card is visually scrolled all the way down. A
+  // 1px tolerance isn't enough to absorb that drift, which silently blocks
+  // forward paging (goTo(1)) at specific zoom percentages while backward
+  // paging — compared against a clean scrollTop <= 0 — stays unaffected.
+  var SCROLL_BOUNDARY_TOLERANCE = 4;
+
   function cardAtScrollBoundary(deltaY) {
-    if (card.scrollHeight <= card.clientHeight + 1) return true; // nothing to scroll
+    if (card.scrollHeight <= card.clientHeight + SCROLL_BOUNDARY_TOLERANCE) return true; // nothing to scroll
     if (deltaY < 0) return card.scrollTop <= 0;
-    return card.scrollTop + card.clientHeight >= card.scrollHeight - 1;
+    return card.scrollTop + card.clientHeight >= card.scrollHeight - SCROLL_BOUNDARY_TOLERANCE;
   }
 
   deck.querySelector('.project-deck__panel').addEventListener('wheel', function (e) {

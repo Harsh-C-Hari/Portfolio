@@ -308,6 +308,8 @@ section[data-od-id="work"] {
 .btn-primary {
   background: var(--c-text);
   color: var(--c-bg);
+  color-scheme: light;
+  forced-color-adjust: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
