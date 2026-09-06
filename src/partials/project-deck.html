@@ -1,4 +1,18 @@
 <!-- ============================================================
+   LIQUID GLASS DISTORTION FILTER (used by .project-deck__arrow /
+   .project-deck__counter via backdrop-filter). Purely decorative,
+   defines no visible shape itself — safe to leave in the DOM.
+   ============================================================ -->
+<svg style="position:absolute; width:0; height:0; overflow:hidden;" aria-hidden="true">
+  <filter id="liquid-glass" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox"
+    color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.012 0.018" numOctaves="2" seed="7" result="noise" />
+    <feGaussianBlur in="noise" stdDeviation="1.6" result="softNoise" />
+    <feDisplacementMap in="SourceGraphic" in2="softNoise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
+
+<!-- ============================================================
    PROJECT DECK OVERLAY
    ============================================================ -->
 <div class="project-deck" id="project-deck" aria-hidden="true">
@@ -15,9 +29,11 @@
          row under the card on mobile, while sitting at the panel's left/
          right edges on desktop (see .project-deck__nav in styles.css) -->
     <div class="project-deck__nav">
-      <button class="project-deck__arrow project-deck__arrow--prev" type="button" aria-label="Previous project" data-deck-prev>&larr;</button>
+      <button class="project-deck__arrow project-deck__arrow--prev" type="button" aria-label="Previous project"
+        data-deck-prev>&larr;</button>
       <span class="project-deck__counter mono" id="project-deck-counter" aria-live="polite"></span>
-      <button class="project-deck__arrow project-deck__arrow--next" type="button" aria-label="Next project" data-deck-next>&rarr;</button>
+      <button class="project-deck__arrow project-deck__arrow--next" type="button" aria-label="Next project"
+        data-deck-next>&rarr;</button>
     </div>
   </div>
 </div>
