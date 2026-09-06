@@ -1,157 +1,157 @@
-    <!-- ============================================================
+<!-- ============================================================
        SELECTED WORK
        ============================================================ -->
-    <section data-od-id="work" id="work">
-      <div class="container">
-        <div class="between" style="margin-bottom: var(--s-10);">
-          <h2>Selected<br>work</h2>
-          <span class="mono muted">03 projects · 1 live experiments</span>
+<section data-od-id="work" id="work">
+  <div class="container">
+    <div class="between" style="margin-bottom: var(--s-10);">
+      <h2>Selected<br>work</h2>
+      <span class="mono muted">03 projects · 1 live experiments</span>
+    </div>
+
+    <!-- Project 1 — HERO treatment -->
+    <article class="project project--hero" data-od-id="project-1">
+      <div>
+        <div class="accent-bar"></div>
+        <span class="project__index">01 / Featured</span>
+        <h3 class="project__title">Personal Cloud Gaming<br>Orchestrator</h3>
+        <p class="project__desc">
+          A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI
+          control plane, React on the front, JWT-secured WebSockets for live telemetry, and
+          Sunshine + Tailscale for low-latency streaming. The reason I built it: I wanted
+          to play my desktop library from my laptop over a flaky network and learn every
+          layer of a real distributed system in the process.
+        </p>
+
+        <dl class="project__meta">
+          <div>
+            <dt>What it does</dt>
+            <dd>Provisions game sessions, streams input/output, monitors host health, and authenticates clients —
+              all from a single dashboard.</dd>
+          </div>
+          <div>
+            <dt>What I learned</dt>
+            <dd>Auth flows that don't lie, WebSocket lifecycle, why "low latency" is a system property, not a
+              feature.</dd>
+          </div>
+        </dl>
+
+        <div class="project__chips">
+          <span class="chip">React</span>
+          <span class="chip">FastAPI</span>
+          <span class="chip">Python</span>
+          <span class="chip">WebSockets</span>
+          <span class="chip">JWT</span>
+          <span class="chip">Sunshine</span>
+          <span class="chip">Tailscale</span>
         </div>
 
-        <!-- Project 1 — HERO treatment -->
-        <article class="project project--hero" data-od-id="project-1">
-          <div>
-            <div class="accent-bar"></div>
-            <span class="project__index">01 / Featured</span>
-            <h3 class="project__title">Personal Cloud Gaming<br>Orchestrator</h3>
-            <p class="project__desc">
-              A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI
-              control plane, React on the front, JWT-secured WebSockets for live telemetry, and
-              Sunshine + Tailscale for low-latency streaming. The reason I built it: I wanted
-              to play my desktop library from my laptop over a flaky network and learn every
-              layer of a real distributed system in the process.
-            </p>
-
-            <dl class="project__meta">
-              <div>
-                <dt>What it does</dt>
-                <dd>Provisions game sessions, streams input/output, monitors host health, and authenticates clients —
-                  all from a single dashboard.</dd>
-              </div>
-              <div>
-                <dt>What I learned</dt>
-                <dd>Auth flows that don't lie, WebSocket lifecycle, why "low latency" is a system property, not a
-                  feature.</dd>
-              </div>
-            </dl>
-
-            <div class="project__chips">
-              <span class="chip">React</span>
-              <span class="chip">FastAPI</span>
-              <span class="chip">Python</span>
-              <span class="chip">WebSockets</span>
-              <span class="chip">JWT</span>
-              <span class="chip">Sunshine</span>
-              <span class="chip">Tailscale</span>
-            </div>
-
-            <div class="project__links">
-              <a class="btn btn-primary" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator"
-                rel="noopener" target="_blank">View on GitHub ↗</a>
-              <a class="btn btn-ghost" href="#contact">Ask me about it</a>
-            </div>
-          </div>
-
-          <div class="project__cover">
-            <span class="badge chip chip--accent mono">Featured</span>
-            <img src="admin_home_page.png" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1600"
-              height="900" loading="lazy" decoding="async"
-              style="display: block; width: 100%; height: 100%; object-fit: cover;">
-          </div>
-        </article>
-
-        <!-- Project 2 -->
-        <article class="project" data-od-id="project-2">
-          <div>
-            <span class="project__index">02 / Platform</span>
-            <h3 class="project__title">Future of CEC</h3>
-            <p class="project__desc">
-              A campus platform for the College of Engineering Chengannur community.
-              Google auth, role-based access for students and lift operators, an integrated AI
-              assistant (local Gemma via Ollama) for student queries, and workflows that
-              actually map to the way the campus runs — including a deliberately simple
-              lift-access request flow that doesn't require an IT ticket.
-            </p>
-
-            <dl class="project__meta">
-              <div>
-                <dt>What it does</dt>
-                <dd>Single place for student queries, lift access, and campus information, backed by a local LLM for the
-                  AI assistant.</dd>
-              </div>
-              <div>
-                <dt>What I learned</dt>
-                <dd>Designing auth for a closed community, running a local LLM in production, and shipping a feature
-                  that real students depend on.</dd>
-              </div>
-            </dl>
-
-            <div class="project__chips">
-              <span class="chip">PostgreSQL</span>
-              <span class="chip">Prisma</span>
-              <span class="chip">Express</span>
-              <span class="chip">FastAPI</span>
-              <span class="chip">Ollama</span>
-              <span class="chip">Gemma</span>
-              <span class="chip">Google OAuth</span>
-            </div>
-
-            <div class="project__links">
-              <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari/Minions--Future_of_CEC" rel="noopener"
-                target="_blank">View on GitHub ↗</a>
-            </div>
-          </div>
-
-          <div class="project__cover">
-            <img src="image-2.webp" alt="Smart Campus Platform" width="1600" height="900" loading="lazy"
-              decoding="async" style="display: block; width: 100%; height: 100%; object-fit: cover;">
-          </div>
-        </article>
-
-        <!-- Project 3 -->
-        <article class="project" data-od-id="project-3">
-          <div>
-            <span class="project__index">03 / Hackathon build</span>
-            <h3 class="project__title">Smart Farming<br>Dashboard</h3>
-            <p class="project__desc">
-              Built during a hackathon: a dashboard that ingests soil and weather sensor data,
-              surfaces trends with Chart.js, and uses an AI agronomy layer to suggest next
-              actions. FastAPI serves the API; the front end focuses on a single screen that
-              a farmer can read in under five seconds.
-            </p>
-
-            <dl class="project__meta">
-              <div>
-                <dt>What it does</dt>
-                <dd>Real-time sensor visualization, AI-driven recommendations, decision-grade summaries at a glance.
-                </dd>
-              </div>
-              <div>
-                <dt>What I learned</dt>
-                <dd>Designing for non-technical users, batching async sensor writes, and how much a clear chart matters
-                  more than a clever model.</dd>
-              </div>
-            </dl>
-
-            <div class="project__chips">
-              <span class="chip">FastAPI</span>
-              <span class="chip">Chart.js</span>
-              <span class="chip">Python</span>
-              <span class="chip">Sensors</span>
-              <span class="chip">AI Agronomy</span>
-            </div>
-
-            <div class="project__links">
-              <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz" rel="noopener"
-                target="_blank">View on GitHub ↗</a>
-            </div>
-          </div>
-
-          <div class="project__cover">
-            <img src="image-1.png" alt="Smart Farming Dashboard analytics view" width="1600" height="900" loading="lazy"
-              decoding="async" style="display:block;width:100%;height:100%;object-fit:cover;">
-
-          </div>
-        </article>
+        <div class="project__links">
+          <a class="btn btn-primary" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator"
+            rel="noopener" target="_blank">View on GitHub ↗</a>
+          <a class="btn btn-ghost" href="#contact">Ask me about it</a>
+        </div>
       </div>
-    </section>
+
+      <div class="project__cover" style="margin-top: 12px;">
+        <span class="badge chip chip--accent mono" style="padding-right: 10px;">Featured</span>
+        <img src="admin_home_page.png" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1600"
+          height="900" loading="lazy" decoding="async"
+          style="display: block; width: 100%; height: 100%; object-fit: cover;">
+      </div>
+    </article>
+
+    <!-- Project 2 -->
+    <article class="project" data-od-id="project-2">
+      <div>
+        <span class="project__index">02 / Platform</span>
+        <h3 class="project__title">Future of CEC</h3>
+        <p class="project__desc">
+          A campus platform for the College of Engineering Chengannur community.
+          Google auth, role-based access for students and lift operators, an integrated AI
+          assistant (local Gemma via Ollama) for student queries, and workflows that
+          actually map to the way the campus runs — including a deliberately simple
+          lift-access request flow that doesn't require an IT ticket.
+        </p>
+
+        <dl class="project__meta">
+          <div>
+            <dt>What it does</dt>
+            <dd>Single place for student queries, lift access, and campus information, backed by a local LLM for the
+              AI assistant.</dd>
+          </div>
+          <div>
+            <dt>What I learned</dt>
+            <dd>Designing auth for a closed community, running a local LLM in production, and shipping a feature
+              that real students depend on.</dd>
+          </div>
+        </dl>
+
+        <div class="project__chips">
+          <span class="chip">PostgreSQL</span>
+          <span class="chip">Prisma</span>
+          <span class="chip">Express</span>
+          <span class="chip">FastAPI</span>
+          <span class="chip">Ollama</span>
+          <span class="chip">Gemma</span>
+          <span class="chip">Google OAuth</span>
+        </div>
+
+        <div class="project__links">
+          <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari/Minions--Future_of_CEC" rel="noopener"
+            target="_blank">View on GitHub ↗</a>
+        </div>
+      </div>
+
+      <div class="project__cover">
+        <img src="image-2.webp" alt="Smart Campus Platform" width="1600" height="900" loading="lazy" decoding="async"
+          style="display: block; width: 100%; height: 100%; object-fit: cover;">
+      </div>
+    </article>
+
+    <!-- Project 3 -->
+    <article class="project" data-od-id="project-3">
+      <div>
+        <span class="project__index">03 / Hackathon build</span>
+        <h3 class="project__title">Smart Farming<br>Dashboard</h3>
+        <p class="project__desc">
+          Built during a hackathon: a dashboard that ingests soil and weather sensor data,
+          surfaces trends with Chart.js, and uses an AI agronomy layer to suggest next
+          actions. FastAPI serves the API; the front end focuses on a single screen that
+          a farmer can read in under five seconds.
+        </p>
+
+        <dl class="project__meta">
+          <div>
+            <dt>What it does</dt>
+            <dd>Real-time sensor visualization, AI-driven recommendations, decision-grade summaries at a glance.
+            </dd>
+          </div>
+          <div>
+            <dt>What I learned</dt>
+            <dd>Designing for non-technical users, batching async sensor writes, and how much a clear chart matters
+              more than a clever model.</dd>
+          </div>
+        </dl>
+
+        <div class="project__chips">
+          <span class="chip">FastAPI</span>
+          <span class="chip">Chart.js</span>
+          <span class="chip">Python</span>
+          <span class="chip">Sensors</span>
+          <span class="chip">AI Agronomy</span>
+        </div>
+
+        <div class="project__links">
+          <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz" rel="noopener"
+            target="_blank">View on GitHub ↗</a>
+        </div>
+      </div>
+
+      <div class="project__cover">
+        <img src="image-1.png" alt="Smart Farming Dashboard analytics view" width="1600" height="900" loading="lazy"
+          decoding="async" style="display:block;width:100%;height:100%;object-fit:cover;">
+
+      </div>
+    </article>
+  </div>
+</section>
