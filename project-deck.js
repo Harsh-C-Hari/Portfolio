@@ -141,39 +141,21 @@
     setTimeout(function () { wheelLock = false; }, 350);
   }, { passive: false });
 
-  // Touch swipe support (mobile): the card follows the finger as it's dragged
-  // horizontally, snaps to the next/prev project past a distance/velocity
-  // threshold, or springs back if the swipe was too short. A short vertical
-  // move at the start of the gesture is left alone so the card's own
-  // scrolling (for long project descriptions) still works normally.
+  // Touch swipe support (mobile): reuses the exact same next/prev transition
+  // as the arrows, keyboard, and wheel (goTo()'s fade + slide via the
+  // `.is-leaving` class) instead of a separate drag-following animation, so
+  // every way of navigating the deck feels identical. The gesture's direction
+  // is locked early (horizontal vs vertical) so a vertical drag still scrolls
+  // a tall card's own content instead of being mistaken for a swipe.
   var panelEl = deck.querySelector('.project-deck__panel');
-  var touch = null; // { startX, startY, lastX, startTime, locked }
-  var SWIPE_DISTANCE_THRESHOLD = 60; // px of horizontal drag to commit
-  var SWIPE_VELOCITY_THRESHOLD = 0.35; // px/ms — fast flicks commit even if short
+  var touch = null; // { startX, startY, endX, locked }
+  var SWIPE_DISTANCE_THRESHOLD = 50; // px of horizontal movement to count as a swipe
   var DIRECTION_LOCK_THRESHOLD = 10; // px before deciding horizontal vs vertical
-
-  function setCardDrag(dx, animate) {
-    if (!dx && !animate) {
-      // Fully hand control back to the stylesheet (used right before goTo(),
-      // whose own .is-leaving transition must not be blocked by an inline one).
-      card.style.transition = '';
-      card.style.transform = '';
-      return;
-    }
-    card.style.transition = animate ? 'transform .25s cubic-bezier(.4, 0, .2, 1)' : 'none';
-    card.style.transform = dx ? 'translateX(' + dx + 'px)' : '';
-    if (animate) {
-      setTimeout(function () {
-        card.style.transition = '';
-        card.style.transform = '';
-      }, 260);
-    }
-  }
 
   panelEl.addEventListener('touchstart', function (e) {
     if (!state.isOpen || e.touches.length !== 1) return;
     var t = e.touches[0];
-    touch = { startX: t.clientX, startY: t.clientY, lastX: t.clientX, startTime: Date.now(), locked: null };
+    touch = { startX: t.clientX, startY: t.clientY, endX: t.clientX, locked: null };
   }, { passive: true });
 
   panelEl.addEventListener('touchmove', function (e) {
@@ -188,41 +170,20 @@
     }
     if (touch.locked !== 'x') return; // vertical gesture: let the card scroll natively
 
-    // Rubber-band resistance at the ends of the deck, where there's no
-    // next/prev project to swipe to.
-    if ((state.index === 0 && dx > 0) || (state.index === data.length - 1 && dx < 0)) {
-      dx *= 0.35;
-    }
-
-    e.preventDefault();
-    touch.lastX = t.clientX;
-    setCardDrag(dx, false);
+    touch.endX = t.clientX;
+    e.preventDefault(); // stop the page/card from also scrolling sideways
   }, { passive: false });
 
   panelEl.addEventListener('touchend', function () {
     if (!touch) return;
-    var dx = touch.lastX - touch.startX;
-    var elapsed = Math.max(1, Date.now() - touch.startTime);
-    var velocity = Math.abs(dx) / elapsed;
+    var dx = touch.endX - touch.startX;
     var wasHorizontal = touch.locked === 'x';
     touch = null;
-    if (!wasHorizontal) return;
-
-    var direction = dx < 0 ? 1 : -1;
-    var canMove = direction === 1 ? state.index < data.length - 1 : state.index > 0;
-    var committed = canMove && (Math.abs(dx) > SWIPE_DISTANCE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD);
-
-    if (committed) {
-      setCardDrag(0, false);
-      goTo(direction);
-    } else {
-      setCardDrag(0, true);
-    }
+    if (!wasHorizontal || Math.abs(dx) < SWIPE_DISTANCE_THRESHOLD) return;
+    goTo(dx < 0 ? 1 : -1);
   }, { passive: true });
 
   panelEl.addEventListener('touchcancel', function () {
-    if (!touch) return;
     touch = null;
-    setCardDrag(0, true);
   }, { passive: true });
 })();
