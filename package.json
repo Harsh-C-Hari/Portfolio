@@ -1,0 +1,13 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Harsh C Hari's portfolio site \u2014 partials assembled into a single static index.html",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node dev.js"
+  },
+  "devDependencies": {
+    "browser-sync": "^3.0.2"
+  }
+}
