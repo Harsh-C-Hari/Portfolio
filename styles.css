@@ -1424,20 +1424,27 @@ footer {
 .img-skeleton::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, transparent 35%, rgba(247, 156, 255, .45) 50%, transparent 65%);
-  background-size: 200% 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  background: linear-gradient(100deg, transparent, rgba(247, 156, 255, .45) 50%, transparent);
+  transform: translateX(-100%);
   animation: img-skeleton-sweep 1.6s ease-in-out infinite;
   z-index: 0;
 }
 
+/* transform-only (no background-position) so the sweep is handled
+   entirely by the compositor thread — it won't compete with scroll
+   for main-thread paint time even with several skeletons on screen
+   at once. */
 @keyframes img-skeleton-sweep {
   0% {
-    background-position: 160% 0;
+    transform: translateX(-100%);
   }
 
   100% {
-    background-position: -60% 0;
+    transform: translateX(266%);
   }
 }
 
