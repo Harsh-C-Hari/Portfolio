@@ -556,6 +556,20 @@ section[data-od-id="work"] {
     0 0 0 3px var(--c-text),
     5px 5px 0 0 var(--c-text);
   margin-right: 14px;
+  /* the box-shadow's 5px hard offset paints below the box but reserves no
+     layout space of its own, so without real margin here the gap before
+     the next line ("EXPERIMENT") ends up noticeably tighter than the gap
+     between every other line — this was originally only fixed for the
+     mobile breakpoint below; it's the same issue at every size. */
+  margin-bottom: 0.16em;
+}
+
+/* the comma sits outside the highlight box (so it isn't part of the pink
+   fill), which left it aligned to the box's baseline instead of resting
+   low the way a comma naturally does — nudge it down independently */
+.hero-h1 .accent-comma {
+  display: inline-block;
+  transform: translateY(0.20em);
 }
 
 .hero-sub {
