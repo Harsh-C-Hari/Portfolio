@@ -1347,51 +1347,15 @@ footer {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .45);
-  /* faint diagonal wash — mostly the site's cream, with a whisper of the
-     pink accent so the glass catches a bit of color instead of reading
-     as plain gray frost */
-  background: linear-gradient(135deg, rgba(247, 156, 255, .16), rgba(246, 246, 238, .38));
-  /* explicit centering — without this, the arrow glyph's position inside
-     the circle falls back to each browser's own default <button>
-     content-alignment, which isn't identical across Chrome/Firefox and
-     is what made the glyph sit slightly off-center on some devices. */
+  border: 1px solid var(--c-border);
+  background: var(--c-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Safe, universal glass: works in every browser on its own. The actual
-     "bend" (SVG displacement) is layered on top of this below, only for
-     browsers that support referencing an SVG filter from backdrop-filter —
-     Firefox doesn't, and silently drops the ENTIRE backdrop-filter
-     declaration if it sees an unsupported function in the list, which is
-     why the buttons showed no blur at all in Firefox rather than a
-     weaker version of the effect. */
-  backdrop-filter: blur(6px) saturate(1.6);
-  -webkit-backdrop-filter: blur(6px) saturate(1.6);
-  /* specular highlight along the top edge + a soft dark edge underneath —
-     reads as a lens with real thickness rather than a flat tinted disc */
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, .8),
-    inset 0 -1px 2px rgba(0, 0, 0, .12),
-    0 2px 8px rgba(0, 0, 0, .18);
   color: var(--c-text);
-  font-family: var(--f-mono);
-  font-size: 16px;
   cursor: pointer;
   z-index: 4;
-  transition: transform .3s cubic-bezier(.4, 0, .2, 1), opacity .3s ease, background .3s ease, box-shadow .3s ease;
-}
-
-/* `-moz-appearance` only parses in Firefox, so this feature query is a
-   reliable "every browser except Firefox" gate — the SVG-distortion glass
-   only applies where it will actually render, leaving Firefox on the
-   plain blur+saturate version above instead of getting nothing. */
-@supports not (-moz-appearance: none) {
-
-  .project-deck__arrow,
-  .project-deck__counter {
-    backdrop-filter: url(#liquid-glass) blur(3px) saturate(1.6);
-  }
+  transition: transform .3s cubic-bezier(.4, 0, .2, 1), background .3s ease, color .3s ease;
 }
 
 .project-deck__arrow--prev {
@@ -1402,26 +1366,21 @@ footer {
   right: var(--s-4);
 }
 
-/* enlarge + solidify on hover, same feel as the site's other buttons */
+/* same solid-fill hover treatment as .btn-primary, so the deck controls
+   read as the same button system as the rest of the site rather than a
+   one-off style */
 @media (hover: hover) and (pointer: fine) {
   .project-deck__arrow:not(:disabled):hover {
     transform: scale(1.1);
-    background: linear-gradient(135deg, rgba(247, 156, 255, .3), rgba(246, 246, 238, .7));
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, .9),
-      inset 0 -1px 2px rgba(0, 0, 0, .12),
-      0 3px 10px rgba(0, 0, 0, .22);
+    background: var(--c-text);
+    color: var(--c-bg);
   }
 }
 
-/* No transform/scale here on purpose — on touch devices a tap can leave
-   an element in :focus-visible after release, and scaling it up made
-   whichever arrow you'd just tapped visibly bigger than the other one
-   until you tapped elsewhere. The outline alone still gives keyboard
-   users a clear focus indicator without that mismatch. */
 .project-deck__arrow:focus-visible {
-  background: linear-gradient(135deg, rgba(247, 156, 255, .3), rgba(246, 246, 238, .7));
-  outline: 2px solid var(--c-text);
+  background: var(--c-text);
+  color: var(--c-bg);
+  outline: 2px solid var(--c-accent);
   outline-offset: 2px;
 }
 
@@ -1442,14 +1401,8 @@ footer {
   height: 40px;
   padding: 0 var(--s-3);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .45);
-  background: linear-gradient(135deg, rgba(247, 156, 255, .16), rgba(246, 246, 238, .38));
-  backdrop-filter: blur(6px) saturate(1.6);
-  -webkit-backdrop-filter: blur(6px) saturate(1.6);
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, .8),
-    inset 0 -1px 2px rgba(0, 0, 0, .12),
-    0 2px 8px rgba(0, 0, 0, .18);
+  border: 1px solid var(--c-border);
+  background: var(--c-bg);
   font-size: 12px;
   color: var(--c-text);
   letter-spacing: .08em;

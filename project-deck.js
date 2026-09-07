@@ -151,7 +151,17 @@
     e.stopPropagation();
     if (wheelLock) return;
     wheelLock = true;
-    goTo(e.deltaY > 0 ? 1 : -1);
+    // Scrolling forward past the last project closes the deck — mirrors
+    // how native galleries/lightboxes treat "nothing left to scroll to."
+    // Wheel-only on purpose: this listener only ever fires from a mouse
+    // wheel or trackpad gesture, never from a touch swipe (those are
+    // handled separately below), so this can't be triggered by an
+    // accidental mobile swipe.
+    if (e.deltaY > 0 && state.index === data.length - 1) {
+      close();
+    } else {
+      goTo(e.deltaY > 0 ? 1 : -1);
+    }
     setTimeout(function () { wheelLock = false; }, 350);
   }, { passive: false });
 
