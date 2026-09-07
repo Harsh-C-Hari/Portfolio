@@ -103,8 +103,14 @@ a {
   text-underline-offset: 3px;
 }
 
-a:hover {
-  color: var(--c-text);
+/* guarded to real pointer devices — otherwise mobile browsers assign
+   :hover on tap and it sticks until the next tap elsewhere on the page,
+   which was overriding .btn-primary's white text back to black on
+   touch devices (a:hover has higher specificity than .btn-primary) */
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    color: var(--c-text);
+  }
 }
 
 /* keyboard focus ring — uses accent pink so it's visible and on-brand */
