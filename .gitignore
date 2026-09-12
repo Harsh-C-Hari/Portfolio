@@ -1,5 +1,8 @@
-.serena
 node_modules
+.serena
 .file-versions
 .od-skills
-portfolio-plan.md
+*.artifact.json
+.DS_Store
+.env
+.env.local

@@ -126,8 +126,15 @@
     });
     mobileNav.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function (e) {
-        e.preventDefault();
         var href = this.getAttribute('href');
+        // non-hash links (e.g. /resume.pdf) aren't scroll targets — just close
+        // the menu and let the browser handle the link normally.
+        if (!href || href.charAt(0) !== '#') {
+          mobileNav.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+          return;
+        }
+        e.preventDefault();
         // close menu first, then scroll after transition (300ms) finishes
         mobileNav.classList.remove('is-open');
         toggle.setAttribute('aria-expanded', 'false');

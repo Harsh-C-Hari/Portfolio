@@ -38,6 +38,9 @@
       '</div>' +
       '<h3>' + escapeHtml(p.title) + '</h3>' +
       '<p>' + escapeHtml(p.blurb) + '</p>' +
+      (p.learned ?
+        '<dl class="project__meta"><div><dt>What I learned</dt><dd>' + escapeHtml(p.learned) + '</dd></div></dl>' :
+        '') +
       '<div class="project__chips">' +
       p.chips.map(function (c) { return '<span class="chip">' + escapeHtml(c) + '</span>'; }).join('') +
       '</div>' +
