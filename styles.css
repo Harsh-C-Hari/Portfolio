@@ -1476,7 +1476,10 @@ footer {
   .hero-rule { flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-12); }
 }
 @media (max-width: 420px) {
-  .hero-deco-wrap { display: none; }
+  .hero-deco-wrap { 
+    opacity: 0.25; 
+    z-index: -1; 
+  }
 }
 
 /* -- Nav mobile drawer --------------------------------------- */
