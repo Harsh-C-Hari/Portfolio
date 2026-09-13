@@ -276,9 +276,12 @@ h3 {
   transition: border-color 0.2s, color 0.2s;
 }
 
-.chip:hover {
-  border-color: var(--c-text);
-  color: var(--c-text);
+/* hover only on pointer-capable devices (not touch) */
+@media (hover: hover) {
+  .chip:hover {
+    border-color: var(--c-text);
+    color: var(--c-text);
+  }
 }
 
 /* Category-coloured chips */
@@ -415,7 +418,12 @@ h3 {
   transition: color 0.2s;
 }
 
-.nav-brand:hover,
+@media (hover: hover) {
+  .nav-brand:hover,
+  .nav-brand.is-active {
+    color: var(--c-accent);
+  }
+}
 .nav-brand.is-active {
   color: var(--c-accent);
 }
@@ -444,7 +452,12 @@ h3 {
   transition: color 0.2s;
 }
 
-.nav-links a:hover,
+@media (hover: hover) {
+  .nav-links a:hover,
+  .nav-links a.is-active {
+    color: var(--c-text);
+  }
+}
 .nav-links a.is-active {
   color: var(--c-text);
 }
@@ -1048,8 +1061,10 @@ section {
   transition: transform 0.6s ease;
 }
 
-.work-panel__cover:hover img {
-  transform: scale(1.03);
+@media (hover: hover) {
+  .work-panel__cover:hover img {
+    transform: scale(1.03);
+  }
 }
 
 /* Transition cues flanking the pinned section */
@@ -1125,8 +1140,10 @@ section {
   transition: border-color 0.2s;
 }
 
-.exp:hover {
-  border-color: var(--c-muted);
+@media (hover: hover) {
+  .exp:hover {
+    border-color: var(--c-muted);
+  }
 }
 
 .exp__head {
@@ -1423,4 +1440,89 @@ footer {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+/* ============================================================
+   MOBILE OPTIMISATIONS
+   All touch/small-screen adjustments in one place.
+   ============================================================ */
+
+/* -- Hero ---------------------------------------------------- */
+@media (max-width: 599px) {
+  .hero {
+    padding-top: calc(var(--nav-h) + var(--s-12));
+    padding-bottom: var(--s-12);
+    align-items: flex-start;
+  }
+  .hero-grid { gap: var(--s-8); }
+  .hero-meta { flex-direction: column; align-items: stretch; }
+  .hero-meta .btn { justify-content: center; padding: 13px 22px; }
+  .hero-rule { flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-12); }
+}
+@media (max-width: 420px) {
+  .hero-deco-wrap { display: none; }
+}
+
+/* -- Nav mobile drawer --------------------------------------- */
+.nav-mobile a {
+  padding: var(--s-3) 0;
+  color: var(--c-text);
+  font-size: var(--t-small);
+  text-decoration: none;
+  display: block;
+}
+.nav-mobile a.is-active { color: var(--c-accent); }
+
+/* -- Buttons: 44px min tap target on coarse pointer ---------- */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; padding: 11px 22px; }
+  .btn:active { transform: none; opacity: 0.8; }
+}
+
+/* -- Contact: stack buttons on small screens ----------------- */
+@media (max-width: 599px) {
+  .contact .row { flex-direction: column; align-items: stretch; }
+  .contact .row .btn { justify-content: center; }
+}
+
+/* -- Work panels -------------------------------------------- */
+@media (max-width: 899px) {
+  .work-panel__title { font-size: clamp(28px, 6vw, 48px); }
+  .work-panel__content { max-width: none; }
+}
+@media (max-width: 599px) {
+  .work-panel { padding-bottom: var(--s-20); }
+}
+
+/* -- Experiments -------------------------------------------- */
+@media (max-width: 599px) {
+  .exp { padding: var(--s-6); }
+  .exp__foot { flex-direction: column; align-items: flex-start; gap: var(--s-3); }
+  .exp__url { word-break: break-all; }
+}
+
+/* -- Skills -------------------------------------------------- */
+@media (max-width: 599px) {
+  .skill-row { gap: var(--s-3); }
+  .skill-row__label { font-size: var(--t-small); }
+}
+
+/* -- Timeline ----------------------------------------------- */
+@media (max-width: 599px) {
+  .timeline__row { grid-template-columns: 1fr; gap: var(--s-1); }
+  .timeline__date { font-size: var(--t-micro); }
+}
+
+/* -- Section header (between) ------------------------------- */
+@media (max-width: 480px) {
+  .between { flex-direction: column; gap: var(--s-3); }
+}
+
+/* -- Footer ------------------------------------------------- */
+@media (max-width: 480px) {
+  .footer-inner { flex-direction: column; align-items: flex-start; gap: var(--s-2); }
+}
+
+/* -- Touch: focus-visible replaces hover feedback ----------- */
+@media (hover: none) {
+  .exp:focus-within { border-color: var(--c-muted); }
 }
