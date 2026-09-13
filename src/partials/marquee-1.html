@@ -1,12 +1,17 @@
-    <!-- ============================================================
-       MARQUEE — "I build..."
-       ============================================================ -->
-    <div class="marquee" aria-hidden="true" data-od-id="marquee-1">
-      <div class="marquee__track">
-        <span class="marquee__item"><span class="dot dot--accent"></span>Build</span>
-        <span class="marquee__item"><span class="dot"></span>Ship</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>Iterate</span>
-        <span class="marquee__item"><span class="dot"></span>Break</span>
-        <span class="marquee__item"><span class="dot dot--accent"></span>Fix</span>
-        <span class="marquee__item"><span class="dot"></span>Learn</span>
-      </div>
+<!-- ============================================================
+     MARQUEE 1 — "Build / Ship / Iterate ..."
+     GSAP drives the motion (xPercent loop + velocity-linked speed).
+     aria-hidden keeps it out of screen reader flow.
+     ============================================================ -->
+<div class="marquee" aria-hidden="true" data-od-id="marquee-1">
+  <div class="marquee__track">
+    <span class="marquee__item"><span class="dot dot--accent"></span>Build</span>
+    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Ship</span>
+    <span class="marquee__item"><span class="dot dot--accent"></span>Iterate</span>
+    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Break</span>
+    <span class="marquee__item"><span class="dot dot--accent"></span>Fix</span>
+    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Learn</span>
+    <span class="marquee__item"><span class="dot dot--accent"></span>Deploy</span>
+    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Debug</span>
+  </div>
+</div>
