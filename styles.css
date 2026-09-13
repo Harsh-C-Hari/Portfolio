@@ -98,6 +98,12 @@
     --s-20: 56px;
     --s-24: 64px;
     --s-32: 80px;
+
+    /* Scale UP typography for better readability on mobile */
+    --t-section: clamp(48px, 6vw, 80px);
+    --t-body: 19px;
+    --t-small: 16px;
+    --t-micro: 14px;
   }
 }
 
