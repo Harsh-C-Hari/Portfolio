@@ -161,11 +161,17 @@ if (!prefersReduced) {
             ? document.getElementById('top')
             : document.querySelector(href);
           if (!target) return;
+          // Compute exact scroll position at click-time from live layout.
+          // getBoundingClientRect reflects the real DOM position including any
+          // GSAP pin spacers, so this always lands the section top flush below nav.
+          const navH = document.querySelector('.nav')?.offsetHeight || 64;
+          const exactY = href === '#top'
+            ? 0
+            : Math.max(0, target.getBoundingClientRect().top + window.scrollY - navH);
           if (lenis) {
-            lenis.scrollTo(target, { offset: -64, duration: 1.4 });
+            lenis.scrollTo(exactY, { immediate: true });
           } else {
-            const offsetTop = target.getBoundingClientRect().top + window.pageYOffset - 64;
-            window.scrollTo({ top: offsetTop < 0 ? 0 : offsetTop, behavior: 'smooth' });
+            window.scrollTo({ top: exactY, behavior: 'instant' });
           }
         }, 310);
       });
@@ -174,6 +180,57 @@ if (!prefersReduced) {
       if (!e.target.closest('.nav') && mobileNav.classList.contains('is-open')) {
         mobileNav.classList.remove('is-open');
         toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  // ── DESKTOP NAV LINKS — smooth scroll with nav-height offset ────────────
+  // Without this, clicking anchor links falls through to the browser's native
+  // scrollIntoView which: (a) ignores the 64px fixed nav, (b) is confused by
+  // the GSAP pin spacer that inflates the page height during the Work section.
+  navLinks.forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href || href[0] !== '#') return; // let external links pass through
+
+      e.preventDefault();
+
+      const target = href === '#top'
+        ? (document.getElementById('top') || document.documentElement)
+        : document.querySelector(href);
+      if (!target) return;
+
+      // Compute exact scroll position at click-time from live layout.
+      // getBoundingClientRect reflects the real DOM position including any
+      // GSAP pin spacers, so this always lands the section top flush below nav.
+      const navH = nav.offsetHeight || 64;
+      const exactY = href === '#top'
+        ? 0
+        : Math.max(0, target.getBoundingClientRect().top + window.scrollY - navH);
+
+      if (lenis) {
+        // immediate:true = instant jump — no animated scroll-through.
+        // A long smooth scroll is bad here because the GSAP-pinned Work section
+        // inflates the page by ~3000px, so a 1.4s tween would drag the user
+        // through all four horizontal panels before reaching the destination.
+        lenis.scrollTo(exactY, { immediate: true });
+      } else {
+        window.scrollTo({ top: exactY, behavior: 'instant' });
+      }
+    });
+  });
+
+  // Also wire the nav brand logo → scroll to top
+  if (navBrand) {
+    navBrand.addEventListener('click', (e) => {
+      const href = navBrand.getAttribute('href');
+      if (href === '#top' || href === '#') {
+        e.preventDefault();
+        if (lenis) {
+          lenis.scrollTo(0, { immediate: true });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       }
     });
   }
