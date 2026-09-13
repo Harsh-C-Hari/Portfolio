@@ -326,22 +326,25 @@ if (!prefersReduced) {
         delay: 0.1,
       });
 
-      // Code-glyph decorative shapes — animate in during scramble
+      // Code-glyph decorative shapes — animate all 10 in during scramble,
+      // then give each a unique multi-axis float so they never move in sync.
       const decos = document.querySelectorAll('.hero-deco');
       if (decos.length) {
-        const decoAnimations = [
-          // { — rotates CW and settles, drifts from top-right
-          { el: decos[0], from: { x: 30, y: -20, rotation: -25, opacity: 0 }, to: { x: 0, y: 0, rotation: 12, opacity: 0.7, duration: 0.9, ease: 'power3.out', delay: 0.25 } },
-          // /> — drifts in from right
-          { el: decos[1], from: { x: 40, opacity: 0 }, to: { x: 0, opacity: 0.55, duration: 0.7, ease: 'power2.out', delay: 0.45 } },
-          // _ cursor — scales from 0, blinks twice then freezes
-          { el: decos[2], from: { scaleX: 0, opacity: 0 }, to: { scaleX: 1, opacity: 0.8, duration: 0.35, ease: 'back.out(1.8)', delay: 0.3 } },
-          // ; — falls down from above
-          { el: decos[3], from: { y: -30, opacity: 0 }, to: { y: 0, opacity: 0.6, duration: 0.65, ease: 'bounce.out', delay: 0.55 } },
+        // Per-symbol entrance config (first 4 keep their existing character)
+        const entranceConfigs = [
+          { from: { x: 30, y: -20, rotation: -25, opacity: 0 }, to: { x: 0, y: 0, rotation: 12, opacity: 0.7, duration: 0.9, ease: 'power3.out', delay: 0.25 } },
+          { from: { x: 40, opacity: 0 },                         to: { x: 0, opacity: 0.55, duration: 0.7, ease: 'power2.out', delay: 0.45 } },
+          { from: { scaleX: 0, opacity: 0 },                     to: { scaleX: 1, opacity: 0.8, duration: 0.35, ease: 'back.out(1.8)', delay: 0.3 } },
+          { from: { y: -30, opacity: 0 },                        to: { y: 0, opacity: 0.6, duration: 0.65, ease: 'bounce.out', delay: 0.55 } },
+          // new 3 — } * ! — staggered from different directions, opacity matches originals
+          { from: { x: -25, y: 20, opacity: 0 },        to: { x: 0, y: 0,       opacity: 0.55, duration: 0.75, ease: 'power3.out',    delay: 0.7  } }, // }
+          { from: { y: 25, opacity: 0 },                 to: { y: 0,             opacity: 0.65, duration: 0.65, ease: 'power2.out',    delay: 0.8  } }, // *
+          { from: { scale: 0.4, opacity: 0 },            to: { scale: 1,         opacity: 0.6,  duration: 0.55, ease: 'back.out(1.4)', delay: 0.9  } }, // !
         ];
 
-        decoAnimations.forEach(({ el, from, to }) => {
-          gsap.fromTo(el, from, to);
+        decos.forEach((el, i) => {
+          const cfg = entranceConfigs[i] || entranceConfigs[entranceConfigs.length - 1];
+          gsap.fromTo(el, cfg.from, cfg.to);
         });
 
         // Cursor blink: _ blinks twice then stays
@@ -359,19 +362,54 @@ if (!prefersReduced) {
           });
         }
 
-        // Subtle float loop on the shapes after they settle
-        decos.forEach((deco, i) => {
-          gsap.to(deco, {
-            y: `+=${6 + i * 2}`,
-            duration: 2.5 + i * 0.4,
-            repeat: -1,
-            yoyo: true,
-            ease: 'power1.inOut',
-            delay: 1.2 + i * 0.3,
+        // ── FLOAT LOOP — one ticker callback drives all symbols ───────────
+        // Why: 21 separate GSAP tweens (7 symbols × 3 axes) each add a ticker
+        // object that fires every RAF. Math.sin-based motion runs in ONE callback,
+        // produces perfectly continuous sinusoidal curves (no yoyo reversal lag),
+        // and keeps the main thread load minimal.
+        //
+        // Each axis gets a unique angular frequency (ω = 2π / period) and a
+        // phase offset so no two symbols ever align — they drift independently.
+        const floatConfigs = [
+          // { symbol }   yAmt  xAmt  rot   yPeriod  xPeriod  rPeriod  yPhase  xPhase  rPhase
+          /* {  */      { y: 8,  x: 4,  r: 6,  yP: 6.2,  xP: 9.4,  rP: 10.6, yΦ: 0.0,  xΦ: 1.1,  rΦ: 2.3  },
+          /* />  */     { y: 10, x: 6,  r: 0,  yP: 5.4,  xP: 7.8,  rP: 0,    yΦ: 0.9,  xΦ: 2.4,  rΦ: 0    },
+          /* _   */     { y: 4,  x: 0,  r: 0,  yP: 3.8,  xP: 0,    rP: 0,    yΦ: 1.7,  xΦ: 0,    rΦ: 0    },
+          /* ;   */     { y: 12, x: 3,  r: -8, yP: 7.6,  xP: 10.2, rP: 12.4, yΦ: 2.6,  xΦ: 0.5,  rΦ: 3.1  },
+          /* }   */     { y: 7,  x: 5,  r: -7, yP: 7.0,  xP: 8.4,  rP: 11.6, yΦ: 3.4,  xΦ: 1.8,  rΦ: 4.2  },
+          /* *   */     { y: 11, x: 4,  r: 4,  yP: 5.8,  xP: 12.2, rP: 0,    yΦ: 0.3,  xΦ: 3.3,  rΦ: 0    },
+          /* !   */     { y: 6,  x: 8,  r: -5, yP: 8.4,  xP: 7.4,  rP: 14.2, yΦ: 1.2,  xΦ: 2.7,  rΦ: 5.0  },
+        ];
+
+        // Force GPU compositing on all deco elements before float starts
+        gsap.set(decos, { force3D: true });
+
+        // Single ticker — runs once per RAF frame, updates all symbols
+        const floatTicker = (time) => {
+          decos.forEach((deco, i) => {
+            const fc = floatConfigs[i];
+            if (!fc) return;
+            const x = fc.x > 0 ? Math.sin((time / fc.xP) * Math.PI * 2 + fc.xΦ) * fc.x : 0;
+            const y = Math.sin((time / fc.yP) * Math.PI * 2 + fc.yΦ) * fc.y;
+            const r = fc.rP > 0 ? Math.sin((time / fc.rP) * Math.PI * 2 + fc.rΦ) * fc.r : 0;
+            gsap.set(deco, { x, y, rotation: r });
           });
+        };
+
+        // Start ticker after entrance animations have settled (~1.5s)
+        let floatTickerAdded = false;
+        gsap.delayedCall(1.5, () => {
+          gsap.ticker.add(floatTicker);
+          floatTickerAdded = true;
         });
+
+        // Clean up ticker if the hero section leaves the page (SPA navigation)
+        // store ref for potential future cleanup
+        window.__heroFloatTicker = floatTicker;
       }
     })();
+
+
 
     // ── SECTION HEADING WORD REVEALS ─────────────────────────────────────
     // Every h2 inside a section (not hero) splits by words on scroll entry

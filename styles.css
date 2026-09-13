@@ -630,6 +630,9 @@ h3 {
   opacity: 0;
   /* initial state; GSAP drives opacity + transform */
   user-select: none;
+  /* Promote to GPU compositor layer so float motion never touches main-thread paint */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .hero-deco[data-glyph="{"] {
@@ -657,6 +660,35 @@ h3 {
   right: 35%;
   color: var(--c-cat-data);
   font-size: clamp(32px, 5vw, 64px);
+}
+
+/* ── New 6 — safe zones: far-right column, very top, very bottom, far-left edge ── */
+
+/* } — top-right cluster, offset from { */
+.hero-deco[data-glyph="}"] {
+  top: 6%;
+  right: 4%;
+  color: var(--c-cat-backend);
+  font-size: clamp(24px, 3.5vw, 52px);
+  opacity: 0;
+}
+
+/* * — top strip above heading, well above text */
+.hero-deco[data-glyph="*"] {
+  top: 5%;
+  left: 42%;
+  color: var(--c-accent);
+  font-size: clamp(28px, 4vw, 58px);
+  opacity: 0;
+}
+
+/* ! — right side, between { and /> vertically */
+.hero-deco[data-glyph="!"] {
+  top: 38%;
+  right: 6%;
+  color: var(--c-cat-data);
+  font-size: clamp(24px, 3.5vw, 52px);
+  opacity: 0;
 }
 
 /* ============================================================
