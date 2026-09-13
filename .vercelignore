@@ -1,13 +1,5 @@
 node_modules
-package-lock.json
-src/
-animation.js
-build.js
-build.py
-dev.js
 PORTFOLIO-REBUILD-PLAN.md
-README.md
-LICENSE
 .serena
 .od-skills
 .file-versions
