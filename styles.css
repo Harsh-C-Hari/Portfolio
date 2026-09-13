@@ -955,9 +955,10 @@ section {
   /* Bottom padding intentionally 0 — the work-transition div below provides gap */
 }
 
-/* Section header content */
+/* Section header content — stays in container alignment (same as all other sections).
+   Proximity to the first project panel is handled by reducing work-transition height. */
 .work-header {
-  padding-bottom: var(--s-10);
+  padding-bottom: var(--s-6);
 }
 
 /* Horizontal rail — contains all panels side by side */
@@ -1053,7 +1054,7 @@ section {
 
 /* Transition cues flanking the pinned section */
 .work-transition {
-  height: var(--s-24);
+  height: var(--s-12);
   display: flex;
   align-items: center;
   justify-content: center;
