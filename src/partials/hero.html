@@ -8,15 +8,24 @@
       <span class="chip chip--accent">Open to internships &amp; collabs</span>
     </div>
 
-    <div class="hero-grid">
-      <!-- H1: SplitText splits by chars → GSAP animates each char up -->
+    <div class="hero-grid" style="position:relative;">
+      <!-- H1: per-line spans so ScrambleText can target each line's
+           textContent without destroying <br> layout structure -->
       <h1 class="hero-h1">
-        I build<br>
-        software,<br>
-        ship ideas,<br>
-        break things,<br>
-        fix them.
+        <span class="hero-line">I build</span>
+        <span class="hero-line">software,</span>
+        <span class="hero-line">ship ideas,</span>
+        <span class="hero-line">break things,</span>
+        <span class="hero-line">fix them.</span>
       </h1>
+
+      <!-- Code-glyph decorative shapes (absolute, aria-hidden) -->
+      <div class="hero-deco-wrap" aria-hidden="true">
+        <span class="hero-deco" data-glyph="{">{</span>
+        <span class="hero-deco" data-glyph="/>">/&gt;</span>
+        <span class="hero-deco" data-glyph="_">_</span>
+        <span class="hero-deco" data-glyph=";">;</span>
+      </div>
 
       <div>
         <p class="hero-sub">

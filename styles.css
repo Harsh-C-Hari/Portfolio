@@ -26,8 +26,10 @@
   /* very quiet text */
 
   /* ── Accent system ───────────────────────────────────────── */
-  --c-accent: #a8ff3e;
-  /* lime-electric — primary signal */
+  --c-accent: #f279c5;
+  /* hot pink — primary signal (replaces lime; green stays scoped to AI taxonomy only) */
+  --c-accent-dark: #d4579f;
+  /* deeper pink for pressed/active states */
   --c-accent-2: #7c6bff;
   /* violet — secondary accent */
   --c-danger: #ff4d6d;
@@ -45,7 +47,7 @@
   --c-cat-systems: #ff4d6d;
   /* rose */
   --c-cat-ai: #a8ff3e;
-  /* lime */
+  /* lime-electric — AI integrations only; NOT the primary accent */
   --c-cat-testing: #ffd166;
   /* yellow */
 
@@ -563,20 +565,19 @@ h3 {
 }
 
 .hero-h1 {
-  /* GSAP SplitText chars will be wrapped — overflow hidden on lines */
-  overflow: hidden;
+  /* ScrambleText targets each .hero-line span individually */
   color: var(--c-text);
+  overflow: visible;
+  /* allow glyphs to extend slightly */
 }
 
-/* SplitText wraps lines in <div class="line">.
-   overflow:hidden clips the yPercent entrance.
-   white-space:nowrap prevents mid-word reflow when chars are wrapped in <span>s. */
-.hero-h1 .line {
+/* Each line of the headline is a block span.
+   ScrambleText animates textContent of each span in sequence. */
+.hero-h1 .hero-line {
+  display: block;
   overflow: hidden;
+  /* clips the scramble flash at line edges */
   white-space: nowrap;
-  width: max-content;
-  padding-right: 0.1em;
-  /* prevent italic/font boundary clipping */
 }
 
 .hero-h1 .accent {
@@ -612,8 +613,132 @@ h3 {
   letter-spacing: 0.06em;
 }
 
+/* Code-glyph decorative shapes — float around the hero headline */
+.hero-deco-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-deco {
+  position: absolute;
+  font-family: var(--f-mono);
+  font-size: clamp(28px, 4vw, 56px);
+  color: var(--c-muted-2);
+  line-height: 1;
+  opacity: 0;
+  /* initial state; GSAP drives opacity + transform */
+  user-select: none;
+}
+
+.hero-deco[data-glyph="{"] {
+  top: 8%;
+  right: 12%;
+  color: var(--c-cat-frontend);
+}
+
+.hero-deco[data-glyph="/>"] {
+  bottom: 18%;
+  right: 5%;
+  color: var(--c-cat-backend);
+  font-size: clamp(18px, 2.5vw, 36px);
+}
+
+.hero-deco[data-glyph="_"] {
+  top: 45%;
+  right: 22%;
+  color: var(--c-accent);
+  font-size: clamp(22px, 3vw, 44px);
+}
+
+.hero-deco[data-glyph=";"] {
+  top: 20%;
+  right: 35%;
+  color: var(--c-cat-data);
+  font-size: clamp(32px, 5vw, 64px);
+}
+
 /* ============================================================
-   MARQUEE
+   VERB REVEAL STRIP (pinned per-character brightness-reveal)
+   Replaces the old marquee-1 infinite loop.
+   ============================================================ */
+.verb-reveal {
+  position: relative;
+  overflow: hidden;
+  /* Natural height — ScrollTrigger scrubs through this as the user scrolls past.
+     No pin:true means no spacer div, no displacement of downstream sections. */
+  min-height: 40svh;
+  display: flex;
+  align-items: center;
+  padding: var(--s-8) 0;
+  border-top: 1px solid var(--c-border);
+  border-bottom: 1px solid var(--c-border);
+  user-select: none;
+}
+
+.verb-reveal__track {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  width: max-content;
+  will-change: transform;
+  font-family: var(--f-display);
+  font-size: clamp(36px, 6vw, 80px);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  padding: 0.25em 0;
+}
+
+.verb-reveal__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Individual char spans injected by JS */
+.verb-reveal__char {
+  display: inline-block;
+  color: var(--c-muted-2);
+  /* start dim; JS animates to var(--c-text) */
+  transition: none;
+  /* GSAP owns the transition */
+}
+
+.verb-reveal__sep {
+  display: inline-block;
+  color: var(--c-muted-2);
+  padding: 0 0.4em;
+  font-size: 0.6em;
+  opacity: 0.5;
+}
+
+/* Floating keyword pills */
+.verb-reveal__pills {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.kw-pill {
+  position: absolute;
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1.5px solid var(--cat-hue, var(--c-accent));
+  color: var(--cat-hue, var(--c-accent));
+  border-radius: 100px;
+  font-family: var(--f-mono);
+  font-size: var(--t-small);
+  letter-spacing: 0.06em;
+  background: transparent;
+  /* JS sets initial transform + opacity and animates them in */
+  opacity: 0;
+  transform: rotate(var(--kw-rotate, -8deg));
+}
+
+/* ============================================================
+   MARQUEE (marquee-2 tech-stack loop — simple velocity loop)
    ============================================================ */
 .marquee {
   overflow: hidden;
@@ -786,11 +911,21 @@ section {
   /* The pin container — ScrollTrigger pins this element */
   overflow: hidden;
   padding: 0; /* no vertical padding — full-viewport height panels */
+  position: relative;
+  z-index: 10;
+  /* z-index 10: ensures the pinned wrapper paints above sections
+     that are still in normal flow while the pin is active. */
 }
 
-/* Section header above the panels (stays in normal flow) */
+/* Outer wrap for the heading — in normal flow, scrolls away before pin fires */
+.work-header-wrap {
+  padding: var(--s-24) 0 0;
+  /* Bottom padding intentionally 0 — the work-transition div below provides gap */
+}
+
+/* Section header content */
 .work-header {
-  padding: var(--s-24) 0 var(--s-10);
+  padding-bottom: var(--s-10);
 }
 
 /* Horizontal rail — contains all panels side by side */
@@ -1183,6 +1318,16 @@ footer {
   .skill-row,
   .timeline__row,
   .exp {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Verb-reveal chars: show bright immediately without scrub */
+  .verb-reveal__char {
+    color: var(--c-text) !important;
+  }
+
+  .kw-pill {
     opacity: 1 !important;
     transform: none !important;
   }

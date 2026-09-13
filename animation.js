@@ -1,7 +1,7 @@
 /**
  * animation.js — Harsh C Hari Portfolio
- * GSAP-driven motion system: hero entrance, scroll reveals,
- * marquee (velocity-linked), horizontal pinned work, smooth scroll.
+ * GSAP-driven motion system: hero scramble-resolve, pinned verb-reveal,
+ * scroll reveals, horizontal pinned work, smooth scroll.
  *
  * Bundled by esbuild -> animation.bundle.js
  */
@@ -9,10 +9,11 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { Observer } from 'gsap/Observer';
 import Lenis from 'lenis';
 
-gsap.registerPlugin(ScrollTrigger, SplitText, Observer);
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, Observer);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REDUCED MOTION GATE
@@ -212,38 +213,44 @@ if (!prefersReduced) {
   // Use gsap.context for clean teardown (important for any SPA-style rebuilds)
   const ctx = gsap.context(() => {
 
-    // ── HERO ENTRANCE — SplitText char animation ──────────────────────────
+    // ── HERO ENTRANCE — ScrambleText per line + code-glyph shapes ────────
     (function heroEntrance() {
       const heroH1 = document.querySelector('.hero-h1');
       if (!heroH1) return;
 
-      // Split by chars, wrapping each line for clip
-      const split = new SplitText(heroH1, {
-        type: 'chars,lines',
-        linesClass: 'line',
+      // Target each .hero-line span individually — each is a plain string,
+      // safe for ScrambleText (avoids the DOM element vs string type error).
+      const lines = heroH1.querySelectorAll('.hero-line');
+      if (!lines.length) return;
+
+      lines.forEach((lineEl, i) => {
+        // Store original text before ScrambleText overwrites it
+        const targetText = lineEl.textContent.trim();
+
+        // Start each line fully scrambled (opacity at 1, visible from start)
+        // ScrambleText begins immediately and resolves at staggered timing
+        gsap.to(lineEl, {
+          duration: 0.65,
+          scrambleText: {
+            text: targetText,
+            chars: '{[(<>)];|}/\\ ',  // code-adjacent charset
+            revealDelay: 0.08,
+            speed: 0.55,
+            delimiter: '',            // character-level (not word)
+          },
+          ease: 'power2.out',
+          delay: i * 0.12,           // cascade: each line starts 120ms after prev
+        });
       });
 
-      gsap.from(split.chars, {
-        yPercent: 110,
-        opacity: 0,
-        duration: 0.85,
-        ease: 'power4.out',
-        stagger: { amount: 0.55, from: 'start' },
-        delay: 0.15,
-        onComplete: () => {
-          // Revert the split so the DOM is clean for resize / copy-paste
-          // Keep the chars in place visually — don't revert, just leave.
-        },
-      });
-
-      // Hero sub + meta fade up
+      // Hero sub + meta fade up — starts after first line begins resolving
       gsap.from(['.hero-sub', '.hero-meta', '.hero-rule'], {
         y: 24,
         opacity: 0,
         duration: 0.75,
         ease: 'power3.out',
         stagger: 0.12,
-        delay: 0.6,
+        delay: 0.55,
       });
 
       // Status chips in the header row
@@ -255,6 +262,52 @@ if (!prefersReduced) {
         ease: 'power2.out',
         delay: 0.1,
       });
+
+      // Code-glyph decorative shapes — animate in during scramble
+      const decos = document.querySelectorAll('.hero-deco');
+      if (decos.length) {
+        const decoAnimations = [
+          // { — rotates CW and settles, drifts from top-right
+          { el: decos[0], from: { x: 30, y: -20, rotation: -25, opacity: 0 }, to: { x: 0, y: 0, rotation: 12, opacity: 0.7, duration: 0.9, ease: 'power3.out', delay: 0.25 } },
+          // /> — drifts in from right
+          { el: decos[1], from: { x: 40, opacity: 0 }, to: { x: 0, opacity: 0.55, duration: 0.7, ease: 'power2.out', delay: 0.45 } },
+          // _ cursor — scales from 0, blinks twice then freezes
+          { el: decos[2], from: { scaleX: 0, opacity: 0 }, to: { scaleX: 1, opacity: 0.8, duration: 0.35, ease: 'back.out(1.8)', delay: 0.3 } },
+          // ; — falls down from above
+          { el: decos[3], from: { y: -30, opacity: 0 }, to: { y: 0, opacity: 0.6, duration: 0.65, ease: 'bounce.out', delay: 0.55 } },
+        ];
+
+        decoAnimations.forEach(({ el, from, to }) => {
+          gsap.fromTo(el, from, to);
+        });
+
+        // Cursor blink: _ blinks twice then stays
+        if (decos[2]) {
+          gsap.to(decos[2], {
+            opacity: 0,
+            duration: 0.12,
+            repeat: 3,
+            yoyo: true,
+            ease: 'none',
+            delay: 0.75,
+            onComplete: () => {
+              gsap.set(decos[2], { opacity: 0.8 });
+            },
+          });
+        }
+
+        // Subtle float loop on the shapes after they settle
+        decos.forEach((deco, i) => {
+          gsap.to(deco, {
+            y: `+=${6 + i * 2}`,
+            duration: 2.5 + i * 0.4,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut',
+            delay: 1.2 + i * 0.3,
+          });
+        });
+      }
     })();
 
     // ── SECTION HEADING WORD REVEALS ─────────────────────────────────────
@@ -286,10 +339,109 @@ if (!prefersReduced) {
       });
     });
 
-    // ── MARQUEE — velocity-linked GSAP loop ───────────────────────────────
-    // The marquee HTML has one set of words. We duplicate the track content
-    // once in JS, then animate xPercent -50 on repeat with GSAP.
-    // Scroll velocity modulates the playback rate — original, not in any template.
+    // ── VERB REVEAL STRIP — scroll-scrubbed, NO pin ───────────────────────
+    // The strip lives in normal flow. As the user scrolls past it, chars
+    // transition dim→bright in sequence, and the track drifts slightly left.
+    // Removing pin:true eliminates the spacer div that was displacing all
+    // downstream sections (About, Skills, Work) by ~2300px.
+    (function () {
+      const verbEl = document.querySelector('.verb-reveal');
+      if (!verbEl) return;
+
+      const track = verbEl.querySelector('.verb-reveal__track');
+      if (!track) return;
+
+      // Wrap every character in a .verb-reveal__char span for GSAP targeting
+      const wordEls = track.querySelectorAll('.verb-reveal__word');
+      wordEls.forEach((wordEl) => {
+        const text = wordEl.textContent;
+        wordEl.innerHTML = text.split('').map(
+          (char) => `<span class="verb-reveal__char">${char}</span>`
+        ).join('');
+      });
+
+      const allChars = track.querySelectorAll('.verb-reveal__char');
+      if (!allChars.length) return;
+
+      requestAnimationFrame(() => {
+        const trackWidth = track.scrollWidth;
+        const viewportW = window.innerWidth;
+
+        // Initial state: all chars dim, track at neutral position
+        gsap.set(allChars, { color: 'var(--c-muted-2)' });
+
+        // Horizontal parallax drift — track slides left slightly as user scrolls
+        // through the section. Not full off-screen, just enough to feel dynamic.
+        gsap.to(track, {
+          x: -(trackWidth * 0.28),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: verbEl,
+            scrub: 1,
+            start: 'top 90%',     // start when section enters viewport bottom
+            end: 'bottom 10%',    // end when section nearly exits viewport top
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Per-character brightness reveal — staggered across the scrub range
+        gsap.fromTo(allChars,
+          { color: 'var(--c-muted-2)' },
+          {
+            color: 'var(--c-text)',
+            stagger: { each: 0.016, from: 'start' },
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: verbEl,
+              scrub: 1,
+              start: 'top 75%',
+              end: 'bottom 25%',
+              invalidateOnRefresh: true,
+            },
+          }
+        );
+
+        // Floating keyword pills — animate in when section enters
+        const pills = verbEl.querySelectorAll('.kw-pill');
+        const pillPositions = [
+          { top: '22%', left: '12%', rotate: -8 },
+          { top: '58%', left: '48%', rotate: 5 },
+          { top: '28%', left: '72%', rotate: -12 },
+        ];
+        pills.forEach((pill, i) => {
+          const pos = pillPositions[i] || pillPositions[0];
+          pill.style.top = pos.top;
+          pill.style.left = pos.left;
+          gsap.set(pill, { rotation: pos.rotate, opacity: 0, y: 20 });
+
+          gsap.to(pill, {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: verbEl,
+              start: 'top 70%',
+              toggleActions: 'play none none reverse',
+            },
+            delay: i * 0.15,
+          });
+
+          gsap.to(pill, {
+            y: '-=8',
+            duration: 1.8 + i * 0.3,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut',
+            delay: 0.9 + i * 0.2,
+          });
+        });
+      }); // end requestAnimationFrame
+    })();
+
+    // ── MARQUEE-2 — velocity-linked GSAP loop (tech-stack strip) ─────────
+    // Only the second .marquee (tech stack) keeps the loop pattern.
+    // marquee-1 is now the verb-reveal section above.
     document.querySelectorAll('.marquee').forEach((marqueeEl) => {
       const track = marqueeEl.querySelector('.marquee__track');
       if (!track || !track.children.length) return;
@@ -305,7 +457,6 @@ if (!prefersReduced) {
       });
 
       // Velocity-linked speed: scroll faster → marquee speeds up
-      // This is the original motion idea — not in any reference source.
       let velocityTarget = 1;
       let currentVelocity = 1;
 
@@ -314,17 +465,14 @@ if (!prefersReduced) {
         start: 'top top',
         end: 'bottom bottom',
         onUpdate: (self) => {
-          // Map scroll velocity (px/s) to a timeline scale multiplier
           const rawVelocity = Math.abs(self.getVelocity());
           velocityTarget = gsap.utils.clamp(1, 6, 1 + rawVelocity / 800);
         },
       });
 
-      // Smooth interpolation of the speed multiplier
       gsap.ticker.add(() => {
         currentVelocity = gsap.utils.interpolate(currentVelocity, velocityTarget, 0.08);
         tl.timeScale(currentVelocity);
-        // Decay back toward 1 when not scrolling
         velocityTarget = gsap.utils.interpolate(velocityTarget, 1, 0.05);
       });
     });
@@ -387,7 +535,10 @@ if (!prefersReduced) {
           trigger: wrapper,
           pin: true,
           scrub: 1,
-          start: 'bottom bottom',
+          // 'top top': pin fires when wrapper top hits viewport top.
+          // 'bottom bottom' was wrong — it pinned mid-page before the section
+          // was fully in view, causing About/Skills to bleed behind the panels.
+          start: 'top top',
           snap: {
             snapTo: 1 / (panels.length - 1),
             duration: { min: 0.3, max: 0.6 },
@@ -424,8 +575,11 @@ if (!prefersReduced) {
           containerAnimation: horizontalTween,
           start: 'left center',
           onEnter: () => tl.play(),
+          // Keep panels visible after they've animated in — do NOT reverse onLeave.
+          // onLeave: tl.reverse() was making panels go blank when scrolling right
+          // past them, so scrolling back showed invisible/empty panels.
           onEnterBack: () => tl.play(),
-          onLeave: () => tl.reverse(),
+          onLeaveBack: () => tl.restart(),
         });
       });
 

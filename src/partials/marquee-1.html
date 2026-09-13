@@ -1,17 +1,25 @@
 <!-- ============================================================
-     MARQUEE 1 — "Build / Ship / Iterate ..."
-     GSAP drives the motion (xPercent loop + velocity-linked speed).
-     aria-hidden keeps it out of screen reader flow.
+     VERB REVEAL STRIP
+     Pinned per-character brightness-reveal (scroll-scrubbed).
+     JS wraps each char in a <span> and drives color via ScrollTrigger.
+     Floating keyword pills animate independently on top.
+     aria-hidden: decorative identity strip, not semantic content.
      ============================================================ -->
-<div class="marquee" aria-hidden="true" data-od-id="marquee-1">
-  <div class="marquee__track">
-    <span class="marquee__item"><span class="dot dot--accent"></span>Build</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Ship</span>
-    <span class="marquee__item"><span class="dot dot--accent"></span>Iterate</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Break</span>
-    <span class="marquee__item"><span class="dot dot--accent"></span>Fix</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Learn</span>
-    <span class="marquee__item"><span class="dot dot--accent"></span>Deploy</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Debug</span>
+<div class="verb-reveal" aria-hidden="true" data-od-id="verb-reveal">
+  <div class="verb-reveal__track">
+    <span class="verb-reveal__word" data-word="Build">Build</span><span class="verb-reveal__sep">·</span><span
+      class="verb-reveal__word" data-word="Ship">Ship</span><span class="verb-reveal__sep">·</span><span
+      class="verb-reveal__word" data-word="Iterate">Iterate</span><span class="verb-reveal__sep">·</span><span
+      class="verb-reveal__word" data-word="Break">Break</span><span class="verb-reveal__sep">·</span><span
+      class="verb-reveal__word" data-word="Fix">Fix</span><span class="verb-reveal__sep">·</span><span
+      class="verb-reveal__word" data-word="Learn">Learn</span><span class="verb-reveal__sep">·</span><span
+      class="verb-reveal__word" data-word="Deploy">Deploy</span>
+  </div>
+
+  <!-- Floating keyword pills — animate in independently over the strip -->
+  <div class="verb-reveal__pills" aria-hidden="true">
+    <span class="kw-pill" style="--cat-hue: var(--c-cat-frontend)">ship</span>
+    <span class="kw-pill" style="--cat-hue: var(--c-cat-ai)">iterate</span>
+    <span class="kw-pill" style="--cat-hue: var(--c-cat-data)">build</span>
   </div>
 </div>

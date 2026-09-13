@@ -2,6 +2,11 @@
      SELECTED WORK — Pinned horizontal-scroll section
      Desktop: ScrollTrigger pins the wrapper, panels slide left.
      Mobile:  Native horizontal scroll with scroll-snap (no pin).
+
+     Structure: work-header is OUTSIDE work-pin-wrapper so that
+     start:'top top' on the wrapper fires when panels (not the
+     heading) reach the viewport top — horizontal scroll only
+     begins once panels are fully visible.
      ============================================================ -->
 
 <!-- Transition cue — hints at the direction change before the pin -->
@@ -10,8 +15,8 @@
   <span class="arrow">→ → →</span>
 </div>
 
-<section data-od-id="work" id="work" class="work-pin-wrapper">
-  <!-- Section header in normal flow (above the pin rail) -->
+<!-- Section header — normal flow, scrolls away before the pin fires -->
+<div id="work" data-od-id="work" class="work-header-wrap">
   <div class="work-header container">
     <span class="eyebrow">selected work</span>
     <div class="between">
@@ -19,8 +24,12 @@
       <span class="mono muted">04 projects</span>
     </div>
   </div>
+</div>
 
-  <!-- Horizontal panel rail — GSAP translates this left on scroll -->
+<!-- Pin wrapper — ONLY the panel rail.
+     start:'top top' fires when THIS element's top = viewport top,
+     i.e. when the first panel is at the very top of the screen. -->
+<section class="work-pin-wrapper" aria-label="Selected work projects">
   <div class="work-pin-container">
 
     <!-- ── Panel 01 ──────────────────────────────────────────────── -->
