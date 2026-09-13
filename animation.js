@@ -61,11 +61,17 @@ if (!prefersReduced) {
   const nav = document.querySelector('.nav');
   if (!nav) return;
 
-  // Add scrolled class for backdrop blur
-  ScrollTrigger.create({
-    start: 'top -60',
-    onToggle: ({ isActive }) => nav.classList.toggle('is-scrolled', isActive),
-  });
+  // Add scrolled class for backdrop blur.
+  // NOTE: deliberately using a native scroll listener instead of ScrollTrigger.
+  // The GSAP pin mechanism for the Work section briefly adjusts the internal
+  // scroll position during pin setup, which can fire onToggle with isActive:false
+  // and strip .is-scrolled even when the user is far down the page.
+  // A direct window.scrollY read is immune to that manipulation.
+  function syncNavScroll() {
+    nav.classList.toggle('is-scrolled', window.scrollY > 10);
+  }
+  syncNavScroll(); // set correct state on initial load / refresh
+  window.addEventListener('scroll', syncNavScroll, { passive: true });
 
   // Sliding active-indicator under desktop nav links
   const indicator = document.querySelector('.nav-indicator');
