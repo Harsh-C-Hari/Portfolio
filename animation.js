@@ -109,6 +109,10 @@ if (!prefersReduced) {
 
   function setActive(href) {
     navLinks.forEach((a) => a.classList.toggle('is-active', a.getAttribute('href') === href));
+    
+    const mobileLinks = document.querySelectorAll('#nav-mobile a[href^="#"]');
+    mobileLinks.forEach((a) => a.classList.toggle('is-active', a.getAttribute('href') === href));
+
     if (navBrand) navBrand.classList.toggle('is-active', href === '#top');
     const activeLink = [...navLinks].find((a) => a.getAttribute('href') === href);
     if (activeLink) moveIndicator(activeLink);
