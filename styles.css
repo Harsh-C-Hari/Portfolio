@@ -106,6 +106,7 @@ html {
   scroll-behavior: smooth;
   /* overridden by Lenis, this is a fallback */
   scroll-padding-top: var(--nav-h);
+  overflow-x: hidden; /* belt-and-braces: catch anything body misses */
 }
 
 body {
@@ -1089,7 +1090,8 @@ section {
 /* Mobile: native horizontal scroll, no pin */
 @media (max-width: 767px) {
   .work-pin-wrapper {
-    overflow: visible;
+    /* Keep overflow hidden so the max-content rail doesn't bleed into layout */
+    overflow: hidden;
   }
 
   .work-pin-container {
@@ -1525,4 +1527,54 @@ footer {
 /* -- Touch: focus-visible replaces hover feedback ----------- */
 @media (hover: none) {
   .exp:focus-within { border-color: var(--c-muted); }
+}
+
+/* ============================================================
+   CRITICAL: Prevent ALL horizontal overflow (zoom-out on mobile)
+   ============================================================ */
+
+/* 1. Hero font must never force the line wider than viewport.
+      nowrap is needed for ScrambleText, so we clamp the font harder. */
+@media (max-width: 480px) {
+  :root {
+    /* Tighter hero clamp on phones: 13vw gives ~51px at 390px wide,
+       safely within "break things," "fix them." line widths */
+    --t-hero: clamp(52px, 13.5vw, 160px);
+    --t-section: clamp(32px, 8.5vw, 80px);
+  }
+}
+
+/* 2. Work section: force the mobile rail to use 100% of wrapper, not max-content */
+@media (max-width: 767px) {
+  .work-pin-container {
+    /* Override the desktop width: max-content — panels are 92vw each */
+    width: 100% !important;
+  }
+
+  /* Swipe affordance strip below work panels */
+  .work-pin-wrapper::after {
+    content: 'swipe \2192';
+    display: block;
+    text-align: center;
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    color: var(--c-muted);
+    letter-spacing: 0.1em;
+    padding: var(--s-3) 0 var(--s-4);
+    opacity: 0.6;
+  }
+}
+
+/* 3. Nav brand: allow wrapping if it's somehow too long */
+.nav-brand {
+  max-width: calc(100vw - 120px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 4. Chip list rows: allow wrap, never push width */
+.skill-row__list,
+.work-panel__chips,
+.exp__chips {
+  overflow: hidden;
 }
