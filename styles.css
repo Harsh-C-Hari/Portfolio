@@ -1521,7 +1521,7 @@ footer {
 
 /* -- Footer ------------------------------------------------- */
 @media (max-width: 480px) {
-  .footer-inner { flex-direction: column; align-items: flex-start; gap: var(--s-2); }
+  .footer-inner { flex-direction: row; justify-content: space-between; gap: var(--s-2); }
 }
 
 /* -- Touch: focus-visible replaces hover feedback ----------- */
