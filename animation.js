@@ -364,25 +364,57 @@ if (!prefersReduced) {
       if (!allChars.length) return;
 
       requestAnimationFrame(() => {
-        const trackWidth = track.scrollWidth;
-        const viewportW = window.innerWidth;
-
-        // Initial state: all chars dim, track at neutral position
+        // Initial state: all chars dim
         gsap.set(allChars, { color: 'var(--c-muted-2)' });
 
-        // Horizontal parallax drift — track slides left slightly as user scrolls
-        // through the section. Not full off-screen, just enough to feel dynamic.
-        gsap.to(track, {
-          x: -(trackWidth * 0.28),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: verbEl,
-            scrub: 1,
-            start: 'top 90%',     // start when section enters viewport bottom
-            end: 'bottom 10%',    // end when section nearly exits viewport top
-            invalidateOnRefresh: true,
-          },
+        let panTween;
+        let resizeTimer;
+
+        function initPanTween() {
+          if (panTween) {
+            if (panTween.scrollTrigger) panTween.scrollTrigger.kill();
+            panTween.kill();
+            panTween = null;
+          }
+
+          // Get containerPadding from the site's existing .container convention
+          const containerEl = document.querySelector('.container') || verbEl;
+          const containerPadding = parseFloat(window.getComputedStyle(containerEl).paddingLeft) || 0;
+          
+          const panDistance = track.scrollWidth - verbEl.clientWidth + (containerPadding * 2);
+
+          // Explicitly set the track's starting x before the ScrollTrigger is created
+          gsap.set(track, { x: containerPadding });
+
+          // Guard the degenerate case: skip pan tween entirely if narrow
+          if (panDistance <= containerPadding) {
+            return;
+          }
+
+          panTween = gsap.to(track, {
+            x: containerPadding - panDistance,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: verbEl,
+              scrub: 1,
+              start: 'top 90%',     // start when section enters viewport bottom
+              end: 'bottom 10%',    // end when section nearly exits viewport top
+              invalidateOnRefresh: true,
+            },
+          });
+        }
+
+        initPanTween();
+
+        // Recompute on resize
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            initPanTween();
+            ScrollTrigger.refresh();
+          }, 200);
         });
+
 
         // Per-character brightness reveal — staggered across the scrub range
         gsap.fromTo(allChars,
@@ -551,8 +583,12 @@ if (!prefersReduced) {
         },
       });
 
-      // Per-panel nested entrance animations (triggered when panel reaches center)
-      panels.forEach((panel) => {
+      // Per-panel nested entrance animations
+      // Panel[0] is special: it's already visible when the pin fires, so play
+      // its content immediately on pin entry — not on 'left center' (which
+      // only fires once the user has already scrolled horizontally past center,
+      // leaving the first panel's details invisible on initial load).
+      panels.forEach((panel, idx) => {
         const title = panel.querySelector('.work-panel__title');
         const desc = panel.querySelector('.work-panel__desc');
         const chips = panel.querySelectorAll('.work-panel__chips .chip');
@@ -570,17 +606,29 @@ if (!prefersReduced) {
         if (links) tl.from(links, { opacity: 0, y: 10, duration: 0.4 }, '-=0.2');
         if (cover) tl.from(cover, { scale: 0.94, opacity: 0, duration: 0.75 }, 0.1);
 
-        ScrollTrigger.create({
-          trigger: panel,
-          containerAnimation: horizontalTween,
-          start: 'left center',
-          onEnter: () => tl.play(),
-          // Keep panels visible after they've animated in — do NOT reverse onLeave.
-          // onLeave: tl.reverse() was making panels go blank when scrolling right
-          // past them, so scrolling back showed invisible/empty panels.
-          onEnterBack: () => tl.play(),
-          onLeaveBack: () => tl.restart(),
-        });
+        if (idx === 0) {
+          // First panel is already in view the moment the section pins — play
+          // its content as soon as the wrapper enters the viewport.
+          ScrollTrigger.create({
+            trigger: wrapper,
+            start: 'top 80%',
+            onEnter: () => tl.play(),
+            onLeaveBack: () => tl.restart(),
+          });
+        } else {
+          // Subsequent panels: fire as soon as the panel's left edge crosses 85%
+          // of the viewport width — content appears while the panel is still
+          // sliding in, not after it's already half-visible.
+          ScrollTrigger.create({
+            trigger: panel,
+            containerAnimation: horizontalTween,
+            start: 'left 85%',
+            onEnter: () => tl.play(),
+            // Keep panels visible after they've animated in — do NOT reverse onLeave.
+            onEnterBack: () => tl.play(),
+            onLeaveBack: () => tl.restart(),
+          });
+        }
       });
 
       // Work-section transition cue (rotate / scale hint before pin)
