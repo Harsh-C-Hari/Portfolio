@@ -86,6 +86,21 @@
   --nav-h: 64px;
 }
 
+/* Scale down large spacing variables for mobile to remove extra white space */
+@media (max-width: 599px) {
+  :root {
+    --s-6: 20px;
+    --s-8: 24px;
+    --s-10: 28px;
+    --s-12: 32px;
+    --s-14: 40px;
+    --s-16: 48px;
+    --s-20: 56px;
+    --s-24: 64px;
+    --s-32: 80px;
+  }
+}
+
 /* ============================================================
    RESET / BASE
    ============================================================ */
