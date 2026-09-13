@@ -332,7 +332,8 @@ if (!prefersReduced) {
       if (decos.length) {
         // Per-symbol entrance config (first 4 keep their existing character)
         const entranceConfigs = [
-          { from: { x: 30, y: -20, rotation: -25, opacity: 0 }, to: { x: 0, y: 0, rotation: 12, opacity: 0.7, duration: 0.9, ease: 'power3.out', delay: 0.25 } },
+          // { — drifts in from top-right, settles at x:0 y:0 rotation:0 (matches ticker start)
+          { from: { x: 30, y: -20, rotation: -25, opacity: 0 }, to: { x: 0, y: 0, rotation: 0, opacity: 0.7, duration: 0.9, ease: 'power3.out', delay: 0.25 } },
           { from: { x: 40, opacity: 0 },                         to: { x: 0, opacity: 0.55, duration: 0.7, ease: 'power2.out', delay: 0.45 } },
           { from: { scaleX: 0, opacity: 0 },                     to: { scaleX: 1, opacity: 0.8, duration: 0.35, ease: 'back.out(1.8)', delay: 0.3 } },
           { from: { y: -30, opacity: 0 },                        to: { y: 0, opacity: 0.6, duration: 0.65, ease: 'bounce.out', delay: 0.55 } },
@@ -362,49 +363,55 @@ if (!prefersReduced) {
           });
         }
 
-        // ── FLOAT LOOP — one ticker callback drives all symbols ───────────
-        // Why: 21 separate GSAP tweens (7 symbols × 3 axes) each add a ticker
-        // object that fires every RAF. Math.sin-based motion runs in ONE callback,
-        // produces perfectly continuous sinusoidal curves (no yoyo reversal lag),
-        // and keeps the main thread load minimal.
+        // ── FLOAT LOOP — one ticker callback, zero-start guarantee ─────────
+        // Root cause of the previous snap: using absolute GSAP time means
+        // sin((t_abs / period) * 2π + phase) evaluates to an arbitrary non-zero
+        // value the moment the ticker starts, causing a visible position jump.
         //
-        // Each axis gets a unique angular frequency (ω = 2π / period) and a
-        // phase offset so no two symbols ever align — they drift independently.
+        // Fix: capture startTime when the ticker is added, use dt = time - startTime.
+        // All phases are set to 0 or π — since sin(0)=0 and sin(π)=0, every axis
+        // starts at exactly 0 displacement, matching where the entrance animations
+        // left each symbol. Diversity in motion comes from different periods alone.
+        //
+        // Phase sign (0 vs Math.PI) controls initial direction: 0 → moves positive
+        // first, Math.PI → moves negative first — gives symbols different initial
+        // drift directions without breaking the zero-start guarantee.
+        const PI2 = Math.PI * 2;
         const floatConfigs = [
-          // { symbol }   yAmt  xAmt  rot   yPeriod  xPeriod  rPeriod  yPhase  xPhase  rPhase
-          /* {  */      { y: 8,  x: 4,  r: 6,  yP: 6.2,  xP: 9.4,  rP: 10.6, yΦ: 0.0,  xΦ: 1.1,  rΦ: 2.3  },
-          /* />  */     { y: 10, x: 6,  r: 0,  yP: 5.4,  xP: 7.8,  rP: 0,    yΦ: 0.9,  xΦ: 2.4,  rΦ: 0    },
-          /* _   */     { y: 4,  x: 0,  r: 0,  yP: 3.8,  xP: 0,    rP: 0,    yΦ: 1.7,  xΦ: 0,    rΦ: 0    },
-          /* ;   */     { y: 12, x: 3,  r: -8, yP: 7.6,  xP: 10.2, rP: 12.4, yΦ: 2.6,  xΦ: 0.5,  rΦ: 3.1  },
-          /* }   */     { y: 7,  x: 5,  r: -7, yP: 7.0,  xP: 8.4,  rP: 11.6, yΦ: 3.4,  xΦ: 1.8,  rΦ: 4.2  },
-          /* *   */     { y: 11, x: 4,  r: 4,  yP: 5.8,  xP: 12.2, rP: 0,    yΦ: 0.3,  xΦ: 3.3,  rΦ: 0    },
-          /* !   */     { y: 6,  x: 8,  r: -5, yP: 8.4,  xP: 7.4,  rP: 14.2, yΦ: 1.2,  xΦ: 2.7,  rΦ: 5.0  },
+          // { symbol }      yAmt  xAmt  rot   yPeriod xPeriod rPeriod yΦ         xΦ         rΦ
+          /* {  */ { y: 8,  x: 4,  r: 5,  yP: 6.2,  xP: 9.4,  rP: 10.6, yΦ: 0,          xΦ: Math.PI,  rΦ: 0         },
+          /* />  */ { y: 10, x: 6,  r: 0,  yP: 5.4,  xP: 7.8,  rP: 0,    yΦ: Math.PI,    xΦ: 0,        rΦ: 0         },
+          /* _   */ { y: 4,  x: 0,  r: 0,  yP: 3.8,  xP: 0,    rP: 0,    yΦ: 0,          xΦ: 0,        rΦ: 0         },
+          /* ;   */ { y: 12, x: 3,  r: -8, yP: 7.6,  xP: 10.2, rP: 12.4, yΦ: Math.PI,    xΦ: Math.PI,  rΦ: Math.PI   },
+          /* }   */ { y: 7,  x: 5,  r: -7, yP: 7.0,  xP: 8.4,  rP: 11.6, yΦ: 0,          xΦ: 0,        rΦ: 0         },
+          /* *   */ { y: 11, x: 4,  r: 4,  yP: 5.8,  xP: 12.2, rP: 0,    yΦ: Math.PI,    xΦ: Math.PI,  rΦ: 0         },
+          /* !   */ { y: 6,  x: 8,  r: -5, yP: 8.4,  xP: 7.4,  rP: 14.2, yΦ: 0,          xΦ: 0,        rΦ: Math.PI   },
         ];
 
         // Force GPU compositing on all deco elements before float starts
         gsap.set(decos, { force3D: true });
 
-        // Single ticker — runs once per RAF frame, updates all symbols
+        // Single ticker — runs once per RAF, updates all 7 symbols
+        let startTime = null;
         const floatTicker = (time) => {
+          if (startTime === null) startTime = time; // capture on first fire
+          const dt = time - startTime;              // relative time — always 0 on first frame
           decos.forEach((deco, i) => {
             const fc = floatConfigs[i];
             if (!fc) return;
-            const x = fc.x > 0 ? Math.sin((time / fc.xP) * Math.PI * 2 + fc.xΦ) * fc.x : 0;
-            const y = Math.sin((time / fc.yP) * Math.PI * 2 + fc.yΦ) * fc.y;
-            const r = fc.rP > 0 ? Math.sin((time / fc.rP) * Math.PI * 2 + fc.rΦ) * fc.r : 0;
+            const x = fc.x > 0 ? Math.sin((dt / fc.xP) * PI2 + fc.xΦ) * fc.x : 0;
+            const y = Math.sin((dt / fc.yP) * PI2 + fc.yΦ) * fc.y;
+            const r = fc.rP > 0 ? Math.sin((dt / fc.rP) * PI2 + fc.rΦ) * fc.r : 0;
             gsap.set(deco, { x, y, rotation: r });
           });
         };
 
-        // Start ticker after entrance animations have settled (~1.5s)
-        let floatTickerAdded = false;
-        gsap.delayedCall(1.5, () => {
+        // Add after all entrance animations finish (latest entrance delay + duration = 0.9+0.9 ≈ 1.8s)
+        gsap.delayedCall(1.85, () => {
           gsap.ticker.add(floatTicker);
-          floatTickerAdded = true;
         });
 
-        // Clean up ticker if the hero section leaves the page (SPA navigation)
-        // store ref for potential future cleanup
+        // Store ref for future cleanup
         window.__heroFloatTicker = floatTicker;
       }
     })();
