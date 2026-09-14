@@ -197,6 +197,15 @@ if (!prefersReduced) {
         toggle.setAttribute('aria-expanded', 'false');
       }
     });
+
+    if (navBrand) {
+      navBrand.addEventListener('click', () => {
+        if (mobileNav.classList.contains('is-open')) {
+          mobileNav.classList.remove('is-open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
   }
 
   // ── DESKTOP NAV LINKS — smooth scroll with nav-height offset ────────────
