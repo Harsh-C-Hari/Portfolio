@@ -16,6 +16,15 @@ import Lenis from 'lenis';
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, Observer);
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DEVELOPER GREETING
+// ─────────────────────────────────────────────────────────────────────────────
+console.log(
+  "%c Designed & Built by Harsh C Hari %c Full-Stack Developer ",
+  "background: #e8e6e0; color: #0a0a0f; padding: 4px 8px; font-weight: bold; border-radius: 4px 0 0 4px; font-family: monospace;",
+  "background: #1c1c28; color: #a4a4b2; padding: 4px 8px; border-radius: 0 4px 4px 0; font-family: monospace;"
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
 // REDUCED MOTION GATE
 // All animation init is wrapped; reduced-motion users get instant reveals.
 // ─────────────────────────────────────────────────────────────────────────────
