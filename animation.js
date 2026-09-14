@@ -833,25 +833,49 @@ if (!prefersReduced) {
     })();
 
     // ── CONTACT ───────────────────────────────────────────────────────────
-    gsap.from('.contact .lede', {
-      y: 20,
-      opacity: 0,
-      duration: 0.7,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: '.contact', start: 'top 80%' },
-    });
-    gsap.from('.contact .btn', {
-      y: 15,
-      opacity: 0,
-      stagger: 0.1,
-      duration: 0.55,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: '.contact .row', start: 'top 85%' },
-    });
+    (function initContact() {
+      const contactSection = document.querySelector('.contact');
+      if (!contactSection) return;
+
+      gsap.from('.contact .lede', {
+        y: 20,
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power2.out',
+        scrollTrigger: { trigger: '.contact', start: 'top 80%' },
+      });
+
+      const buttons = contactSection.querySelectorAll('.btn');
+      if (buttons.length) {
+        gsap.from(buttons, {
+          y: 15,
+          opacity: 0,
+          stagger: 0.15, // Stagger links individually
+          duration: 0.55,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.contact .row', start: 'top 85%' },
+        });
+
+        // More pronounced hover for "Email me" (primary button)
+        buttons.forEach(btn => {
+          if (btn.classList.contains('btn-primary')) {
+            btn.addEventListener('mouseenter', () => {
+              gsap.to(btn, { scale: 1.08, duration: 0.25, ease: 'back.out(1.5)' });
+            });
+            btn.addEventListener('mouseleave', () => {
+              gsap.to(btn, { scale: 1, duration: 0.25, ease: 'power2.out' });
+            });
+          }
+        });
+      }
+    })();
 
     // ── MICRO-INTERACTIONS — buttons ──────────────────────────────────────
     // GSAP hover on buttons so timing is unified with the animation system
     document.querySelectorAll('.btn').forEach((btn) => {
+      // Skip contact primary button (handled in initContact)
+      if (btn.closest('.contact') && btn.classList.contains('btn-primary')) return;
+      
       btn.addEventListener('mouseenter', () => {
         gsap.to(btn, { scale: 1.03, duration: 0.2, ease: 'power1.out' });
       });
