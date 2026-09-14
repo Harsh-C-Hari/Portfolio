@@ -576,7 +576,7 @@ h3 {
 
 .nav-mobile.is-open {
   display: flex;
-  max-height: 400px;
+  max-height: 700px;
 }
 
 @media (min-width: 768px) {
