@@ -899,55 +899,63 @@ if (!prefersReduced) {
         });
 
         // More pronounced hover for "Email me" (primary button)
-        buttons.forEach(btn => {
-          if (btn.classList.contains('btn-primary')) {
-            btn.addEventListener('mouseenter', () => {
-              gsap.to(btn, { scale: 1.08, duration: 0.25, ease: 'back.out(1.5)' });
-            });
-            btn.addEventListener('mouseleave', () => {
-              gsap.to(btn, { scale: 1, duration: 0.25, ease: 'power2.out' });
-            });
-          }
-        });
+        if (window.matchMedia('(pointer: fine)').matches) {
+          buttons.forEach(btn => {
+            if (btn.classList.contains('btn-primary')) {
+              btn.addEventListener('mouseenter', () => {
+                gsap.to(btn, { scale: 1.08, duration: 0.25, ease: 'back.out(1.5)' });
+              });
+              btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, { scale: 1, duration: 0.25, ease: 'power2.out' });
+              });
+            }
+          });
+        }
       }
     })();
 
     // ── MICRO-INTERACTIONS — buttons ──────────────────────────────────────
     // GSAP hover on buttons so timing is unified with the animation system
-    document.querySelectorAll('.btn').forEach((btn) => {
-      // Skip contact primary button (handled in initContact)
-      if (btn.closest('.contact') && btn.classList.contains('btn-primary')) return;
-      
-      btn.addEventListener('mouseenter', () => {
-        gsap.to(btn, { scale: 1.03, duration: 0.2, ease: 'power1.out' });
+    if (window.matchMedia('(pointer: fine)').matches) {
+      document.querySelectorAll('.btn').forEach((btn) => {
+        // Skip contact primary button (handled in initContact)
+        if (btn.closest('.contact') && btn.classList.contains('btn-primary')) return;
+        
+        btn.addEventListener('mouseenter', () => {
+          gsap.to(btn, { scale: 1.03, duration: 0.2, ease: 'power1.out' });
+        });
+        btn.addEventListener('mouseleave', () => {
+          gsap.to(btn, { scale: 1, duration: 0.25, ease: 'power2.out' });
+        });
       });
-      btn.addEventListener('mouseleave', () => {
-        gsap.to(btn, { scale: 1, duration: 0.25, ease: 'power2.out' });
-      });
-    });
+    }
 
     // ── MICRO-INTERACTIONS — work covers ──────────────────────────────────
-    document.querySelectorAll('.work-panel__cover').forEach(cover => {
-      const img = cover.querySelector('img');
-      if (img) {
-        cover.addEventListener('mouseenter', () => {
-          gsap.to(img, { scale: 1.03, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
-        });
-        cover.addEventListener('mouseleave', () => {
-          gsap.to(img, { scale: 1, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
-        });
-      }
-    });
+    if (window.matchMedia('(pointer: fine)').matches) {
+      document.querySelectorAll('.work-panel__cover').forEach(cover => {
+        const img = cover.querySelector('img');
+        if (img) {
+          cover.addEventListener('mouseenter', () => {
+            gsap.to(img, { scale: 1.03, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
+          });
+          cover.addEventListener('mouseleave', () => {
+            gsap.to(img, { scale: 1, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
+          });
+        }
+      });
+    }
 
     // ── MICRO-INTERACTIONS — chips ────────────────────────────────────────
-    document.querySelectorAll('.chip').forEach((chip) => {
-      chip.addEventListener('mouseenter', () => {
-        gsap.to(chip, { scale: 1.06, duration: 0.18, ease: 'power1.out' });
+    if (window.matchMedia('(pointer: fine)').matches) {
+      document.querySelectorAll('.chip').forEach((chip) => {
+        chip.addEventListener('mouseenter', () => {
+          gsap.to(chip, { scale: 1.06, duration: 0.18, ease: 'power1.out' });
+        });
+        chip.addEventListener('mouseleave', () => {
+          gsap.to(chip, { scale: 1, duration: 0.2, ease: 'power2.out' });
+        });
       });
-      chip.addEventListener('mouseleave', () => {
-        gsap.to(chip, { scale: 1, duration: 0.2, ease: 'power2.out' });
-      });
-    });
+    }
 
     // ── FOOTER ────────────────────────────────────────────────────────────
     gsap.from('.footer-inner', {
