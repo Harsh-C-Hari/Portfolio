@@ -901,6 +901,45 @@ if (!prefersReduced) {
       scrollTrigger: { trigger: 'footer', start: 'top 90%' },
     });
 
+    // ── MAGNETIC BUTTONS ──────────────────────────────────────────────────
+    (function initMagneticButtons() {
+      // Only apply if the device has a fine pointer (e.g. a mouse)
+      if (!window.matchMedia('(pointer: fine)').matches) return;
+
+      const magneticButtons = document.querySelectorAll('.hero .btn-primary, .contact .btn-primary');
+      
+      magneticButtons.forEach(btn => {
+        btn.addEventListener('mousemove', (e) => {
+          const rect = btn.getBoundingClientRect();
+          // Calculate distance from center of the button
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          
+          // Move the button towards the cursor (strength factor: 0.2)
+          const deltaX = (e.clientX - centerX) * 0.2;
+          const deltaY = (e.clientY - centerY) * 0.2;
+
+          gsap.to(btn, {
+            x: deltaX,
+            y: deltaY,
+            duration: 0.2,
+            ease: 'power2.out',
+            overwrite: 'auto' // only overwrite x/y, leaving scale alone
+          });
+        });
+
+        btn.addEventListener('mouseleave', () => {
+          gsap.to(btn, {
+            x: 0,
+            y: 0,
+            duration: 0.6,
+            ease: 'elastic.out(1, 0.4)',
+            overwrite: 'auto'
+          });
+        });
+      });
+    })();
+
   }); // end gsap.context
 
 } // end if (!prefersReduced)
