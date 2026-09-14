@@ -21,12 +21,14 @@ gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, Observer);
 // ─────────────────────────────────────────────────────────────────────────────
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Reveal all GSAP targets immediately for reduced-motion users
 if (prefersReduced) {
   document.querySelectorAll('.gsap-reveal').forEach((el) => {
     el.style.opacity = '1';
     el.style.transform = 'none';
   });
+  
+  const overlay = document.querySelector('.intro-overlay');
+  if (overlay) overlay.remove();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -279,6 +281,18 @@ if (yearEl) yearEl.textContent = new Date().getFullYear();
 if (!prefersReduced) {
   // Use gsap.context for clean teardown (important for any SPA-style rebuilds)
   const ctx = gsap.context(() => {
+    // ── INTRO OVERLAY ────────────────────────────────────────────────────────
+    (function initIntro() {
+      const overlay = document.querySelector('.intro-overlay');
+      if (overlay) {
+        gsap.to(overlay, {
+          opacity: 0,
+          duration: 0.4,
+          ease: 'power2.inOut',
+          onComplete: () => overlay.remove()
+        });
+      }
+    })();
 
     // ── HERO ENTRANCE — ScrambleText per line + code-glyph shapes ────────
     (function heroEntrance() {

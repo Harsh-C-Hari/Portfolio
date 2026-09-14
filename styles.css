@@ -107,6 +107,15 @@
   }
 }
 
+/* ── Intro Overlay ─────────────────────────────────────────── */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--c-bg);
+  z-index: 9999;
+  pointer-events: none; /* Let clicks pass if JS fails */
+}
+
 /* ============================================================
    RESET / BASE
    ============================================================ */
