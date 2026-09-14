@@ -718,6 +718,21 @@ if (!prefersReduced) {
         if (links) tl.from(links, { opacity: 0, y: 10, duration: 0.4 }, '-=0.2');
         if (cover) tl.from(cover, { scale: 0.94, opacity: 0, duration: 0.75 }, 0.1);
 
+        if (idx !== 0) {
+          panel.setAttribute('inert', '');
+          panel.setAttribute('aria-hidden', 'true'); // fallback for inert-unaware AT
+        }
+
+        function makeInteractive() {
+          panel.removeAttribute('inert');
+          panel.removeAttribute('aria-hidden');
+        }
+        function makeInert() {
+          if (idx === 0) return; // keep the first panel always interactive when scrolled fully back to start
+          panel.setAttribute('inert', '');
+          panel.setAttribute('aria-hidden', 'true');
+        }
+
         if (idx === 0) {
           // First panel is already in view the moment the section pins — play
           // its content as soon as the wrapper enters the viewport.
@@ -735,10 +750,10 @@ if (!prefersReduced) {
             trigger: panel,
             containerAnimation: horizontalTween,
             start: 'left 85%',
-            onEnter: () => tl.play(),
+            onEnter: () => { tl.play(); makeInteractive(); },
             // Keep panels visible after they've animated in — do NOT reverse onLeave.
-            onEnterBack: () => tl.play(),
-            onLeaveBack: () => tl.restart(),
+            onEnterBack: () => { tl.play(); makeInteractive(); },
+            onLeaveBack: () => { tl.restart(); makeInert(); },
           });
         }
       });
