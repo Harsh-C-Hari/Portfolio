@@ -756,6 +756,25 @@ if (!prefersReduced) {
             onLeaveBack: () => { tl.restart(); makeInert(); },
           });
         }
+
+        // Parallax depth for the cover image
+        const img = panel.querySelector('.work-panel__cover img');
+        if (img) {
+          gsap.fromTo(img, 
+            { yPercent: -10 }, 
+            {
+              yPercent: 10,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: panel,
+                containerAnimation: horizontalTween,
+                start: 'left right',
+                end: 'right left',
+                scrub: true
+              }
+            }
+          );
+        }
       });
 
       // Work-section transition cue (rotate / scale hint before pin)
@@ -882,6 +901,19 @@ if (!prefersReduced) {
       btn.addEventListener('mouseleave', () => {
         gsap.to(btn, { scale: 1, duration: 0.25, ease: 'power2.out' });
       });
+    });
+
+    // ── MICRO-INTERACTIONS — work covers ──────────────────────────────────
+    document.querySelectorAll('.work-panel__cover').forEach(cover => {
+      const img = cover.querySelector('img');
+      if (img) {
+        cover.addEventListener('mouseenter', () => {
+          gsap.to(img, { scale: 1.03, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
+        });
+        cover.addEventListener('mouseleave', () => {
+          gsap.to(img, { scale: 1, duration: 0.6, ease: 'power2.out', overwrite: 'auto' });
+        });
+      }
     });
 
     // ── MICRO-INTERACTIONS — chips ────────────────────────────────────────
