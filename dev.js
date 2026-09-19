@@ -11,13 +11,13 @@ const { build } = require('./build');
 const bs = browserSync.create();
 
 // Build once up front so index.html is fresh when the server starts.
-build();
+build().catch((err) => console.error(err));
 
 bs.init({
   server: {
     baseDir: __dirname
   },
-  files: ['styles.css', 'script.js'], // reload automatically when these change
+  files: ['styles.css', 'animation.bundle.js'], // reload automatically when these change
   open: false,
   notify: false,
   ui: false,
@@ -27,10 +27,10 @@ bs.init({
 // usePolling makes this reliable on every filesystem (network drives, some
 // containers/VMs and WSL setups don't deliver native file-change events).
 // It costs a little CPU but the interval is short enough to feel instant.
-bs.watch(['src/layout.html', 'src/partials/*.html'], { usePolling: true, interval: 150 }).on('change', (file) => {
+bs.watch(['src/layout.html', 'src/partials/*.html', 'styles.css', 'animation.js'], { usePolling: true, interval: 150 }).on('change', async (file) => {
   try {
-    build();
-    bs.reload('index.html');
+    await build();
+    bs.reload();
   } catch (err) {
     console.error(`Build failed after change to ${file}:`, err.message);
   }

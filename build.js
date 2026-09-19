@@ -6,6 +6,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = __dirname;
 const LAYOUT_PATH = path.join(ROOT, 'src', 'layout.html');
@@ -13,16 +14,28 @@ const OUTPUT_PATH = path.join(ROOT, 'index.html');
 
 const INCLUDE_RE = /<!-- include:(\S+?\.html) -->\r?\n/g;
 
+// styles.css and animation.bundle.js are served with a one-year immutable cache
+// (see vercel.json), so their URLs must change whenever their content does.
+function versionOf(file) {
+  const p = path.join(ROOT, file);
+  if (!fs.existsSync(p)) return '0';
+  return crypto.createHash('md5').update(fs.readFileSync(p)).digest('hex').slice(0, 8);
+}
+
 function assembleHTML() {
   const layout = fs.readFileSync(LAYOUT_PATH, 'utf8');
 
-  const assembled = layout.replace(INCLUDE_RE, (match, relPath) => {
+  let assembled = layout.replace(INCLUDE_RE, (match, relPath) => {
     const partialPath = path.join(ROOT, relPath);
     if (!fs.existsSync(partialPath)) {
       throw new Error(`Partial not found: ${partialPath}`);
     }
     return fs.readFileSync(partialPath, 'utf8');
   });
+
+  assembled = assembled
+    .replace('href="styles.css"', `href="styles.css?v=${versionOf('styles.css')}"`)
+    .replace('src="animation.bundle.js"', `src="animation.bundle.js?v=${versionOf('animation.bundle.js')}"`);
 
   fs.writeFileSync(OUTPUT_PATH, assembled, 'utf8');
   console.log(`Built ${OUTPUT_PATH} (${Buffer.byteLength(assembled, 'utf8')} bytes)`);
@@ -54,8 +67,8 @@ async function bundleJS() {
 }
 
 async function build() {
+  await bundleJS(); // first, so the HTML can reference the bundle's content hash
   assembleHTML();
-  await bundleJS();
 }
 
 if (require.main === module) {

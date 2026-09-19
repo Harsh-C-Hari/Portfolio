@@ -4,21 +4,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
   <title>Harsh C Hari — Full-Stack Developer &amp; CSE Student</title>
   <meta name="description"
     content="Harsh C Hari — CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
 
-  <!-- ── Favicon ── inline SVG ──────────────────────────────────────────── -->
-  <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0f'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='22' font-weight='900' font-family='Arial Black%2C sans-serif' fill='%23f279c5'%3EH%3C/text%3E%3C/svg%3E">
+  <!-- Marks the page as JS-capable before first paint so CSS can safely stage intro states -->
+  <script>document.documentElement.classList.add('js');</script>
 
-  <!-- ── Google Fonts ────────────────────────────────────────────────────── -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f49cf5'/%3E%3Crect x='1' y='1' width='30' height='30' fill='none' stroke='%23000' stroke-width='2'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='22' font-weight='900' font-family='Arial Black%2C sans-serif' fill='%23000'%3EH%3C/text%3E%3C/svg%3E">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Sometype+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 
-  <!-- ── Open Graph ────────────────────────────────────────────────────── -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Harsh C Hari">
   <meta property="og:title" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
@@ -31,7 +34,6 @@
   <meta property="og:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
   <meta property="og:locale" content="en_IN">
 
-  <!-- ── Twitter / X Card ─────────────────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
   <meta name="twitter:description"
@@ -43,29 +45,25 @@
 </head>
 
 <body>
-  <div class="intro-overlay" aria-hidden="true"></div>
-  <div class="noise-overlay" aria-hidden="true"></div>
+  <!-- include:src/partials/loader.html -->
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
   <span id="top" aria-hidden="true" style="position:absolute;top:0;left:0;"></span>
   <a class="skip-link" href="#main-content">Skip to content</a>
+
   <!-- include:src/partials/nav.html -->
 
   <main id="main-content">
 
     <!-- include:src/partials/hero.html -->
 
-    <!-- include:src/partials/marquee-1.html -->
+    <!-- include:src/partials/ticker.html -->
+
+    <!-- include:src/partials/work.html -->
 
     <!-- include:src/partials/about.html -->
 
     <!-- include:src/partials/skills.html -->
-
-    <!-- include:src/partials/work.html -->
-
-    <!-- include:src/partials/experiments.html -->
-
-    <!-- include:src/partials/marquee-2.html -->
-
-    <!-- include:src/partials/timeline.html -->
 
     <!-- include:src/partials/contact.html -->
 
@@ -73,9 +71,7 @@
 
   <!-- include:src/partials/footer.html -->
 
-  <!-- Animation bundle (GSAP + Lenis, bundled by esbuild) -->
   <script src="animation.bundle.js" defer></script>
-
 </body>
 
 </html>

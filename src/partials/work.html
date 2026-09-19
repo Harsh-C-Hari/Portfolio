@@ -1,164 +1,128 @@
-<!-- ============================================================
-     SELECTED WORK — Pinned horizontal-scroll section
-     Desktop: ScrollTrigger pins the wrapper, panels slide left.
-     Mobile:  Native horizontal scroll with scroll-snap (no pin).
-
-     Structure: work-header is OUTSIDE work-pin-wrapper so that
-     start:'top top' on the wrapper fires when panels (not the
-     heading) reach the viewport top — horizontal scroll only
-     begins once panels are fully visible.
-     ============================================================ -->
-<div class="work-transition work-transition--top" aria-hidden="true">
-</div>
-<!-- Section header — normal flow, scrolls away before the pin fires -->
-<div id="work" data-od-id="work" class="work-header-wrap">
-  <div class="work-header container">
-    <div class="between">
-      <h2>What I've<br>shipped</h2>
-      <span class="mono muted">04 projects</span>
-    </div>
+<section class="section work" id="work" aria-labelledby="work-title">
+  <div class="container">
+    <header class="section__head">
+      <h2 class="title" id="work-title">What I've<br>shipped</h2>
+      <p class="section__note">Four projects. Code, and a live link where there is one.</p>
+    </header>
   </div>
-</div>
 
-<!-- Pin wrapper — ONLY the panel rail.
-     start:'top top' fires when THIS element's top = viewport top,
-     i.e. when the first panel is at the very top of the screen. -->
-<section class="work-pin-wrapper" aria-label="Selected work projects">
-  <div class="work-pin-container">
+  <div class="container work__stack">
 
-    <!-- ── Panel 01 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-1">
-      <div class="work-panel__content">
-        <span class="work-panel__index">01 / Featured</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Personal Cloud Gaming<br>Orchestrator</h3>
-        <p class="work-panel__desc">
-          A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI
-          control plane, React on the front, JWT-secured WebSockets for live telemetry,
-          and Sunshine + Tailscale for low-latency streaming.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="frontend">React</span>
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="backend">Python</span>
-          <span class="chip" data-cat="backend">WebSockets</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="systems">Sunshine</span>
-          <span class="chip" data-cat="systems">Tailscale</span>
+    <article class="project" style="--i:0">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Independent, in progress</p>
+          <h3 class="project__title">Personal Cloud Gaming Orchestrator</h3>
+          <p class="project__desc">
+            A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI control plane,
+            React on the front, JWT-secured WebSockets for live telemetry, and Sunshine + Tailscale for
+            low-latency streaming.
+          </p>
+          <dl class="stats">
+            <div><dt>Tiers</dt><dd>3</dd><dd class="stats__sub">host agent, control plane, web UI</dd></div>
+            <div><dt>Live data</dt><dd>JWT</dd><dd class="stats__sub">secured WebSocket telemetry</dd></div>
+          </dl>
+          <p class="project__stack">React, FastAPI, Python, WebSockets, JWT, Sunshine, Tailscale</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator" rel="noopener" target="_blank">GitHub ↗</a>
+            <a class="btn" href="#contact">Ask me about it</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator"
-            rel="noopener" target="_blank">GitHub ↗</a>
-          <a class="btn btn-ghost" href="#contact">Ask me about it</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <span class="badge chip chip--accent mono">Featured</span>
-        <img src="admin_home_page.webp" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1919"
-          height="942" loading="lazy" decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Control plane</span></div>
+            <img src="admin_home_page.webp" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1919" height="942" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-    <!-- ── Panel 02 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-2">
-      <div class="work-panel__content">
-        <span class="work-panel__index">02 / Featured</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Productivity<br>Dashboard</h3>
-        <p class="work-panel__desc">
-          226 REST endpoints across 40 FastAPI routers — tasks, role-based permissions,
-          bug tracking, and a knowledge base. Ships as an installable PWA with Web Push
-          notifications via GitHub Actions cron so deadline alerts land with the app closed.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="frontend">React</span>
-          <span class="chip" data-cat="frontend">TypeScript</span>
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="data">SQLAlchemy</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="frontend">Tailwind</span>
-          <span class="chip" data-cat="backend">Web Push</span>
+    <article class="project" style="--i:1">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Independent, live</p>
+          <h3 class="project__title">Productivity Dashboard</h3>
+          <p class="project__desc">
+            Tasks, role-based permissions, bug tracking and a knowledge base. It ships as an installable
+            PWA with Web Push notifications sent from a GitHub Actions cron, so deadline alerts land
+            with the app closed.
+          </p>
+          <dl class="stats">
+            <div><dt>Endpoints</dt><dd>226</dd><dd class="stats__sub">REST</dd></div>
+            <div><dt>Routers</dt><dd>40</dd><dd class="stats__sub">FastAPI</dd></div>
+            <div><dt>Installs as</dt><dd>PWA</dd><dd class="stats__sub">with Web Push</dd></div>
+          </dl>
+          <p class="project__stack">React, TypeScript, FastAPI, SQLAlchemy, JWT, Tailwind, Web Push</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://productivity-dashboard-phi-navy.vercel.app/" rel="noopener" target="_blank">Open live ↗</a>
+            <a class="btn" href="https://github.com/Harsh-C-Hari/Productivity-Dashboard" rel="noopener" target="_blank">GitHub ↗</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/Productivity-Dashboard" rel="noopener"
-            target="_blank">GitHub ↗</a>
-          <a class="btn btn-primary" href="https://productivity-dashboard-phi-navy.vercel.app/" rel="noopener"
-            target="_blank">Live ↗</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <img src="image-prodash.webp" alt="Productivity Dashboard interface" width="1919" height="936" loading="lazy"
-          decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Productivity Dashboard</span></div>
+            <img src="image-prodash.webp" alt="Productivity Dashboard interface" width="1919" height="936" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-    <!-- ── Panel 03 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-3">
-      <div class="work-panel__content">
-        <span class="work-panel__index">03 / Platform</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Future of<br>CEC</h3>
-        <p class="work-panel__desc">
-          A Student Portal, admin dashboard, and Lift Access system built by a 4-person team —
-          Google auth restricted to institutional email, role-based access for students and lift
-          operators, and an AI assistant (local Gemma via Ollama) for student queries.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="data">PostgreSQL</span>
-          <span class="chip" data-cat="data">Prisma</span>
-          <span class="chip" data-cat="backend">Express</span>
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="ai">Ollama</span>
-          <span class="chip" data-cat="ai">Gemma</span>
+    <article class="project" style="--i:2">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Team of four</p>
+          <h3 class="project__title">Future of CEC</h3>
+          <p class="project__desc">
+            A Student Portal, admin dashboard and Lift Access system. Google sign-in is restricted to
+            institutional email, students and lift operators get role-based access, and a local Gemma
+            model served through Ollama answers student queries.
+          </p>
+          <dl class="stats">
+            <div><dt>Team</dt><dd>4</dd><dd class="stats__sub">people</dd></div>
+            <div><dt>Sign-in</dt><dd>Google</dd><dd class="stats__sub">institutional email only</dd></div>
+            <div><dt>Assistant</dt><dd>Gemma</dd><dd class="stats__sub">local, via Ollama</dd></div>
+          </dl>
+          <p class="project__stack">PostgreSQL, Prisma, Express, FastAPI, JWT, Ollama, Gemma</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/Minions--Future_of_CEC" rel="noopener" target="_blank">GitHub ↗</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/Minions--Future_of_CEC" rel="noopener"
-            target="_blank">GitHub ↗</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <img src="image-2.webp" alt="Smart Campus Platform — Future of CEC" width="1919" height="938" loading="lazy"
-          decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Smart campus platform</span></div>
+            <img src="image-2.webp" alt="Smart Campus Platform, Future of CEC" width="1919" height="938" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-    <!-- ── Panel 04 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-4">
-      <div class="work-panel__content">
-        <span class="work-panel__index">04 / Hackathon</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Smart Farming<br>Dashboard</h3>
-        <p class="work-panel__desc">
-          Built in 24 hours by a 3-person team: a dashboard visualizing simulated soil and
-          weather sensor trends with Chart.js, backed by Firebase, with Gemini API generating
-          crop-care recommendations.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="frontend">Chart.js</span>
-          <span class="chip" data-cat="backend">Python</span>
-          <span class="chip" data-cat="data">Firebase</span>
-          <span class="chip" data-cat="ai">Gemini API</span>
+    <article class="project" style="--i:3">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Hackathon, team of three</p>
+          <h3 class="project__title">Smart Farming Dashboard</h3>
+          <p class="project__desc">
+            Built in 24 hours: a dashboard that charts simulated soil and weather sensor trends with
+            Chart.js, backed by Firebase, with the Gemini API generating crop-care recommendations.
+          </p>
+          <dl class="stats">
+            <div><dt>Build time</dt><dd>24h</dd><dd class="stats__sub">start to demo</dd></div>
+            <div><dt>Team</dt><dd>3</dd><dd class="stats__sub">people</dd></div>
+            <div><dt>Advice from</dt><dd>Gemini</dd><dd class="stats__sub">crop-care recommendations</dd></div>
+          </dl>
+          <p class="project__stack">FastAPI, Python, Chart.js, Firebase, Gemini API</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz" rel="noopener" target="_blank">GitHub ↗</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz"
-            rel="noopener" target="_blank">GitHub ↗</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <img src="image-1.webp" alt="Smart Farming Dashboard analytics view" width="1280" height="668" loading="lazy"
-          decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Smart Farming Dashboard</span></div>
+            <img src="image-1.webp" alt="Smart Farming Dashboard analytics view" width="1280" height="668" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-  </div><!-- /.work-pin-container -->
+  </div>
 </section>
-
-<!-- Transition cue back to vertical scroll -->
-<div class="work-transition work-transition--bottom" aria-hidden="true">
-</div>

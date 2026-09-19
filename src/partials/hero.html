@@ -1,54 +1,34 @@
-<!-- ============================================================
-     HERO
-     ============================================================ -->
-<section class="hero" id="hero" data-od-id="hero">
-  <div class="container">
-    <div class="row" style="margin-bottom: var(--s-8);">
-      <span class="chip">CSE · 2025–2029</span>
-      <span class="chip chip--accent">Open to internships &amp; collabs</span>
+<section class="hero" id="hero">
+  <div class="hero__inner">
+
+    <div class="hero__status">
+      <span class="status"><i class="status__dot" aria-hidden="true"></i>Open to internships and collabs</span>
+      <span class="hero__clock">Kerala, <time data-clock>--:--:--</time> IST</span>
     </div>
 
-    <div class="hero-grid" style="position:relative;">
-      <!-- H1: per-line spans so ScrambleText can target each line's
-           textContent without destroying <br> layout structure -->
-      <h1 class="hero-h1">
-        <span class="hero-line">I build</span>
-        <span class="hero-line">software,</span>
-        <span class="hero-line">ship ideas,</span>
-        <span class="hero-line">break things,</span>
-        <span class="hero-line">fix them.</span>
-      </h1>
+    <h1 class="hero__h1" aria-label="I build software, ship ideas, break things, fix them.">
+      <span class="w" aria-hidden="true"><span class="w__in">I</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">build</span></span>
+      <span class="nb" aria-hidden="true"><mark class="hl"><span class="w"><span class="w__in">software</span></span></mark><span class="w"><span class="w__in">,</span></span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">ship</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">ideas,</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">break</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">things,</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">fix</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">them.</span></span>
+    </h1>
 
-      <!-- Code-glyph decorative shapes (absolute, aria-hidden) -->
-      <div class="hero-deco-wrap" aria-hidden="true">
-        <!-- original 4 — proven positions -->
-        <span class="hero-deco" data-glyph="{">{</span>
-        <span class="hero-deco" data-glyph="/>">/&gt;</span>
-        <span class="hero-deco" data-glyph="_">_</span>
-        <span class="hero-deco" data-glyph=";">;</span>
-        <!-- new 6 — unique glyphs, safe zones -->
-        <span class="hero-deco" data-glyph="}">}</span>
-        <span class="hero-deco" data-glyph="*">*</span>
-        <span class="hero-deco" data-glyph="!">!</span>
-      </div>
-
-      <div>
-        <p class="hero-sub">
-          I'm Harsh — a full-stack developer and CSE student at College of Engineering Chengannur.
-          React, FastAPI, PostgreSQL, Python, real-time data, auth, AI integrations.
-          I learn by building — and I'd rather ship something imperfect than ship nothing.
-        </p>
-        <div class="hero-meta">
-          <a class="btn btn-primary" href="#work">See my work</a>
-          <a class="btn btn-ghost" href="#contact">Get in touch</a>
-          <a class="btn btn-ghost" href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
-        </div>
+    <div class="hero__foot">
+      <p class="hero__sub">
+        I'm Harsh, a full-stack developer and CSE student at College of Engineering Chengannur.
+        React, FastAPI, PostgreSQL, Python, real-time data, auth and AI integrations.
+        I learn by building, and I'd rather ship something imperfect than ship nothing.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--pink" href="#work" data-magnetic>See my work</a>
+        <a class="btn" href="#contact" data-magnetic>Get in touch</a>
       </div>
     </div>
 
-    <div class="hero-rule">
-      <span>Full-Stack · Systems · AI Integrations</span>
-      <span>Kerala, IN · IST</span>
-    </div>
   </div>
 </section>

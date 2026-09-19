@@ -4,21 +4,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
   <title>Harsh C Hari — Full-Stack Developer &amp; CSE Student</title>
   <meta name="description"
     content="Harsh C Hari — CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
 
-  <!-- ── Favicon ── inline SVG ──────────────────────────────────────────── -->
-  <link rel="icon" type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230a0a0f'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='22' font-weight='900' font-family='Arial Black%2C sans-serif' fill='%23f279c5'%3EH%3C/text%3E%3C/svg%3E">
+  <!-- Marks the page as JS-capable before first paint so CSS can safely stage intro states -->
+  <script>document.documentElement.classList.add('js');</script>
 
-  <!-- ── Google Fonts ────────────────────────────────────────────────────── -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f49cf5'/%3E%3Crect x='1' y='1' width='30' height='30' fill='none' stroke='%23000' stroke-width='2'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='22' font-weight='900' font-family='Arial Black%2C sans-serif' fill='%23000'%3EH%3C/text%3E%3C/svg%3E">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Sometype+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
 
-  <!-- ── Open Graph ────────────────────────────────────────────────────── -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Harsh C Hari">
   <meta property="og:title" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
@@ -31,7 +34,6 @@
   <meta property="og:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
   <meta property="og:locale" content="en_IN">
 
-  <!-- ── Twitter / X Card ─────────────────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
   <meta name="twitter:description"
@@ -39,554 +41,320 @@
   <meta name="twitter:image" content="https://harshchari.vercel.app/og-image.jpg">
   <meta name="twitter:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=c1b6ee03">
 </head>
 
 <body>
-  <div class="intro-overlay" aria-hidden="true"></div>
-  <div class="noise-overlay" aria-hidden="true"></div>
+  <!-- Intro loader: ink panel with a counter, wipes up once. Skipped on repeat visits and for reduced motion. -->
+<div class="loader" aria-hidden="true">
+  <span class="loader__name">Harsh C Hari</span>
+  <span class="loader__count">000</span>
+</div>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
   <span id="top" aria-hidden="true" style="position:absolute;top:0;left:0;"></span>
   <a class="skip-link" href="#main-content">Skip to content</a>
-  <!-- ============================================================
-     NAV
-     ============================================================ -->
-<header class="nav" data-od-id="nav">
-  <div class="nav-inner">
-    <a href="#top" class="nav-brand">Harsh&nbsp;C&nbsp;Hari</a>
-    <nav class="nav-links" aria-label="Primary">
+
+  <header class="nav" data-nav>
+  <div class="nav__inner">
+    <a href="#top" class="nav__brand"><span class="nav__mark" aria-hidden="true">H</span>Harsh C Hari</a>
+
+    <nav class="nav__links" aria-label="Primary">
+      <span class="nav__indicator" aria-hidden="true"></span>
+      <a href="#work">Work</a>
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
-      <a href="#work">Work</a>
-      <a href="#experiments">Experiments</a>
-      <a href="#timeline">Journey</a>
       <a href="#contact">Contact</a>
-      <a href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
-      <!-- Sliding active indicator — GSAP moves this between links -->
-      <span class="nav-indicator" aria-hidden="true"></span>
     </nav>
-    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="nav-mobile">
-      <span></span><span></span><span></span>
+
+    <a class="nav__resume" href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+
+    <button class="nav__toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu">
+      <span></span><span></span>
     </button>
   </div>
-  <div class="nav-mobile" id="nav-mobile" role="navigation" aria-label="Mobile navigation">
+
+  <div class="menu" id="menu" hidden>
+    <a href="#work">Work</a>
     <a href="#about">About</a>
     <a href="#skills">Skills</a>
-    <a href="#work">Work</a>
-    <a href="#experiments">Experiments</a>
-    <a href="#timeline">Journey</a>
     <a href="#contact">Contact</a>
     <a href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
   </div>
 </header>
+
   <main id="main-content">
 
-    <!-- ============================================================
-     HERO
-     ============================================================ -->
-<section class="hero" id="hero" data-od-id="hero">
-  <div class="container">
-    <div class="row" style="margin-bottom: var(--s-8);">
-      <span class="chip">CSE · 2025–2029</span>
-      <span class="chip chip--accent">Open to internships &amp; collabs</span>
+    <section class="hero" id="hero">
+  <div class="hero__inner">
+
+    <div class="hero__status">
+      <span class="status"><i class="status__dot" aria-hidden="true"></i>Open to internships and collabs</span>
+      <span class="hero__clock">Kerala, <time data-clock>--:--:--</time> IST</span>
     </div>
 
-    <div class="hero-grid" style="position:relative;">
-      <!-- H1: per-line spans so ScrambleText can target each line's
-           textContent without destroying <br> layout structure -->
-      <h1 class="hero-h1">
-        <span class="hero-line">I build</span>
-        <span class="hero-line">software,</span>
-        <span class="hero-line">ship ideas,</span>
-        <span class="hero-line">break things,</span>
-        <span class="hero-line">fix them.</span>
-      </h1>
+    <h1 class="hero__h1" aria-label="I build software, ship ideas, break things, fix them.">
+      <span class="w" aria-hidden="true"><span class="w__in">I</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">build</span></span>
+      <span class="nb" aria-hidden="true"><mark class="hl"><span class="w"><span class="w__in">software</span></span></mark><span class="w"><span class="w__in">,</span></span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">ship</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">ideas,</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">break</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">things,</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">fix</span></span>
+      <span class="w" aria-hidden="true"><span class="w__in">them.</span></span>
+    </h1>
 
-      <!-- Code-glyph decorative shapes (absolute, aria-hidden) -->
-      <div class="hero-deco-wrap" aria-hidden="true">
-        <!-- original 4 — proven positions -->
-        <span class="hero-deco" data-glyph="{">{</span>
-        <span class="hero-deco" data-glyph="/>">/&gt;</span>
-        <span class="hero-deco" data-glyph="_">_</span>
-        <span class="hero-deco" data-glyph=";">;</span>
-        <!-- new 6 — unique glyphs, safe zones -->
-        <span class="hero-deco" data-glyph="}">}</span>
-        <span class="hero-deco" data-glyph="*">*</span>
-        <span class="hero-deco" data-glyph="!">!</span>
-      </div>
-
-      <div>
-        <p class="hero-sub">
-          I'm Harsh — a full-stack developer and CSE student at College of Engineering Chengannur.
-          React, FastAPI, PostgreSQL, Python, real-time data, auth, AI integrations.
-          I learn by building — and I'd rather ship something imperfect than ship nothing.
-        </p>
-        <div class="hero-meta">
-          <a class="btn btn-primary" href="#work">See my work</a>
-          <a class="btn btn-ghost" href="#contact">Get in touch</a>
-          <a class="btn btn-ghost" href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
-        </div>
+    <div class="hero__foot">
+      <p class="hero__sub">
+        I'm Harsh, a full-stack developer and CSE student at College of Engineering Chengannur.
+        React, FastAPI, PostgreSQL, Python, real-time data, auth and AI integrations.
+        I learn by building, and I'd rather ship something imperfect than ship nothing.
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--pink" href="#work" data-magnetic>See my work</a>
+        <a class="btn" href="#contact" data-magnetic>Get in touch</a>
       </div>
     </div>
 
-    <div class="hero-rule">
-      <span>Full-Stack · Systems · AI Integrations</span>
-      <span>Kerala, IN · IST</span>
-    </div>
   </div>
 </section>
-    <!-- ============================================================
-     VERB REVEAL STRIP
-     Pinned per-character brightness-reveal (scroll-scrubbed).
-     JS wraps each char in a <span> and drives color via ScrollTrigger.
-     Floating keyword pills animate independently on top.
-     aria-hidden: decorative identity strip, not semantic content.
-     ============================================================ -->
-<div class="verb-reveal" aria-hidden="true" data-od-id="verb-reveal">
-  <div class="verb-reveal__track">
-    <span class="verb-reveal__word" data-word="Build">Build</span><span class="verb-reveal__sep">·</span><span
-      class="verb-reveal__word" data-word="Ship">Ship</span><span class="verb-reveal__sep">·</span><span
-      class="verb-reveal__word" data-word="Iterate">Iterate</span><span class="verb-reveal__sep">·</span><span
-      class="verb-reveal__word" data-word="Break">Break</span><span class="verb-reveal__sep">·</span><span
-      class="verb-reveal__word" data-word="Fix">Fix</span><span class="verb-reveal__sep">·</span><span
-      class="verb-reveal__word" data-word="Learn">Learn</span><span class="verb-reveal__sep">·</span><span
-      class="verb-reveal__word" data-word="Deploy">Deploy</span>
-  </div>
 
-  <!-- Floating keyword pills — animate in independently over the strip -->
-  <div class="verb-reveal__pills" aria-hidden="true">
-    <span class="kw-pill" style="--cat-hue: var(--c-cat-frontend)">ship</span>
-    <span class="kw-pill" style="--cat-hue: var(--c-cat-ai)">iterate</span>
-    <span class="kw-pill" style="--cat-hue: var(--c-cat-data)">build</span>
+    <!-- Stack ticker. Decorative: the same tools are listed in plain text under Skills. -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    <div class="ticker__group">
+      <span class="ticker__item">React</span><i class="ticker__sep"></i>
+      <span class="ticker__item">FastAPI</span><i class="ticker__sep"></i>
+      <span class="ticker__item">PostgreSQL</span><i class="ticker__sep"></i>
+      <span class="ticker__item">TypeScript</span><i class="ticker__sep"></i>
+      <span class="ticker__item">WebSockets</span><i class="ticker__sep"></i>
+      <span class="ticker__item">Ollama</span><i class="ticker__sep"></i>
+      <span class="ticker__item">Prisma</span><i class="ticker__sep"></i>
+      <span class="ticker__item">Python</span><i class="ticker__sep"></i>
+    </div>
   </div>
 </div>
-        <!-- ============================================================
-       ABOUT
-       ============================================================ -->
-    <section data-od-id="about" id="about">
-      <div class="container">
-        <div class="about">
-          <div>
-            <h2>About</h2>
-            <div class="about__photo img-skeleton" style="aspect-ratio: 4 / 5;">
-              <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy"
-                decoding="async">
-            </div>
-          </div>
-          <div>
-            <p>I'm a second-year CSE student who treats personal projects like real systems.
-              I care about how things feel to use and how they behave when they fail. I prefer
-              boring, well-understood tools over novel ones — and reach for new tech only when
-              it actually solves a problem I have.</p>
-            <p>
-              Outside of code: I follow motorsport, run small experiments on the side, and
-              spend more time than I'd like to admit getting the small details right.
-            </p>
 
-            <dl class="about__side" style="margin-top: var(--s-6);">
-              <dt>Based in</dt>
-              <dd>Kerala, India</dd>
-              <dt>Studying</dt>
-              <dd>B.Tech CSE, College of Engineering Chengannur (2025–2029)</dd>
-              <dt>Currently</dt>
-              <dd>Building CEC platform &amp; Cloud Gaming Orchestrator; looking for internships and collabs.</dd>
-              <dt>Open to</dt>
-              <dd>Internships · OSS collabs · Hackathons · Side projects that need an extra engineer</dd>
-            </dl>
+    <section class="section work" id="work" aria-labelledby="work-title">
+  <div class="container">
+    <header class="section__head">
+      <h2 class="title" id="work-title">What I've<br>shipped</h2>
+      <p class="section__note">Four projects. Code, and a live link where there is one.</p>
+    </header>
+  </div>
+
+  <div class="container work__stack">
+
+    <article class="project" style="--i:0">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Independent, in progress</p>
+          <h3 class="project__title">Personal Cloud Gaming Orchestrator</h3>
+          <p class="project__desc">
+            A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI control plane,
+            React on the front, JWT-secured WebSockets for live telemetry, and Sunshine + Tailscale for
+            low-latency streaming.
+          </p>
+          <dl class="stats">
+            <div><dt>Tiers</dt><dd>3</dd><dd class="stats__sub">host agent, control plane, web UI</dd></div>
+            <div><dt>Live data</dt><dd>JWT</dd><dd class="stats__sub">secured WebSocket telemetry</dd></div>
+          </dl>
+          <p class="project__stack">React, FastAPI, Python, WebSockets, JWT, Sunshine, Tailscale</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator" rel="noopener" target="_blank">GitHub ↗</a>
+            <a class="btn" href="#contact">Ask me about it</a>
           </div>
         </div>
-      </div>
-    </section>
-    <!-- ============================================================
-       SKILLS — only what projects evidence
-       ============================================================ -->
-<section data-od-id="skills" id="skills">
-  <div class="container">
-    <div class="between" style="margin-bottom: var(--s-10);">
-      <h2>What I<br>work with</h2>
-    </div>
-
-    <div class="skill-row" data-cat-row="frontend">
-      <div class="skill-row__label">Frontend</div>
-      <div>
-        <div class="skill-row__list">
-          <span class="chip" data-cat="frontend">React</span>
-          <span class="chip" data-cat="frontend">TypeScript</span>
-          <span class="chip" data-cat="frontend">Tailwind</span>
-          <span class="chip" data-cat="frontend">Radix UI</span>
-          <span class="chip" data-cat="frontend">HTML/CSS</span>
-          <span class="chip" data-cat="frontend">Chart.js</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="skill-row" data-cat-row="backend">
-      <div class="skill-row__label">Backend</div>
-      <div>
-        <div class="skill-row__list">
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="backend">Express</span>
-          <span class="chip" data-cat="backend">Node.js</span>
-          <span class="chip" data-cat="backend">Python</span>
-          <span class="chip" data-cat="backend">REST APIs</span>
-          <span class="chip" data-cat="backend">WebSockets</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="backend">RBAC</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="skill-row" data-cat-row="data">
-      <div class="skill-row__label">Data</div>
-      <div>
-        <div class="skill-row__list">
-          <span class="chip" data-cat="data">PostgreSQL</span>
-          <span class="chip" data-cat="data">Prisma</span>
-          <span class="chip" data-cat="data">SQLAlchemy</span>
-          <span class="chip" data-cat="data">Firebase</span>
-          <span class="chip" data-cat="data">SQL</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="skill-row" data-cat-row="systems">
-      <div class="skill-row__label">Systems &amp; infra</div>
-      <div>
-        <div class="skill-row__list">
-          <span class="chip" data-cat="systems">Linux</span>
-          <span class="chip" data-cat="systems">Sunshine</span>
-          <span class="chip" data-cat="systems">Tailscale</span>
-          <span class="chip" data-cat="systems">Vercel</span>
-          <span class="chip" data-cat="systems">Git</span>
-          <span class="chip" data-cat="systems">GitHub Actions</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="skill-row" data-cat-row="ai">
-      <div class="skill-row__label">AI integrations</div>
-      <div>
-        <div class="skill-row__list">
-          <span class="chip" data-cat="ai">Ollama</span>
-          <span class="chip" data-cat="ai">Gemma</span>
-          <span class="chip" data-cat="ai">Gemini API</span>
-          <span class="chip" data-cat="ai">Prompt design</span>
-          <span class="chip" data-cat="ai">Local LLM serving</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="skill-row" data-cat-row="testing">
-      <div class="skill-row__label">Testing</div>
-      <div>
-        <div class="skill-row__list">
-          <span class="chip" data-cat="testing">Vitest</span>
-          <span class="chip" data-cat="testing">React Testing Library</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-    <!-- ============================================================
-     SELECTED WORK — Pinned horizontal-scroll section
-     Desktop: ScrollTrigger pins the wrapper, panels slide left.
-     Mobile:  Native horizontal scroll with scroll-snap (no pin).
-
-     Structure: work-header is OUTSIDE work-pin-wrapper so that
-     start:'top top' on the wrapper fires when panels (not the
-     heading) reach the viewport top — horizontal scroll only
-     begins once panels are fully visible.
-     ============================================================ -->
-<div class="work-transition work-transition--top" aria-hidden="true">
-</div>
-<!-- Section header — normal flow, scrolls away before the pin fires -->
-<div id="work" data-od-id="work" class="work-header-wrap">
-  <div class="work-header container">
-    <div class="between">
-      <h2>What I've<br>shipped</h2>
-      <span class="mono muted">04 projects</span>
-    </div>
-  </div>
-</div>
-
-<!-- Pin wrapper — ONLY the panel rail.
-     start:'top top' fires when THIS element's top = viewport top,
-     i.e. when the first panel is at the very top of the screen. -->
-<section class="work-pin-wrapper" aria-label="Selected work projects">
-  <div class="work-pin-container">
-
-    <!-- ── Panel 01 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-1">
-      <div class="work-panel__content">
-        <span class="work-panel__index">01 / Featured</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Personal Cloud Gaming<br>Orchestrator</h3>
-        <p class="work-panel__desc">
-          A self-hosted cloud gaming stack: a Python agent on the host talks to a FastAPI
-          control plane, React on the front, JWT-secured WebSockets for live telemetry,
-          and Sunshine + Tailscale for low-latency streaming.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="frontend">React</span>
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="backend">Python</span>
-          <span class="chip" data-cat="backend">WebSockets</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="systems">Sunshine</span>
-          <span class="chip" data-cat="systems">Tailscale</span>
-        </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator"
-            rel="noopener" target="_blank">GitHub ↗</a>
-          <a class="btn btn-ghost" href="#contact">Ask me about it</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <span class="badge chip chip--accent mono">Featured</span>
-        <img src="admin_home_page.webp" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1919"
-          height="942" loading="lazy" decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Control plane</span></div>
+            <img src="admin_home_page.webp" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1919" height="942" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-    <!-- ── Panel 02 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-2">
-      <div class="work-panel__content">
-        <span class="work-panel__index">02 / Featured</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Productivity<br>Dashboard</h3>
-        <p class="work-panel__desc">
-          226 REST endpoints across 40 FastAPI routers — tasks, role-based permissions,
-          bug tracking, and a knowledge base. Ships as an installable PWA with Web Push
-          notifications via GitHub Actions cron so deadline alerts land with the app closed.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="frontend">React</span>
-          <span class="chip" data-cat="frontend">TypeScript</span>
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="data">SQLAlchemy</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="frontend">Tailwind</span>
-          <span class="chip" data-cat="backend">Web Push</span>
+    <article class="project" style="--i:1">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Independent, live</p>
+          <h3 class="project__title">Productivity Dashboard</h3>
+          <p class="project__desc">
+            Tasks, role-based permissions, bug tracking and a knowledge base. It ships as an installable
+            PWA with Web Push notifications sent from a GitHub Actions cron, so deadline alerts land
+            with the app closed.
+          </p>
+          <dl class="stats">
+            <div><dt>Endpoints</dt><dd>226</dd><dd class="stats__sub">REST</dd></div>
+            <div><dt>Routers</dt><dd>40</dd><dd class="stats__sub">FastAPI</dd></div>
+            <div><dt>Installs as</dt><dd>PWA</dd><dd class="stats__sub">with Web Push</dd></div>
+          </dl>
+          <p class="project__stack">React, TypeScript, FastAPI, SQLAlchemy, JWT, Tailwind, Web Push</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://productivity-dashboard-phi-navy.vercel.app/" rel="noopener" target="_blank">Open live ↗</a>
+            <a class="btn" href="https://github.com/Harsh-C-Hari/Productivity-Dashboard" rel="noopener" target="_blank">GitHub ↗</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/Productivity-Dashboard" rel="noopener"
-            target="_blank">GitHub ↗</a>
-          <a class="btn btn-primary" href="https://productivity-dashboard-phi-navy.vercel.app/" rel="noopener"
-            target="_blank">Live ↗</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <img src="image-prodash.webp" alt="Productivity Dashboard interface" width="1919" height="936" loading="lazy"
-          decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Productivity Dashboard</span></div>
+            <img src="image-prodash.webp" alt="Productivity Dashboard interface" width="1919" height="936" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-    <!-- ── Panel 03 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-3">
-      <div class="work-panel__content">
-        <span class="work-panel__index">03 / Platform</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Future of<br>CEC</h3>
-        <p class="work-panel__desc">
-          A Student Portal, admin dashboard, and Lift Access system built by a 4-person team —
-          Google auth restricted to institutional email, role-based access for students and lift
-          operators, and an AI assistant (local Gemma via Ollama) for student queries.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="data">PostgreSQL</span>
-          <span class="chip" data-cat="data">Prisma</span>
-          <span class="chip" data-cat="backend">Express</span>
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="backend">JWT</span>
-          <span class="chip" data-cat="ai">Ollama</span>
-          <span class="chip" data-cat="ai">Gemma</span>
+    <article class="project" style="--i:2">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Team of four</p>
+          <h3 class="project__title">Future of CEC</h3>
+          <p class="project__desc">
+            A Student Portal, admin dashboard and Lift Access system. Google sign-in is restricted to
+            institutional email, students and lift operators get role-based access, and a local Gemma
+            model served through Ollama answers student queries.
+          </p>
+          <dl class="stats">
+            <div><dt>Team</dt><dd>4</dd><dd class="stats__sub">people</dd></div>
+            <div><dt>Sign-in</dt><dd>Google</dd><dd class="stats__sub">institutional email only</dd></div>
+            <div><dt>Assistant</dt><dd>Gemma</dd><dd class="stats__sub">local, via Ollama</dd></div>
+          </dl>
+          <p class="project__stack">PostgreSQL, Prisma, Express, FastAPI, JWT, Ollama, Gemma</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/Minions--Future_of_CEC" rel="noopener" target="_blank">GitHub ↗</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/Minions--Future_of_CEC" rel="noopener"
-            target="_blank">GitHub ↗</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <img src="image-2.webp" alt="Smart Campus Platform — Future of CEC" width="1919" height="938" loading="lazy"
-          decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Smart campus platform</span></div>
+            <img src="image-2.webp" alt="Smart Campus Platform, Future of CEC" width="1919" height="938" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-    <!-- ── Panel 04 ──────────────────────────────────────────────── -->
-    <article class="work-panel" data-od-id="project-4">
-      <div class="work-panel__content">
-        <span class="work-panel__index">04 / Hackathon</span>
-        <div class="accent-bar"></div>
-        <h3 class="work-panel__title">Smart Farming<br>Dashboard</h3>
-        <p class="work-panel__desc">
-          Built in 24 hours by a 3-person team: a dashboard visualizing simulated soil and
-          weather sensor trends with Chart.js, backed by Firebase, with Gemini API generating
-          crop-care recommendations.
-        </p>
-        <div class="work-panel__chips">
-          <span class="chip" data-cat="backend">FastAPI</span>
-          <span class="chip" data-cat="frontend">Chart.js</span>
-          <span class="chip" data-cat="backend">Python</span>
-          <span class="chip" data-cat="data">Firebase</span>
-          <span class="chip" data-cat="ai">Gemini API</span>
+    <article class="project" style="--i:3">
+      <div class="project__card">
+        <div class="project__body">
+          <p class="project__kind">Hackathon, team of three</p>
+          <h3 class="project__title">Smart Farming Dashboard</h3>
+          <p class="project__desc">
+            Built in 24 hours: a dashboard that charts simulated soil and weather sensor trends with
+            Chart.js, backed by Firebase, with the Gemini API generating crop-care recommendations.
+          </p>
+          <dl class="stats">
+            <div><dt>Build time</dt><dd>24h</dd><dd class="stats__sub">start to demo</dd></div>
+            <div><dt>Team</dt><dd>3</dd><dd class="stats__sub">people</dd></div>
+            <div><dt>Advice from</dt><dd>Gemini</dd><dd class="stats__sub">crop-care recommendations</dd></div>
+          </dl>
+          <p class="project__stack">FastAPI, Python, Chart.js, Firebase, Gemini API</p>
+          <div class="project__links">
+            <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz" rel="noopener" target="_blank">GitHub ↗</a>
+          </div>
         </div>
-        <div class="work-panel__links">
-          <a class="btn btn-ghost-accent" href="https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz"
-            rel="noopener" target="_blank">GitHub ↗</a>
-        </div>
-      </div>
-
-      <div class="work-panel__cover img-skeleton">
-        <img src="image-1.webp" alt="Smart Farming Dashboard analytics view" width="1280" height="668" loading="lazy"
-          decoding="async">
+        <figure class="project__shot">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Smart Farming Dashboard</span></div>
+            <img src="image-1.webp" alt="Smart Farming Dashboard analytics view" width="1280" height="668" loading="lazy" decoding="async">
+          </div>
+        </figure>
       </div>
     </article>
 
-  </div><!-- /.work-pin-container -->
+  </div>
 </section>
 
-<!-- Transition cue back to vertical scroll -->
-<div class="work-transition work-transition--bottom" aria-hidden="true">
-</div>
-    <!-- ============================================================
-       LIVE EXPERIMENTS
-       ============================================================ -->
-<section data-od-id="experiments" id="experiments">
+    <section class="section about" id="about" aria-labelledby="about-title">
   <div class="container">
-    <div class="between" style="margin-bottom: var(--s-10);">
-      <div>
-        <h2>Live<br>experiments</h2>
-        <p class="mono muted" style="margin-top: var(--s-3);">Deployed · Public URL</p>
-      </div>
-      <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari" rel="noopener" target="_blank">All on GitHub ↗</a>
-    </div>
+    <h2 class="title title--sm" id="about-title">About</h2>
 
-    <div class="exp-grid">
-      <article class="exp" data-od-id="exp-1">
-        <div class="exp__head">
-          <h3 class="exp__title">Productivity<br>Dashboard</h3>
-          <span class="chip chip--accent mono">Live</span>
-        </div>
-        <p>
-          A personal productivity dashboard — tasks, focus timers, and lightweight analytics.
-          Built to replace the half-dozen tools I was juggling, not to compete with them.
+    <p class="about__statement" data-scrub>
+      I'm a second-year CSE student who treats personal projects like real systems. I care about how things
+      feel to use and how they behave when they fail. I prefer boring, well-understood tools, and reach for
+      new tech only when it solves a problem I actually have.
+    </p>
+
+    <div class="about__grid">
+      <figure class="about__photo">
+        <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy" decoding="async">
+      </figure>
+
+      <div class="about__side">
+        <p class="about__note">
+          Outside of code I follow motorsport, run small experiments on the side, and spend more time than
+          I'd like to admit getting the small details right.
         </p>
-        <div class="exp__chips">
-          <span class="chip" data-cat="frontend">React</span>
-          <span class="chip" data-cat="systems">Vercel</span>
-          <span class="chip" data-cat="frontend">Recharts</span>
-        </div>
-        <div class="exp__foot">
-          <span class="exp__url">productivity-dashboard-phi-navy.vercel.app</span>
-          <a class="btn btn-primary" href="https://productivity-dashboard-phi-navy.vercel.app/" rel="noopener"
-            target="_blank">Open ↗</a>
-        </div>
-      </article>
+        <dl class="facts">
+          <div><dt>Based in</dt><dd>Kerala, India</dd></div>
+          <div><dt>Studying</dt><dd>B.Tech CSE, College of Engineering Chengannur (2025–2029)</dd></div>
+          <div><dt>Currently</dt><dd>Building the CEC platform and the Cloud Gaming Orchestrator</dd></div>
+          <div><dt>Open to</dt><dd>Internships, OSS collabs, hackathons, and side projects that need an extra engineer</dd></div>
+        </dl>
+      </div>
     </div>
   </div>
 </section>
-    <!-- ============================================================
-     MARQUEE 2 — tech stack strip (runs in reverse direction)
-     GSAP drives motion (xPercent in opposite direction).
-     ============================================================ -->
-<div class="marquee marquee--reverse" aria-hidden="true" data-od-id="marquee-2">
-  <div class="marquee__track">
-    <span class="marquee__item"><span class="dot dot--accent"></span>React</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>FastAPI</span>
-    <span class="marquee__item"><span class="dot dot--accent"></span>PostgreSQL</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Python</span>
-    <span class="marquee__item"><span class="dot dot--accent"></span>TypeScript</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Prisma</span>
-    <span class="marquee__item"><span class="dot dot--accent"></span>WebSockets</span>
-    <span class="marquee__item marquee__item--muted"><span class="dot"></span>Ollama</span>
-  </div>
-</div>
-    <!-- ============================================================
-       JOURNEY — scrub-driven progress line, honest entries only
-       ============================================================ -->
-<section data-od-id="timeline" id="timeline" class="timeline-section">
+
+    <section class="section skills" id="skills" aria-labelledby="skills-title">
   <div class="container">
-    <div class="between" style="margin-bottom: var(--s-10);">
-      <h2>Journey</h2>
-    </div>
+    <h2 class="title" id="skills-title">What I<br>work with</h2>
+    <p class="section__note skills__note">Only tools that show up in something I've built.</p>
 
-    <div class="timeline-inner">
-      <!-- Scrub-driven progress line — GSAP animates scaleY from 0→1 -->
-      <div class="timeline-progress" aria-hidden="true">
-        <div class="timeline-progress__fill"></div>
+    <div class="skill-list">
+      <div class="skill-row">
+        <h3 class="skill-row__label">Frontend</h3>
+        <p class="skill-row__items">React, TypeScript, Tailwind, Radix UI, HTML/CSS, Chart.js</p>
       </div>
-
-      <div class="timeline">
-        <div class="timeline__row">
-          <span class="timeline__date">2025 →</span>
-          <span class="timeline__title">B.Tech CSE, College of Engineering Chengannur</span>
-          <span class="timeline__meta">2025–2029 · In progress</span>
-        </div>
-
-        <div class="timeline__row">
-          <span class="timeline__date">2025</span>
-          <span class="timeline__title">Build with AI — Smart Farming Dashboard</span>
-          <span class="timeline__meta">Hackathon · Team build</span>
-        </div>
-
-        <div class="timeline__row">
-          <span class="timeline__date">2026</span>
-          <span class="timeline__title">Personal Cloud Gaming Orchestrator</span>
-          <span class="timeline__meta">Independent · In progress</span>
-        </div>
-
-        <div class="timeline__row">
-          <span class="timeline__date">2026</span>
-          <span class="timeline__title">Future of CEC — campus platform</span>
-          <span class="timeline__meta">Hackathon · Team build</span>
-        </div>
+      <div class="skill-row">
+        <h3 class="skill-row__label">Backend</h3>
+        <p class="skill-row__items">FastAPI, Express, Node.js, Python, REST APIs, WebSockets, JWT, RBAC</p>
+      </div>
+      <div class="skill-row">
+        <h3 class="skill-row__label">Data</h3>
+        <p class="skill-row__items">PostgreSQL, Prisma, SQLAlchemy, Firebase, SQL</p>
+      </div>
+      <div class="skill-row">
+        <h3 class="skill-row__label">Systems &amp; infra</h3>
+        <p class="skill-row__items">Linux, Sunshine, Tailscale, Vercel, Git, GitHub Actions</p>
+      </div>
+      <div class="skill-row">
+        <h3 class="skill-row__label">AI</h3>
+        <p class="skill-row__items">Ollama, Gemma, Gemini API</p>
       </div>
     </div>
   </div>
 </section>
-    <!-- ============================================================
-       CONTACT
-       ============================================================ -->
-<section class="contact" data-od-id="contact" id="contact">
+
+    <section class="contact" id="contact" aria-labelledby="contact-title">
   <div class="container">
-    <div class="between" style="margin-bottom: var(--s-10);">
-      <h2>Get in<br>touch</h2>
-      <span class="mono muted">Replies within a day or two</span>
+    <h2 class="contact__title" id="contact-title">Got something<br>worth building?</h2>
+
+    <a class="contact__mail" href="mailto:harshchari808@gmail.com" data-email="harshchari808@gmail.com">harshchari808@gmail.com</a>
+
+    <div class="contact__row">
+      <button class="btn btn--pink" type="button" data-copy data-magnetic>Copy email</button>
+      <a class="btn btn--inv" href="https://github.com/Harsh-C-Hari" rel="noopener" target="_blank">GitHub ↗</a>
+      <a class="btn btn--inv" href="https://www.linkedin.com/in/harsh-c-hari" rel="noopener" target="_blank">LinkedIn ↗</a>
+      <a class="btn btn--inv" href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
     </div>
 
-    <div class="grid grid-2" style="align-items: start;">
-      <div>
-        <p class="lede">
-          If you're working on something interesting — or hiring for an internship —
-          I'd love to hear from you.
-        </p>
-        <div class="row" style="margin-top: var(--s-8);">
-          <a class="btn btn-primary" href="mailto:harshchari808@gmail.com">Email me</a>
-          <a class="btn btn-ghost" href="https://github.com/Harsh-C-Hari" rel="noopener" target="_blank">GitHub ↗</a>
-          <a class="btn btn-ghost" href="https://www.linkedin.com/in/harsh-c-hari" rel="noopener"
-            target="_blank">LinkedIn ↗</a>
-        </div>
-      </div>
-    </div>
+    <p class="contact__note">I reply within a day or two. Hiring for an internship, or building something interesting? Write to me.</p>
+    <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
   </div>
 </section>
+
   </main>
 
-    <!-- ============================================================
-     FOOTER
-     ============================================================ -->
-  <footer data-od-id="footer">
-    <div class="footer-inner">
-      <span>© <span id="year">2026</span> Harsh C Hari</span>
-      <span class="mono muted">Kerala, IN · IST</span>
-      <a href="#top" style="color: var(--c-accent); font-family: var(--f-mono); font-size: var(--t-micro);">Back to top ↑</a>
-    </div>
-  </footer>
-  <!-- Animation bundle (GSAP + Lenis, bundled by esbuild) -->
-  <script src="animation.bundle.js" defer></script>
+  <footer class="footer">
+  <div class="footer__inner">
+    <span>© <span id="year">2026</span> Harsh C Hari</span>
+    <span>Kerala, <time data-clock>--:--:--</time> IST</span>
+    <a href="#top" class="footer__top">Back to top</a>
+  </div>
+</footer>
 
+  <script src="animation.bundle.js?v=4901891d" defer></script>
 </body>
 
 </html>

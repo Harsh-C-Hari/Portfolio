@@ -1,37 +1,30 @@
-    <!-- ============================================================
-       ABOUT
-       ============================================================ -->
-    <section data-od-id="about" id="about">
-      <div class="container">
-        <div class="about">
-          <div>
-            <h2>About</h2>
-            <div class="about__photo img-skeleton" style="aspect-ratio: 4 / 5;">
-              <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy"
-                decoding="async">
-            </div>
-          </div>
-          <div>
-            <p>I'm a second-year CSE student who treats personal projects like real systems.
-              I care about how things feel to use and how they behave when they fail. I prefer
-              boring, well-understood tools over novel ones — and reach for new tech only when
-              it actually solves a problem I have.</p>
-            <p>
-              Outside of code: I follow motorsport, run small experiments on the side, and
-              spend more time than I'd like to admit getting the small details right.
-            </p>
+<section class="section about" id="about" aria-labelledby="about-title">
+  <div class="container">
+    <h2 class="title title--sm" id="about-title">About</h2>
 
-            <dl class="about__side" style="margin-top: var(--s-6);">
-              <dt>Based in</dt>
-              <dd>Kerala, India</dd>
-              <dt>Studying</dt>
-              <dd>B.Tech CSE, College of Engineering Chengannur (2025–2029)</dd>
-              <dt>Currently</dt>
-              <dd>Building CEC platform &amp; Cloud Gaming Orchestrator; looking for internships and collabs.</dd>
-              <dt>Open to</dt>
-              <dd>Internships · OSS collabs · Hackathons · Side projects that need an extra engineer</dd>
-            </dl>
-          </div>
-        </div>
+    <p class="about__statement" data-scrub>
+      I'm a second-year CSE student who treats personal projects like real systems. I care about how things
+      feel to use and how they behave when they fail. I prefer boring, well-understood tools, and reach for
+      new tech only when it solves a problem I actually have.
+    </p>
+
+    <div class="about__grid">
+      <figure class="about__photo">
+        <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy" decoding="async">
+      </figure>
+
+      <div class="about__side">
+        <p class="about__note">
+          Outside of code I follow motorsport, run small experiments on the side, and spend more time than
+          I'd like to admit getting the small details right.
+        </p>
+        <dl class="facts">
+          <div><dt>Based in</dt><dd>Kerala, India</dd></div>
+          <div><dt>Studying</dt><dd>B.Tech CSE, College of Engineering Chengannur (2025–2029)</dd></div>
+          <div><dt>Currently</dt><dd>Building the CEC platform and the Cloud Gaming Orchestrator</dd></div>
+          <div><dt>Open to</dt><dd>Internships, OSS collabs, hackathons, and side projects that need an extra engineer</dd></div>
+        </dl>
       </div>
-    </section>
+    </div>
+  </div>
+</section>
