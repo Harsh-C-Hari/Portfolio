@@ -1108,3 +1108,37 @@ ul {
     transition: none;
   }
 }
+
+/* Belt-and-braces: on any device whose primary pointer is coarse
+   (finger touch), force resting styles even if a hybrid device
+   mis-reports hover support, so nothing ever stays "stuck" hovered. */
+@media (hover: none), (pointer: coarse) {
+  .nav__resume:hover {
+    background: transparent;
+    color: inherit;
+  }
+
+  .menu a:hover {
+    color: var(--paper);
+  }
+
+  .btn:hover {
+    transform: none;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .btn--inv:hover {
+    box-shadow: 4px 4px 0 var(--paper);
+  }
+
+  .skill-row:hover {
+    background: transparent;
+    color: inherit;
+    padding-inline: 0;
+  }
+
+  .contact__mail:hover {
+    background-size: 100% 0.06em;
+    background-position: 0 100%;
+  }
+}
