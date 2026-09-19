@@ -43,12 +43,39 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 html {
   scroll-padding-top: var(--nav-h);
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Interactive elements: kill the tap highlight box and long-press
+   selection/callout, but let text remain selectable everywhere else. */
+a,
+button,
+input,
+textarea,
+select,
+label,
+[role="button"],
+[onclick],
+.btn,
+nav *,
+[data-cursor] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+a:focus,
+button:focus,
+[role="button"]:focus {
+  outline: none;
 }
 
 body {
