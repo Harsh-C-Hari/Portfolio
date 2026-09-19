@@ -230,6 +230,14 @@ ul {
     mix-blend-mode: difference;
     pointer-events: none;
     opacity: 0;
+    /* Firefox's WebRender compositor occasionally rasterizes a
+       mix-blend-mode element in screen-space tiles instead of a
+       single GPU layer, which shows up as a faint grid where the
+       tile seams fall — worse over hard edges like button shadows.
+       Forcing a promoted layer keeps it on one stable texture. */
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
