@@ -262,6 +262,7 @@ ul {
   height: 30px;
   background: var(--pink);
   border: var(--line);
+  color: var(--ink);
   font-family: var(--f-display);
   font-size: 18px;
   line-height: 1;
@@ -311,19 +312,26 @@ ul {
 }
 
 .nav__toggle {
+  position: relative;
+  z-index: 3;
   display: grid;
   gap: 7px;
   width: 44px;
   height: 44px;
   place-content: center;
+  color: var(--ink);
+  transition: color 0.3s var(--ease);
 }
 
 .nav__toggle span {
   display: block;
   width: 26px;
   height: 2px;
-  background: var(--ink);
-  transition: transform 0.35s var(--ease);
+  background: currentColor;
+  border-radius: 1px;
+  transform-origin: center;
+  transition: transform 0.45s var(--ease), background-color 0.3s var(--ease);
+  will-change: transform;
 }
 
 .nav.is-open .nav__toggle span:first-child {
@@ -332,6 +340,21 @@ ul {
 
 .nav.is-open .nav__toggle span:last-child {
   transform: translateY(-4.5px) rotate(-45deg);
+}
+
+/* The full-bleed menu paints over the nav bar itself (see .menu comment above),
+   so once it's open the brand + toggle need to flip to light ink to stay visible
+   against the black overlay instead of going dark-on-dark. */
+.nav.is-open .nav__inner {
+  color: var(--paper);
+}
+
+.nav.is-open .nav__toggle {
+  color: var(--paper);
+}
+
+.nav.is-open .nav__mark {
+  color: var(--ink);
 }
 
 .menu {

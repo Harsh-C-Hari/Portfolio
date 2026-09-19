@@ -198,7 +198,15 @@ function runIntro() {
   }
 
   gsap.set(words, { yPercent: 115 });
-  gsap.set(hl, { clipPath: 'inset(-12px 100% -16px -12px)' });
+  // Fully closed clip: matching px units on every side (not a % mix) so the
+  // browser doesn't have to interpolate right from "100%" to a px value later,
+  // which left a permanent sliver open at the box's left edge (the visible
+  // gap is boxWidth - leftInset - rightInset; with leftInset -12px and
+  // rightInset 100%, that's always exactly 12px, letting the "s" peek through
+  // before the reveal). Sizing the closed inset off the element's own
+  // measured width guarantees a true zero/negative gap at any font size.
+  const hlClosedRight = hl ? Math.ceil(hl.getBoundingClientRect().width) + 40 : 0;
+  gsap.set(hl, { clipPath: `inset(-12px ${hlClosedRight}px -16px -12px)` });
   gsap.set(heroBits, { opacity: 0, y: 16 });
 
   const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
