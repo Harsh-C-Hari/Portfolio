@@ -59,7 +59,11 @@ function scrollToTarget(hash) {
   }
   const el = $(hash);
   if (!el) return;
-  if (lenis) lenis.scrollTo(el, { offset: -navH() + 1, duration: 1.2 });
+  // No manual nav-height offset here: Lenis reads `scroll-padding-top` off
+  // <html> itself (see styles.css) and already subtracts it internally, so
+  // adding navH() again on top of that was double-compensating and landing
+  // sections ~68px past their real start.
+  if (lenis) lenis.scrollTo(el, { duration: 1.2 });
   else el.scrollIntoView({ block: 'start' });
 }
 
