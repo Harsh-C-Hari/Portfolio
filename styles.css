@@ -1052,6 +1052,20 @@ ul {
   box-shadow: 4px 4px 0 var(--paper);
 }
 
+/* Higher specificity than the resting rule above, so the pressed/hover
+   look always wins the cascade here instead of being silently
+   overridden back to the resting paper shadow. */
+.contact .btn--pink:hover,
+.contact .btn--pink.is-pressed {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--paper);
+}
+
+.contact .btn--pink:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--paper);
+}
+
 .contact__note {
   max-width: 48ch;
   margin-top: 40px;
@@ -1148,9 +1162,10 @@ ul {
 
   /* Copy email: native touch-hover is unreliable/sticky here — the
      .is-pressed class (driven by pointer events) is the source of
-     truth for the pressed look on coarse-pointer devices instead. */
-  [data-copy]:hover {
+     truth for the pressed look on coarse-pointer devices instead.
+     Scoped to match/beat .contact .btn--pink:hover's specificity. */
+  .contact .btn--pink:hover {
     transform: none;
-    box-shadow: 4px 4px 0 var(--ink);
+    box-shadow: 4px 4px 0 var(--paper);
   }
 }
