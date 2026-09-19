@@ -336,6 +336,17 @@ if (copyBtn && mail) {
       if (copyStatus) copyStatus.textContent = '';
     }, 1800);
   });
+
+  // The pressed-in look is meant to stay visible on tap, but native
+  // touch ":hover" can get stuck on until the next tap elsewhere on
+  // the page. Drive it with pointer events instead, so it always
+  // releases cleanly on lift/cancel — on every input type.
+  const press = () => copyBtn.classList.add('is-pressed');
+  const release = () => copyBtn.classList.remove('is-pressed');
+  copyBtn.addEventListener('pointerdown', press);
+  copyBtn.addEventListener('pointerup', release);
+  copyBtn.addEventListener('pointercancel', release);
+  copyBtn.addEventListener('pointerleave', release);
 }
 
 /* ------------------------------------------------------------

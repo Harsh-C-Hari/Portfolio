@@ -482,9 +482,13 @@ ul {
   }
 }
 
-/* Copy email button: keep the pressed-in hover look on every device
-   (touch included) — it doubles as visible tap feedback here. */
-[data-copy]:hover {
+/* Copy email button: keep the pressed-in hover look on every device.
+   Desktop/trackpad gets it from real :hover (safe — mouseleave always
+   fires). Touch gets it from the .is-pressed class toggled by pointer
+   events in animation.js, which always releases on lift/cancel and
+   never sticks the way touch-simulated :hover can. */
+[data-copy]:hover,
+[data-copy].is-pressed {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--ink);
 }
@@ -1140,5 +1144,13 @@ ul {
   .contact__mail:hover {
     background-size: 100% 0.06em;
     background-position: 0 100%;
+  }
+
+  /* Copy email: native touch-hover is unreliable/sticky here — the
+     .is-pressed class (driven by pointer events) is the source of
+     truth for the pressed look on coarse-pointer devices instead. */
+  [data-copy]:hover {
+    transform: none;
+    box-shadow: 4px 4px 0 var(--ink);
   }
 }
