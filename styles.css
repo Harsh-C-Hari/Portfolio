@@ -333,9 +333,11 @@ ul {
   transition: background-color 0.2s, color 0.2s;
 }
 
-.nav__resume:hover {
-  background: var(--ink);
-  color: var(--paper);
+@media (hover: hover) and (pointer: fine) {
+  .nav__resume:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
 }
 
 .nav__toggle {
@@ -408,9 +410,14 @@ ul {
   color: var(--paper);
 }
 
-.menu a:hover,
 .menu a:focus-visible {
   color: var(--pink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .menu a:hover {
+    color: var(--pink);
+  }
 }
 
 @media (min-width: 900px) {
@@ -447,11 +454,6 @@ ul {
   transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease), background-color 0.18s;
 }
 
-.btn:hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
 .btn:active {
   transform: translate(4px, 4px);
   box-shadow: 0 0 0 var(--ink);
@@ -468,8 +470,23 @@ ul {
   box-shadow: 4px 4px 0 var(--paper);
 }
 
-.btn--inv:hover {
-  box-shadow: 2px 2px 0 var(--paper);
+/* Hover pressed-in effect: mouse/trackpad devices only, for buttons in general */
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .btn--inv:hover {
+    box-shadow: 2px 2px 0 var(--paper);
+  }
+}
+
+/* Copy email button: keep the pressed-in hover look on every device
+   (touch included) — it doubles as visible tap feedback here. */
+[data-copy]:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
 }
 
 /* ============================================================
@@ -963,7 +980,9 @@ ul {
   .skill-row {
     grid-template-columns: minmax(200px, 3fr) 9fr;
   }
+}
 
+@media (min-width: 800px) and (hover: hover) and (pointer: fine) {
   .skill-row:hover {
     background: var(--ink);
     color: var(--paper);
@@ -1005,9 +1024,11 @@ ul {
   word-break: break-all;
 }
 
-.contact__mail:hover {
-  background-size: 0% 0.06em;
-  background-position: 100% 100%;
+@media (hover: hover) and (pointer: fine) {
+  .contact__mail:hover {
+    background-size: 0% 0.06em;
+    background-position: 100% 100%;
+  }
 }
 
 .contact .btn:focus-visible,
