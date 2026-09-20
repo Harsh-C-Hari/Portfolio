@@ -382,8 +382,21 @@ if (finePointer && !reduceMotion) {
     ry(e.clientY);
   });
   document.addEventListener('mouseover', (e) => {
+    // Enlarging via `scale` puts a transform on the same element as
+    // mix-blend-mode, which is exactly what triggers Firefox's
+    // quadrant-seam compositor bug on the blended circle. Resizing
+    // via width/height instead keeps `transform` doing translation
+    // only, which Firefox composites as a single stable layer.
     const hot = e.target.closest('a, button, .frame');
-    gsap.to(ring, { scale: hot ? 1.9 : 1, duration: 0.3, ease: 'power3.out' });
+    const size = hot ? 68.4 : 36;
+    gsap.to(ring, {
+      width: size,
+      height: size,
+      marginTop: -size / 2,
+      marginLeft: -size / 2,
+      duration: 0.3,
+      ease: 'power3.out',
+    });
   });
   document.addEventListener('mouseleave', () => gsap.to(ring, { opacity: 0, duration: 0.2 }));
 }
