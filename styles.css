@@ -738,7 +738,12 @@ ul {
   padding: clamp(20px, 3vw, 40px);
   background: var(--card);
   border: var(--line);
-  box-shadow: 8px 8px 0 var(--ink);
+  /* filter: drop-shadow (not box-shadow) on purpose: identical look
+     for a square-cornered, opaque card, but Firefox renders filters
+     on one isolated compositor surface instead of re-tiling a
+     box-shadow rectangle every frame of the scroll-scrubbed scale
+     animation below — that re-tiling is what showed as a grid. */
+  filter: drop-shadow(8px 8px 0 var(--ink));
   transform-origin: 50% 0;
 }
 
@@ -868,6 +873,15 @@ ul {
   .project {
     position: sticky;
     top: var(--top);
+  }
+
+  /* The stacking effect continuously scales .project__card while
+     scrolling (scroll-scrubbed, not hover-driven). Layer promotion
+     as extra insurance alongside the drop-shadow fix above. */
+  .project__card {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 }
 
