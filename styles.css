@@ -72,9 +72,11 @@ nav *,
   -webkit-user-select: none;
   user-select: none;
 }
-a:focus,
-button:focus,
-[role="button"]:focus {
+/* Hide the ring only when focus did NOT come from the keyboard (tap / click).
+   Plain `a:focus` here would out-rank :focus-visible and strip it for keyboard users too. */
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -87,6 +89,16 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
+
+/* overflow-x:hidden on <body> makes the body its own scroll container, which silently breaks
+   position:sticky for everything inside it (the project-card stacking). `clip` hides the same
+   horizontal overflow without creating a scroll container. */
+@supports (overflow: clip) {
+  body {
+    overflow-x: clip;
+  }
+}
+
 
 img,
 svg {
@@ -723,9 +735,14 @@ ul {
   padding-top: clamp(64px, 8vw, 112px);
 }
 
+/* Block flow, not grid: a sticky item is confined to its own grid area, so in a grid each
+   card could never stick past its row and the stacking would silently do nothing. */
 .work__stack {
-  display: grid;
-  gap: clamp(32px, 6vw, 80px);
+  display: block;
+}
+
+.project + .project {
+  margin-top: clamp(32px, 6vw, 80px);
 }
 
 .project {
@@ -868,9 +885,11 @@ ul {
   }
 }
 
-/* Sticky stacking only where the card can fit on screen */
-@media (min-width: 900px) and (min-height: 700px) {
-  .project {
+/* Sticky stacking. animation.js adds .is-stacking only when every card is short enough
+   to be fully visible while stuck (measured, so it holds at any screen size). Otherwise the
+   cards simply scroll past normally instead of having their buttons cut off. */
+@media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .work__stack.is-stacking .project {
     position: sticky;
     top: var(--top);
   }
@@ -878,7 +897,7 @@ ul {
   /* The stacking effect continuously scales .project__card while
      scrolling (scroll-scrubbed, not hover-driven). Layer promotion
      as extra insurance alongside the drop-shadow fix above. */
-  .project__card {
+  .work__stack.is-stacking .project__card {
     will-change: transform;
     transform: translateZ(0);
     backface-visibility: hidden;

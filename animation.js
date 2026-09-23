@@ -262,31 +262,66 @@ if (track && !reduceMotion) {
 /* ------------------------------------------------------------
    Work: cards stack, previous one recedes as the next covers it
    ------------------------------------------------------------ */
-const mm = gsap.matchMedia();
-mm.add('(min-width: 900px) and (min-height: 700px) and (prefers-reduced-motion: no-preference)', () => {
+const stackEl = $('.work__stack');
+const stackMQ = window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
+let stackTweens = [];
+
+function teardownStack() {
+  stackTweens.forEach((t) => {
+    if (t.scrollTrigger) t.scrollTrigger.kill();
+    t.kill();
+  });
+  stackTweens = [];
+  if (stackEl) stackEl.classList.remove('is-stacking');
+  gsap.set($$('.project__card'), { clearProps: 'transform,scale' });
+}
+
+// Cards only stick if EVERY card is fully visible while stuck (nav + its stagger offset + a small
+// margin). On shorter screens (e.g. 1280x720) they scroll normally instead of being cut off.
+function setupStack() {
+  teardownStack();
+  if (!stackEl || !stackMQ.matches) return;
   const projects = $$('.project');
+  const fits = projects.every((p, i) => {
+    const card = $('.project__card', p);
+    return card.offsetHeight + navH() + 20 + i * 16 + 12 <= window.innerHeight;
+  });
+  if (!fits) return;
+
+  stackEl.classList.add('is-stacking');
   projects.forEach((p, i) => {
     const next = projects[i + 1];
     if (!next) return;
-    gsap.to($('.project__card', p), {
-      scale: 0.94,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: next,
-        start: () => `top ${Math.round(window.innerHeight * 0.9)}`,
-        end: () => `top ${navH() + 20 + (i + 1) * 16}`,
-        scrub: true,
-      },
-    });
+    stackTweens.push(
+      gsap.to($('.project__card', p), {
+        scale: 0.94,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: next,
+          start: () => `top ${Math.round(window.innerHeight * 0.9)}`,
+          end: () => `top ${navH() + 20 + (i + 1) * 16}`,
+          scrub: true,
+        },
+      })
+    );
   });
+}
+setupStack();
+let stackResizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(stackResizeTimer);
+  stackResizeTimer = setTimeout(setupStack, 200);
 });
+stackMQ.addEventListener('change', setupStack);
 
 /* ------------------------------------------------------------
    About: statement fills in as you read
    ------------------------------------------------------------ */
 const statement = $('[data-scrub]');
 if (statement && !reduceMotion) {
-  const split = SplitText.create(statement, { type: 'words,chars', charsClass: 'char' });
+  // aria: 'none' -> SplitText adds no aria-label (invalid on a <p>). Screen readers get the
+  // sr-only copy in the markup; this animated copy is aria-hidden.
+  const split = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
   gsap.fromTo(
     split.chars,
     { opacity: 0.16 },
@@ -295,7 +330,7 @@ if (statement && !reduceMotion) {
       ease: 'none',
       stagger: 0.5,
       scrollTrigger: {
-        trigger: statement,
+        trigger: statement.closest('.about__statement'),
         start: 'top 82%',
         end: 'bottom 55%',
         scrub: 0.4,
@@ -404,5 +439,12 @@ if (finePointer && !reduceMotion) {
 /* ------------------------------------------------------------
    Layout settles after webfonts + images
    ------------------------------------------------------------ */
-document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
-window.addEventListener('load', () => ScrollTrigger.refresh());
+// Card heights depend on the webfonts, so re-decide whether the cards can stack once they are in.
+document.fonts && document.fonts.ready.then(() => {
+  setupStack();
+  ScrollTrigger.refresh();
+});
+window.addEventListener('load', () => {
+  setupStack();
+  ScrollTrigger.refresh();
+});
