@@ -3,7 +3,8 @@
 // Motion budget, on purpose:
 //   1. One page-load sequence: counter loader -> hero words rise -> highlighter wipes in.
 //   2. Project cards stack as you scroll (CSS sticky + a small scale-back).
-//   3. The About statement fills in letter by letter as you read it.
+//   3. The About statement fills in letter by letter while the page holds still (pinned);
+//      it releases the moment the last letter is lit.
 //   Everything else answers an action (hover, click, scroll direction).
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -59,6 +60,11 @@ function scrollToTarget(hash) {
   }
   const el = $(hash);
   if (!el) return;
+  // About pins the page while its text fills in; land right where that begins.
+  if (hash === '#about' && aboutST && lenis) {
+    lenis.scrollTo(aboutST.start, { duration: 1.2 });
+    return;
+  }
   // No manual nav-height offset here: Lenis reads `scroll-padding-top` off
   // <html> itself (see styles.css) and already subtracts it internally, so
   // adding navH() again on top of that was double-compensating and landing
@@ -315,28 +321,96 @@ window.addEventListener('resize', () => {
 stackMQ.addEventListener('change', setupStack);
 
 /* ------------------------------------------------------------
-   About: statement fills in as you read
+   About: the page holds still while the statement fills in
    ------------------------------------------------------------ */
+// The heading + statement pin to the middle of the screen and scrolling "spends" itself on
+// highlighting the text, letter by letter. The moment the last letter is lit the pin lets go and
+// the page carries on down. If the block can't fit on screen (very short landscape phones) it
+// falls back to a plain scrubbed fill with no pin, so nothing is ever cut off or trapped.
+const aboutLead = $('.about__lead');
 const statement = $('[data-scrub]');
-if (statement && !reduceMotion) {
+let aboutST = null;
+
+if (aboutLead && statement && !reduceMotion) {
   // aria: 'none' -> SplitText adds no aria-label (invalid on a <p>). Screen readers get the
   // sr-only copy in the markup; this animated copy is aria-hidden.
   const split = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
-  gsap.fromTo(
-    split.chars,
-    { opacity: 0.16 },
-    {
-      opacity: 1,
-      ease: 'none',
-      stagger: 0.5,
-      scrollTrigger: {
-        trigger: statement.closest('.about__statement'),
-        start: 'top 82%',
-        end: 'bottom 55%',
-        scrub: 0.4,
-      },
+  let aboutTL = null;
+  let aboutW = 0;
+
+  const teardownAbout = () => {
+    if (aboutTL) {
+      if (aboutTL.scrollTrigger) aboutTL.scrollTrigger.kill(true); // true -> also removes the pin spacer
+      aboutTL.kill();
     }
-  );
+    aboutTL = null;
+    aboutST = null;
+    gsap.set(split.chars, { opacity: 0.16 });
+  };
+
+  const setupAbout = () => {
+    teardownAbout();
+    aboutW = window.innerWidth;
+
+    // Pin only if heading + statement fit under the nav with a little air.
+    const pinned = aboutLead.offsetHeight + navH() + 32 <= window.innerHeight;
+    // Scroll "budget" for the fill: long enough to read at a calm pace, short enough not to nag.
+    const distance = () => Math.round(Math.max(window.innerHeight * 1.4, 800));
+
+    aboutTL = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: pinned
+        ? {
+            trigger: aboutLead,
+            start: () => `center ${Math.round(window.innerHeight / 2 + navH() / 2)}px`,
+            end: () => `+=${distance()}`,
+            pin: true,
+            scrub: 0.4,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          }
+        : {
+            trigger: statement.closest('.about__statement'),
+            start: 'top 82%',
+            end: 'bottom 55%',
+            scrub: 0.4,
+          },
+    });
+
+    // Letters light up across the first ~90% of the pinned distance; the last ~10% is a short
+    // hold so the finished sentence is readable for a beat before the page is released.
+    aboutTL.fromTo(
+      split.chars,
+      { opacity: 0.16 },
+      { opacity: 1, duration: 0.06, stagger: { amount: 0.9 } }
+    );
+    aboutTL.to({}, { duration: pinned ? 0.1 : 0.001 });
+
+    aboutST = aboutTL.scrollTrigger;
+  };
+
+  setupAbout();
+
+  // Rebuild only when the width changes (rotation, window resize). Height-only resizes, like a
+  // mobile browser's address bar sliding away, must not rebuild a pin mid-scroll.
+  let aboutResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(aboutResizeTimer);
+    aboutResizeTimer = setTimeout(() => {
+      if (window.innerWidth !== aboutW) {
+        setupAbout();
+        ScrollTrigger.refresh();
+      }
+    }, 200);
+  });
+
+  // The block's height depends on the webfonts, so re-decide whether it fits once they are in.
+  const resetAbout = () => {
+    setupAbout();
+    ScrollTrigger.refresh();
+  };
+  document.fonts && document.fonts.ready.then(resetAbout);
+  window.addEventListener('load', resetAbout);
 }
 
 /* ------------------------------------------------------------
