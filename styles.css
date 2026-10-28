@@ -1210,3 +1210,44 @@ ul {
     box-shadow: 4px 4px 0 var(--paper);
   }
 }
+
+/* ============================================================
+   Page transition cover  (.pt)
+   Two full-screen layers that rise on leave and lift on arrive.
+   Phase 1: structural CSS only. Phase 2 adds the JS animation.
+   ============================================================ */
+.pt {
+  position: fixed;
+  inset: 0;
+  z-index: 9999; /* above nav (100), cursor (200), loader (300), progress (150) */
+  pointer-events: none;
+}
+
+/* Both layers off-screen by default (slid below the viewport) */
+.pt__pink,
+.pt__ink {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+  will-change: transform;
+}
+
+.pt__pink { background: var(--pink); }
+.pt__ink  { background: var(--ink);  }
+
+/* When arriving via a page transition: show the cover immediately
+   (set by the inline head script before CSS loads) so there is
+   no flash of the new page's content before the cover lifts. */
+html.pt-enter .pt {
+  pointer-events: auto;
+}
+html.pt-enter .pt__pink,
+html.pt-enter .pt__ink {
+  transform: translateY(0);
+}
+
+/* Suppress the intro loader when arriving via page transition
+   (the cover itself serves as the entry animation) */
+html.pt-enter .loader {
+  display: none;
+}

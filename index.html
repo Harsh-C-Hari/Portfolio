@@ -2,6 +2,10 @@
 <html lang="en">
 
 <head>
+  <!-- Page transition: if sessionStorage flag is set, add pt-enter before CSS loads
+       so the cover is already on-screen at first paint (no flash of new page content). -->
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
@@ -13,11 +17,11 @@
   <!-- Marks the page as JS-capable before first paint so CSS can safely stage intro states -->
   <script>document.documentElement.classList.add('js');</script>
 
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +50,7 @@
   <meta name="twitter:image" content="https://harshchari.vercel.app/og-image-2.jpg">
   <meta name="twitter:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
 
-  <link rel="stylesheet" href="styles.css?v=70e5a81b">
+  <link rel="stylesheet" href="/styles.css?v=f536da55">
 </head>
 
 <body>
@@ -62,7 +66,7 @@
 
   <header class="nav" data-nav>
   <div class="nav__inner">
-    <a href="#top" class="nav__brand">Harsh C Hari</a>
+    <a href="/" class="nav__brand">Harsh C Hari</a>
 
     <nav class="nav__links" aria-label="Primary">
       <span class="nav__indicator" aria-hidden="true"></span>
@@ -87,6 +91,11 @@
     <a href="/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
   </div>
 </header>
+  <!-- Page transition cover — two full-screen layers that rise on leave and lift on arrive.
+     aria-hidden: this is purely visual, screen readers should not interact with it.
+     Markup only in Phase 1; JS wiring in Phase 2. -->
+<div class="pt" aria-hidden="true"><i class="pt__pink"></i><i class="pt__ink"></i></div>
+
   <main id="main-content">
 
     <section class="hero" id="hero">
@@ -173,7 +182,7 @@
         <figure class="project__shot">
           <div class="frame">
             <div class="frame__bar"><i></i><i></i><i></i><span>Control plane</span></div>
-            <img src="admin_home_page.webp" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1919" height="942" loading="lazy" decoding="async">
+            <img src="/admin_home_page.webp" alt="Personal Cloud Gaming Orchestrator control plane UI" width="1919" height="942" loading="lazy" decoding="async">
           </div>
         </figure>
       </div>
@@ -203,7 +212,7 @@
         <figure class="project__shot">
           <div class="frame">
             <div class="frame__bar"><i></i><i></i><i></i><span>Productivity Dashboard</span></div>
-            <img src="image-prodash.webp" alt="Productivity Dashboard interface" width="1919" height="936" loading="lazy" decoding="async">
+            <img src="/image-prodash.webp" alt="Productivity Dashboard interface" width="1919" height="936" loading="lazy" decoding="async">
           </div>
         </figure>
       </div>
@@ -232,7 +241,7 @@
         <figure class="project__shot">
           <div class="frame">
             <div class="frame__bar"><i></i><i></i><i></i><span>Smart campus platform</span></div>
-            <img src="image-2.webp" alt="Smart Campus Platform, Future of CEC" width="1919" height="938" loading="lazy" decoding="async">
+            <img src="/image-2.webp" alt="Smart Campus Platform, Future of CEC" width="1919" height="938" loading="lazy" decoding="async">
           </div>
         </figure>
       </div>
@@ -260,7 +269,7 @@
         <figure class="project__shot">
           <div class="frame">
             <div class="frame__bar"><i></i><i></i><i></i><span>Smart Farming Dashboard</span></div>
-            <img src="image-1.webp" alt="Smart Farming Dashboard analytics view" width="1280" height="668" loading="lazy" decoding="async">
+            <img src="/image-1.webp" alt="Smart Farming Dashboard analytics view" width="1280" height="668" loading="lazy" decoding="async">
           </div>
         </figure>
       </div>
@@ -282,7 +291,7 @@
 
     <div class="about__grid">
       <figure class="about__photo">
-        <img src="harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy" decoding="async">
+        <img src="/harsh-portrait.webp" alt="Harsh C Hari" width="900" height="1117" loading="lazy" decoding="async">
       </figure>
 
       <div class="about__side">
@@ -370,7 +379,7 @@
   </div>
 </footer>
 
-  <script src="animation.bundle.js?v=4c0c8d2f" defer></script>
+  <script src="/animation.bundle.js?v=c6497e9b" defer></script>
 </body>
 
 </html>

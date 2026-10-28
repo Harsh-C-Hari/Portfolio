@@ -12,7 +12,7 @@
         { "label": "Role", "value": "Design & full-stack build" },
         { "label": "Status", "value": "v0.1 live · Phase 26 next" },
         { "label": "API routes", "value": "74" },
-        { "label": "Year", "value": "CONFIRM_WITH_HARSH" }
+        { "label": "Year", "value": "2026" }
       ],
       "stack": ["React", "Vite", "FastAPI", "Python", "SQLite", "WebSockets", "JWT", "Sunshine", "Tailscale"],
       "thumb": { "src": "/admin_home_page.webp", "alt": "PCGO admin dashboard home page", "width": 1919, "height": 942 },
@@ -32,7 +32,7 @@
         { "label": "Role", "value": "Design & full-stack build" },
         { "label": "REST endpoints", "value": "226" },
         { "label": "Database tables", "value": "36" },
-        { "label": "Year", "value": "CONFIRM_WITH_HARSH" }
+        { "label": "Year", "value": "2026" }
       ],
       "stack": ["React", "TypeScript", "FastAPI", "SQLAlchemy", "PostgreSQL", "JWT", "Tailwind", "Web Push", "Vercel"],
       "thumb": { "src": "/image-prodash.webp", "alt": "Productivity Dashboard task and study view", "width": 1919, "height": 936 },

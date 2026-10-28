@@ -1,52 +1,109 @@
 // Assembles index.html from src/layout.html + src/partials/*.html,
 // then bundles animation.js -> animation.bundle.js via esbuild.
+// Also generates case-study pages from layout-page.html + src/projects/*.html.
+//
+// Template variables available in any included partial or layout:
+//   {{home}}  - empty string on home page, "/" on every sub-page
+//   {{base}}  - always "/" (for root-absolute assets)
 //
 // Usage: node build.js
+//        BUILD_STRICT=1 node build.js   <- fails on any CONFIRM_WITH_HARSH
 'use strict';
 
-const fs = require('fs');
+const fs   = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const ROOT = __dirname;
-const LAYOUT_PATH = path.join(ROOT, 'src', 'layout.html');
-const OUTPUT_PATH = path.join(ROOT, 'index.html');
+const ROOT        = __dirname;
+const LAYOUT_HOME = path.join(ROOT, 'src', 'layout.html');
+const LAYOUT_PAGE = path.join(ROOT, 'src', 'layout-page.html');
+const OUTPUT_HOME = path.join(ROOT, 'index.html');
+const DATA_PROJECTS = path.join(ROOT, 'data', 'projects.json');
 
-const INCLUDE_RE = /<!-- include:(\S+?\.html) -->\r?\n/g;
+const INCLUDE_RE  = /<!-- include:(\S+?\.html) -->\r?\n/g;
+const VAR_RE      = /\{\{(\w+)\}\}/g;
 
-// styles.css and animation.bundle.js are served with a one-year immutable cache
-// (see vercel.json), so their URLs must change whenever their content does.
+const STRICT = process.env.BUILD_STRICT === '1';
+
+// Collect warnings across the build; printed at the end.
+const warnings = [];
+
+/* ----------------------------------------------------------------
+   Helpers
+   ---------------------------------------------------------------- */
+
 function versionOf(file) {
   const p = path.join(ROOT, file);
   if (!fs.existsSync(p)) return '0';
   return crypto.createHash('md5').update(fs.readFileSync(p)).digest('hex').slice(0, 8);
 }
 
-function assembleHTML() {
-  const layout = fs.readFileSync(LAYOUT_PATH, 'utf8');
-
-  let assembled = layout.replace(INCLUDE_RE, (match, relPath) => {
-    const partialPath = path.join(ROOT, relPath);
-    if (!fs.existsSync(partialPath)) {
-      throw new Error(`Partial not found: ${partialPath}`);
-    }
-    return fs.readFileSync(partialPath, 'utf8');
+/**
+ * Replace <!-- include:path --> directives, recursively, then substitute
+ * {{variable}} placeholders from the given vars map.
+ */
+function assemble(templatePath, vars = {}) {
+  const raw = fs.readFileSync(templatePath, 'utf8');
+  // Replace includes
+  let html = raw.replace(INCLUDE_RE, (match, relPath) => {
+    const abs = path.join(ROOT, relPath);
+    if (!fs.existsSync(abs)) throw new Error(`Partial not found: ${abs}`);
+    return fs.readFileSync(abs, 'utf8');
   });
-
-  assembled = assembled
-    .replace('href="styles.css"', `href="styles.css?v=${versionOf('styles.css')}"`)
-    .replace('src="animation.bundle.js"', `src="animation.bundle.js?v=${versionOf('animation.bundle.js')}"`);
-
-  fs.writeFileSync(OUTPUT_PATH, assembled, 'utf8');
-  console.log(`Built ${OUTPUT_PATH} (${Buffer.byteLength(assembled, 'utf8')} bytes)`);
+  // Replace variables
+  html = html.replace(VAR_RE, (_, name) => {
+    if (name in vars) return vars[name];
+    return `{{${name}}}`; // leave unknown vars as-is (don't swallow them)
+  });
+  return html;
 }
 
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function writeFile(filePath, content) {
+  ensureDir(path.dirname(filePath));
+  fs.writeFileSync(filePath, content, 'utf8');
+}
+
+/* ----------------------------------------------------------------
+   Load and validate projects.json
+   ---------------------------------------------------------------- */
+function loadProjects() {
+  if (!fs.existsSync(DATA_PROJECTS)) {
+    console.warn('[build] WARNING: data/projects.json not found — skipping project data');
+    return [];
+  }
+  const raw = JSON.parse(fs.readFileSync(DATA_PROJECTS, 'utf8'));
+  const projects = raw.projects || [];
+
+  projects.forEach((p) => {
+    // Warn on any CONFIRM_WITH_HARSH value anywhere in the project object
+    const scan = (obj, path2) => {
+      if (typeof obj === 'string' && obj.includes('CONFIRM_WITH_HARSH')) {
+        const msg = `[CONFIRM_WITH_HARSH] ${path2}: "${obj}"`;
+        warnings.push(msg);
+        console.warn('\x1b[33m%s\x1b[0m', `⚠  ${msg}`);
+      } else if (Array.isArray(obj)) {
+        obj.forEach((item, i) => scan(item, `${path2}[${i}]`));
+      } else if (obj && typeof obj === 'object') {
+        Object.entries(obj).forEach(([k, v]) => scan(v, `${path2}.${k}`));
+      }
+    };
+    scan(p, `projects[${p.slug}]`);
+  });
+
+  return projects;
+}
+
+/* ----------------------------------------------------------------
+   JS bundle
+   ---------------------------------------------------------------- */
 async function bundleJS() {
-  // esbuild bundles animation.js (with GSAP + Lenis imports) into one file.
-  // Falls back gracefully if animation.js doesn't exist yet (Phase 1 bootstrap).
   const animSrc = path.join(ROOT, 'animation.js');
   if (!fs.existsSync(animSrc)) {
-    console.log('animation.js not found — skipping JS bundle (run again after Phase 3)');
+    console.log('animation.js not found — skipping JS bundle');
     return;
   }
   try {
@@ -66,9 +123,117 @@ async function bundleJS() {
   }
 }
 
+/* ----------------------------------------------------------------
+   Home page (index.html)
+   ---------------------------------------------------------------- */
+function buildHome(projects) {
+  const vars = {
+    home: '',   // on home, hash links are just #section
+    base: '/',
+  };
+
+  let html = assemble(LAYOUT_HOME, vars);
+
+  // Cache-bust versioned assets
+  html = html
+    .replace('href="styles.css"',         `href="styles.css?v=${versionOf('styles.css')}"`)
+    .replace('href="/styles.css"',        `href="/styles.css?v=${versionOf('styles.css')}"`)
+    .replace('src="animation.bundle.js"', `src="animation.bundle.js?v=${versionOf('animation.bundle.js')}"`)
+    .replace('src="/animation.bundle.js"',`src="/animation.bundle.js?v=${versionOf('animation.bundle.js')}"`);
+
+  writeFile(OUTPUT_HOME, html);
+  console.log(`Built ${OUTPUT_HOME} (${Buffer.byteLength(html, 'utf8')} bytes)`);
+  return html;
+}
+
+/* ----------------------------------------------------------------
+   Case-study pages  (/work/<slug>/index.html)
+   ---------------------------------------------------------------- */
+function buildCasePages(projects) {
+  // Derive site origin from the canonical tag in layout.html
+  const layoutSrc  = fs.readFileSync(LAYOUT_HOME, 'utf8');
+  const originMatch = layoutSrc.match(/rel="canonical"\s+href="(https?:\/\/[^/"]+)/);
+  const origin      = originMatch ? originMatch[1] : 'https://harshchari.vercel.app';
+
+  if (!fs.existsSync(LAYOUT_PAGE)) {
+    console.log('[build] layout-page.html not found — skipping case pages (Phase 1 placeholder)');
+    return;
+  }
+
+  const pagesBuilt = [];
+
+  projects.forEach((project) => {
+    if (!project.page) return; // no case page for this project
+
+    const slug    = project.slug;
+    const bodyPath = path.join(ROOT, 'src', 'projects', `${slug}.html`);
+    if (!fs.existsSync(bodyPath)) {
+      console.log(`[build] src/projects/${slug}.html not found — skipping /work/${slug}`);
+      return;
+    }
+
+    const pageHref   = `${origin}/work/${slug}`;
+    const ogImage    = `${origin}/img/work/${slug}/og.jpg`;
+    const title      = project.page?.title || `${project.title}: case study | Harsh C Hari`;
+    const desc       = project.page?.description || project.summary || '';
+    const bodyHtml   = fs.readFileSync(bodyPath, 'utf8');
+
+    const vars = {
+      home:            '/',
+      base:            '/',
+      page_title:      title,
+      page_description: desc,
+      page_canonical:  pageHref,
+      page_og_image:   ogImage,
+      page_slug:       slug,
+      page_body:       bodyHtml,
+      css_version:     versionOf('styles.css'),
+      js_version:      versionOf('animation.bundle.js'),
+    };
+
+    let html = assemble(LAYOUT_PAGE, vars);
+
+    const outPath = path.join(ROOT, 'work', slug, 'index.html');
+    writeFile(outPath, html);
+    pagesBuilt.push(`/work/${slug}`);
+    console.log(`Built /work/${slug} (${Buffer.byteLength(html, 'utf8')} bytes)`);
+  });
+
+  return pagesBuilt;
+}
+
+/* ----------------------------------------------------------------
+   Summary / strict mode
+   ---------------------------------------------------------------- */
+function printSummary(pagesBuilt = []) {
+  console.log('\n── Build summary ─────────────────────────────');
+  console.log(`  Home page:   index.html`);
+  if (pagesBuilt.length) {
+    pagesBuilt.forEach((p) => console.log(`  Case page:   ${p}`));
+  }
+  if (warnings.length) {
+    console.log(`\n  ⚠  ${warnings.length} CONFIRM_WITH_HARSH warning(s):`);
+    warnings.forEach((w) => console.log(`     ${w}`));
+  } else {
+    console.log('  ✓  No CONFIRM_WITH_HARSH warnings');
+  }
+  console.log('──────────────────────────────────────────────\n');
+
+  if (STRICT && warnings.length) {
+    console.error('[BUILD_STRICT] Build failed: unresolved CONFIRM_WITH_HARSH values.');
+    process.exit(1);
+  }
+}
+
+/* ----------------------------------------------------------------
+   Main
+   ---------------------------------------------------------------- */
 async function build() {
-  await bundleJS(); // first, so the HTML can reference the bundle's content hash
-  assembleHTML();
+  const projects   = loadProjects();
+  await bundleJS();           // JS first so HTML can hash the bundle
+  buildHome(projects);
+  const pagesBuilt = buildCasePages(projects) || [];
+  printSummary(pagesBuilt);
 }
 
 if (require.main === module) {

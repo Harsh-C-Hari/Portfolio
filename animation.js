@@ -1,10 +1,11 @@
 // Motion layer. Bundled by build.js (esbuild) into animation.bundle.js.
+// Runs on every page. Every feature early-returns when its required element
+// is absent, so sub-pages (case studies, docs) don't throw.
 //
-// Motion budget, on purpose:
+// Motion budget:
 //   1. One page-load sequence: counter loader -> hero words rise -> highlighter wipes in.
-//   2. Project cards stack as you scroll (CSS sticky + a small scale-back).
-//   3. The About statement fills in letter by letter while the page holds still (pinned);
-//      it releases the moment the last letter is lit.
+//   2. Project cards stack as you scroll (CSS sticky + scale-back). HOME ONLY.
+//   3. The About statement fills in letter by letter while the page holds still (pinned). HOME ONLY.
 //   Everything else answers an action (hover, click, scroll direction).
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -17,7 +18,14 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const finePointer  = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const isHome       = !document.documentElement.dataset.page; // layout-page.html sets data-page
+
+/* ------------------------------------------------------------
+   Set intro-seen flag on every page so the loader is skipped
+   if the visitor lands on a case page first, then goes home.
+   ------------------------------------------------------------ */
+try { sessionStorage.setItem('intro-seen', '1'); } catch (e) { /* private browsing */ }
 
 /* ------------------------------------------------------------
    Live IST clock (hero + footer)
@@ -30,12 +38,14 @@ const clockFmt = new Intl.DateTimeFormat('en-GB', {
   second: '2-digit',
 });
 const clocks = $$('[data-clock]');
-const tickClock = () => {
-  const t = clockFmt.format(new Date());
-  clocks.forEach((el) => (el.textContent = t));
-};
-tickClock();
-setInterval(tickClock, 1000);
+if (clocks.length) {
+  const tickClock = () => {
+    const t = clockFmt.format(new Date());
+    clocks.forEach((el) => (el.textContent = t));
+  };
+  tickClock();
+  setInterval(tickClock, 1000);
+}
 
 const year = $('#year');
 if (year) year.textContent = new Date().getFullYear();
@@ -65,10 +75,6 @@ function scrollToTarget(hash) {
     lenis.scrollTo(aboutST.start, { duration: 1.2 });
     return;
   }
-  // No manual nav-height offset here: Lenis reads `scroll-padding-top` off
-  // <html> itself (see styles.css) and already subtracts it internally, so
-  // adding navH() again on top of that was double-compensating and landing
-  // sections ~68px past their real start.
   if (lenis) lenis.scrollTo(el, { duration: 1.2 });
   else el.scrollIntoView({ block: 'start' });
 }
@@ -84,11 +90,11 @@ document.addEventListener('click', (e) => {
 /* ------------------------------------------------------------
    Nav: scrolled state, scroll-spy, sliding highlighter, mobile menu
    ------------------------------------------------------------ */
-const nav = $('[data-nav]');
+const nav      = $('[data-nav]');
 const navLinks = $$('.nav__links a');
 const indicator = $('.nav__indicator');
-const toggle = $('.nav__toggle');
-const menu = $('#menu');
+const toggle   = $('.nav__toggle');
+const menu     = $('#menu');
 
 function moveIndicator(link) {
   if (!indicator) return;
@@ -109,7 +115,8 @@ function moveIndicator(link) {
 function setActive(id) {
   let active = null;
   navLinks.forEach((a) => {
-    const on = a.getAttribute('href') === `#${id}`;
+    const href = a.getAttribute('href');
+    const on   = href === `#${id}` || href === `/#${id}`;
     if (on) {
       a.setAttribute('aria-current', 'true');
       active = a;
@@ -120,36 +127,43 @@ function setActive(id) {
   moveIndicator(active);
 }
 
-const spySections = ['work', 'about', 'skills', 'contact'].map((id) => document.getElementById(id));
+// Only observe spy sections that actually exist on this page (home only)
+const spySections = ['work', 'about', 'skills', 'contact']
+  .map((id) => document.getElementById(id))
+  .filter(Boolean);
 let currentSpy = null;
-const spy = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((en) => {
-      if (en.isIntersecting) {
-        currentSpy = en.target.id;
-        setActive(currentSpy);
-      } else if (currentSpy === en.target.id) {
-        currentSpy = null;
-        setActive(null);
-      }
-    });
-  },
-  { rootMargin: '-45% 0px -50% 0px' }
-);
-spySections.forEach((s) => s && spy.observe(s));
+
+if (spySections.length) {
+  const spy = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((en) => {
+        if (en.isIntersecting) {
+          currentSpy = en.target.id;
+          setActive(currentSpy);
+        } else if (currentSpy === en.target.id) {
+          currentSpy = null;
+          setActive(null);
+        }
+      });
+    },
+    { rootMargin: '-45% 0px -50% 0px' }
+  );
+  spySections.forEach((s) => spy.observe(s));
+}
 
 window.addEventListener('resize', () => {
   const on = $('.nav__links a[aria-current="true"]');
   if (on) moveIndicator(on);
 });
 
-// A plain scroll listener, not a ScrollTrigger: a trigger that ends at 'max' turns itself
-// off at the very bottom of the page, which made the bar transparent over the black contact section.
-const syncNav = () => nav.classList.toggle('is-scrolled', window.scrollY > 8);
-window.addEventListener('scroll', syncNav, { passive: true });
-syncNav();
+if (nav) {
+  const syncNav = () => nav.classList.toggle('is-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', syncNav, { passive: true });
+  syncNav();
+}
 
 function openMenu() {
+  if (!nav || !menu || !toggle) return;
   nav.classList.add('is-open');
   menu.hidden = false;
   toggle.setAttribute('aria-expanded', 'true');
@@ -161,24 +175,24 @@ function openMenu() {
   }
 }
 function closeMenu() {
-  if (!nav.classList.contains('is-open')) return;
+  if (!nav || !nav.classList.contains('is-open')) return;
   nav.classList.remove('is-open');
-  menu.hidden = true;
-  toggle.setAttribute('aria-expanded', 'false');
-  toggle.setAttribute('aria-label', 'Open menu');
+  if (menu) menu.hidden = true;
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  }
   lenis && lenis.start();
   document.documentElement.style.overflow = '';
 }
-toggle.addEventListener('click', () => (nav.classList.contains('is-open') ? closeMenu() : openMenu()));
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeMenu();
-});
+if (toggle) toggle.addEventListener('click', () => (nav.classList.contains('is-open') ? closeMenu() : openMenu()));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 window.matchMedia('(min-width: 900px)').addEventListener('change', closeMenu);
 
 /* ------------------------------------------------------------
    Scroll progress bar
    ------------------------------------------------------------ */
-if (!reduceMotion) {
+if (!reduceMotion && $('.progress__bar')) {
   gsap.to('.progress__bar', {
     scaleX: 1,
     ease: 'none',
@@ -188,10 +202,11 @@ if (!reduceMotion) {
 
 /* ------------------------------------------------------------
    Intro: loader counter -> panel wipe -> hero words -> highlighter
+   HOME ONLY
    ------------------------------------------------------------ */
-const loader = $('.loader');
-const words = $$('.hero__h1 .w__in');
-const hl = $('.hl');
+const loader   = $('.loader');
+const words    = $$('.hero__h1 .w__in');
+const hl       = $('.hl');
 const heroBits = $$('.hero__status, .hero__foot');
 
 function endIntro() {
@@ -199,7 +214,13 @@ function endIntro() {
 }
 
 function runIntro() {
-  const seen = sessionStorage.getItem('intro-seen') === '1';
+  // Guard: only run if hero elements actually exist
+  if (!words.length && !hl && !heroBits.length) {
+    endIntro();
+    return;
+  }
+
+  const seen       = sessionStorage.getItem('intro-seen-home') === '1';
   const skipLoader = reduceMotion || seen;
 
   if (reduceMotion) {
@@ -208,21 +229,14 @@ function runIntro() {
   }
 
   gsap.set(words, { yPercent: 115 });
-  // Fully closed clip: matching px units on every side (not a % mix) so the
-  // browser doesn't have to interpolate right from "100%" to a px value later,
-  // which left a permanent sliver open at the box's left edge (the visible
-  // gap is boxWidth - leftInset - rightInset; with leftInset -12px and
-  // rightInset 100%, that's always exactly 12px, letting the "s" peek through
-  // before the reveal). Sizing the closed inset off the element's own
-  // measured width guarantees a true zero/negative gap at any font size.
   const hlClosedRight = hl ? Math.ceil(hl.getBoundingClientRect().width) + 40 : 0;
-  gsap.set(hl, { clipPath: `inset(-12px ${hlClosedRight}px -16px -12px)` });
+  if (hl) gsap.set(hl, { clipPath: `inset(-12px ${hlClosedRight}px -16px -12px)` });
   gsap.set(heroBits, { opacity: 0, y: 16 });
 
   const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
   if (!skipLoader && loader) {
-    const count = $('.loader__count');
+    const count   = $('.loader__count');
     const counter = { v: 0 };
     tl.to(counter, {
       v: 100,
@@ -236,12 +250,16 @@ function runIntro() {
   }
 
   tl.to(words, { yPercent: 0, duration: 1, stagger: 0.07 }, skipLoader ? 0 : '-=0.35');
-  tl.to(hl, { clipPath: 'inset(-12px -16px -16px -12px)', duration: 0.7, ease: 'power3.inOut' }, '-=0.45');
+  if (hl) tl.to(hl, { clipPath: 'inset(-12px -16px -16px -12px)', duration: 0.7, ease: 'power3.inOut' }, '-=0.45');
   tl.to(heroBits, { opacity: 1, y: 0, duration: 0.8, stagger: 0.12 }, '-=0.6');
 
-  sessionStorage.setItem('intro-seen', '1');
+  try { sessionStorage.setItem('intro-seen-home', '1'); } catch (e) { /* */ }
 }
-runIntro();
+
+// Only run intro on home page
+if (isHome) {
+  runIntro();
+}
 
 /* ------------------------------------------------------------
    Ticker: loops forever, speeds up and reverses with scroll
@@ -249,27 +267,29 @@ runIntro();
 const track = $('.ticker__track');
 if (track && !reduceMotion) {
   const group = $('.ticker__group', track);
-  // Repeat the group until one copy is wider than the viewport, then duplicate for the loop.
-  const unit = group.innerHTML;
-  while (group.scrollWidth < window.innerWidth) group.insertAdjacentHTML('beforeend', unit);
-  track.appendChild(group.cloneNode(true));
+  if (group) {
+    const unit = group.innerHTML;
+    while (group.scrollWidth < window.innerWidth) group.insertAdjacentHTML('beforeend', unit);
+    track.appendChild(group.cloneNode(true));
 
-  const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 40, repeat: -1 });
-  ScrollTrigger.create({
-    onUpdate: (self) => {
-      const v = self.getVelocity();
-      const dir = self.direction;
-      gsap.to(loop, { timeScale: dir * (1 + Math.min(Math.abs(v) / 250, 5)), duration: 0.2, overwrite: true });
-      gsap.to(loop, { timeScale: dir, duration: 0.8, delay: 0.2, overwrite: false });
-    },
-  });
+    const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 40, repeat: -1 });
+    ScrollTrigger.create({
+      onUpdate: (self) => {
+        const v   = self.getVelocity();
+        const dir = self.direction;
+        gsap.to(loop, { timeScale: dir * (1 + Math.min(Math.abs(v) / 250, 5)), duration: 0.2, overwrite: true });
+        gsap.to(loop, { timeScale: dir, duration: 0.8, delay: 0.2, overwrite: false });
+      },
+    });
+  }
 }
 
 /* ------------------------------------------------------------
-   Work: cards stack, previous one recedes as the next covers it
+   Work: cards stack — HOME ONLY
+   (Removed in Phase 3 when the new work list lands)
    ------------------------------------------------------------ */
 const stackEl = $('.work__stack');
-const stackMQ = window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
+const stackMQ  = window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
 let stackTweens = [];
 
 function teardownStack() {
@@ -282,15 +302,14 @@ function teardownStack() {
   gsap.set($$('.project__card'), { clearProps: 'transform,scale' });
 }
 
-// Cards only stick if EVERY card is fully visible while stuck (nav + its stagger offset + a small
-// margin). On shorter screens (e.g. 1280x720) they scroll normally instead of being cut off.
 function setupStack() {
   teardownStack();
   if (!stackEl || !stackMQ.matches) return;
   const projects = $$('.project');
+  if (!projects.length) return;
   const fits = projects.every((p, i) => {
     const card = $('.project__card', p);
-    return card.offsetHeight + navH() + 20 + i * 16 + 12 <= window.innerHeight;
+    return card && card.offsetHeight + navH() + 20 + i * 16 + 12 <= window.innerHeight;
   });
   if (!fits) return;
 
@@ -305,42 +324,40 @@ function setupStack() {
         scrollTrigger: {
           trigger: next,
           start: () => `top ${Math.round(window.innerHeight * 0.9)}`,
-          end: () => `top ${navH() + 20 + (i + 1) * 16}`,
+          end:   () => `top ${navH() + 20 + (i + 1) * 16}`,
           scrub: true,
         },
       })
     );
   });
 }
-setupStack();
-let stackResizeTimer;
-window.addEventListener('resize', () => {
-  clearTimeout(stackResizeTimer);
-  stackResizeTimer = setTimeout(setupStack, 200);
-});
-stackMQ.addEventListener('change', setupStack);
+
+if (isHome && stackEl) {
+  setupStack();
+  let stackResizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(stackResizeTimer);
+    stackResizeTimer = setTimeout(setupStack, 200);
+  });
+  stackMQ.addEventListener('change', setupStack);
+}
 
 /* ------------------------------------------------------------
-   About: the page holds still while the statement fills in
+   About: pin + fill-in — HOME ONLY
+   Do not refactor or touch the About pin logic.
    ------------------------------------------------------------ */
-// The heading + statement pin to the middle of the screen and scrolling "spends" itself on
-// highlighting the text, letter by letter. The moment the last letter is lit the pin lets go and
-// the page carries on down. If the block can't fit on screen (very short landscape phones) it
-// falls back to a plain scrubbed fill with no pin, so nothing is ever cut off or trapped.
 const aboutLead = $('.about__lead');
-const statement = $('[data-scrub]');
-let aboutST = null;
+const statement  = $('[data-scrub]');
+let aboutST      = null;
 
 if (aboutLead && statement && !reduceMotion) {
-  // aria: 'none' -> SplitText adds no aria-label (invalid on a <p>). Screen readers get the
-  // sr-only copy in the markup; this animated copy is aria-hidden.
-  const split = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
-  let aboutTL = null;
-  let aboutW = 0;
+  const split  = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
+  let aboutTL  = null;
+  let aboutW   = 0;
 
   const teardownAbout = () => {
     if (aboutTL) {
-      if (aboutTL.scrollTrigger) aboutTL.scrollTrigger.kill(true); // true -> also removes the pin spacer
+      if (aboutTL.scrollTrigger) aboutTL.scrollTrigger.kill(true);
       aboutTL.kill();
     }
     aboutTL = null;
@@ -351,10 +368,7 @@ if (aboutLead && statement && !reduceMotion) {
   const setupAbout = () => {
     teardownAbout();
     aboutW = window.innerWidth;
-
-    // Pin only if heading + statement fit under the nav with a little air.
-    const pinned = aboutLead.offsetHeight + navH() + 32 <= window.innerHeight;
-    // Scroll "budget" for the fill: long enough to read at a calm pace, short enough not to nag.
+    const pinned   = aboutLead.offsetHeight + navH() + 32 <= window.innerHeight;
     const distance = () => Math.round(Math.max(window.innerHeight * 1.4, 800));
 
     aboutTL = gsap.timeline({
@@ -362,37 +376,32 @@ if (aboutLead && statement && !reduceMotion) {
       scrollTrigger: pinned
         ? {
             trigger: aboutLead,
-            start: () => `center ${Math.round(window.innerHeight / 2 + navH() / 2)}px`,
-            end: () => `+=${distance()}`,
-            pin: true,
-            scrub: 0.4,
+            start:   () => `center ${Math.round(window.innerHeight / 2 + navH() / 2)}px`,
+            end:     () => `+=${distance()}`,
+            pin:     true,
+            scrub:   0.4,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           }
         : {
             trigger: statement.closest('.about__statement'),
-            start: 'top 82%',
-            end: 'bottom 55%',
-            scrub: 0.4,
+            start:   'top 82%',
+            end:     'bottom 55%',
+            scrub:   0.4,
           },
     });
 
-    // Letters light up across the first ~90% of the pinned distance; the last ~10% is a short
-    // hold so the finished sentence is readable for a beat before the page is released.
     aboutTL.fromTo(
       split.chars,
       { opacity: 0.16 },
       { opacity: 1, duration: 0.06, stagger: { amount: 0.9 } }
     );
     aboutTL.to({}, { duration: pinned ? 0.1 : 0.001 });
-
     aboutST = aboutTL.scrollTrigger;
   };
 
   setupAbout();
 
-  // Rebuild only when the width changes (rotation, window resize). Height-only resizes, like a
-  // mobile browser's address bar sliding away, must not rebuild a pin mid-scroll.
   let aboutResizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(aboutResizeTimer);
@@ -404,11 +413,7 @@ if (aboutLead && statement && !reduceMotion) {
     }, 200);
   });
 
-  // The block's height depends on the webfonts, so re-decide whether it fits once they are in.
-  const resetAbout = () => {
-    setupAbout();
-    ScrollTrigger.refresh();
-  };
+  const resetAbout = () => { setupAbout(); ScrollTrigger.refresh(); };
   document.fonts && document.fonts.ready.then(resetAbout);
   window.addEventListener('load', resetAbout);
 }
@@ -416,9 +421,9 @@ if (aboutLead && statement && !reduceMotion) {
 /* ------------------------------------------------------------
    Contact: copy email
    ------------------------------------------------------------ */
-const copyBtn = $('[data-copy]');
+const copyBtn    = $('[data-copy]');
 const copyStatus = $('[data-copy-status]');
-const mail = $('[data-email]');
+const mail       = $('[data-email]');
 if (copyBtn && mail) {
   const label = copyBtn.textContent;
   let timer;
@@ -431,7 +436,7 @@ if (copyBtn && mail) {
       ta.value = value;
       ta.setAttribute('readonly', '');
       ta.style.position = 'fixed';
-      ta.style.opacity = '0';
+      ta.style.opacity  = '0';
       document.body.appendChild(ta);
       ta.select();
       document.execCommand('copy');
@@ -446,11 +451,7 @@ if (copyBtn && mail) {
     }, 1800);
   });
 
-  // The pressed-in look is meant to stay visible on tap, but native
-  // touch ":hover" can get stuck on until the next tap elsewhere on
-  // the page. Drive it with pointer events instead, so it always
-  // releases cleanly on lift/cancel — on every input type.
-  const press = () => copyBtn.classList.add('is-pressed');
+  const press   = () => copyBtn.classList.add('is-pressed');
   const release = () => copyBtn.classList.remove('is-pressed');
   copyBtn.addEventListener('pointerdown', press);
   copyBtn.addEventListener('pointerup', release);
@@ -470,55 +471,50 @@ if (finePointer && !reduceMotion) {
       qx((e.clientX - (r.left + r.width / 2)) * 0.25);
       qy((e.clientY - (r.top + r.height / 2)) * 0.25);
     });
-    el.addEventListener('mouseleave', () => {
-      qx(0);
-      qy(0);
-    });
+    el.addEventListener('mouseleave', () => { qx(0); qy(0); });
   });
 
   const ring = $('.cursor');
-  document.body.classList.add('has-cursor');
-  const rx = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3.out' });
-  const ry = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3.out' });
-  let shown = false;
-  window.addEventListener('mousemove', (e) => {
-    if (!shown) {
-      shown = true;
-      gsap.set(ring, { x: e.clientX, y: e.clientY });
-      gsap.to(ring, { opacity: 1, duration: 0.3 });
-    }
-    rx(e.clientX);
-    ry(e.clientY);
-  });
-  document.addEventListener('mouseover', (e) => {
-    // Enlarging via `scale` puts a transform on the same element as
-    // mix-blend-mode, which is exactly what triggers Firefox's
-    // quadrant-seam compositor bug on the blended circle. Resizing
-    // via width/height instead keeps `transform` doing translation
-    // only, which Firefox composites as a single stable layer.
-    const hot = e.target.closest('a, button, .frame');
-    const size = hot ? 68.4 : 36;
-    gsap.to(ring, {
-      width: size,
-      height: size,
-      marginTop: -size / 2,
-      marginLeft: -size / 2,
-      duration: 0.3,
-      ease: 'power3.out',
+  if (ring) {
+    document.body.classList.add('has-cursor');
+    const rx = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3.out' });
+    const ry = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3.out' });
+    let shown = false;
+    window.addEventListener('mousemove', (e) => {
+      if (!shown) {
+        shown = true;
+        gsap.set(ring, { x: e.clientX, y: e.clientY });
+        gsap.to(ring, { opacity: 1, duration: 0.3 });
+      }
+      rx(e.clientX);
+      ry(e.clientY);
     });
-  });
-  document.addEventListener('mouseleave', () => gsap.to(ring, { opacity: 0, duration: 0.2 }));
+    document.addEventListener('mouseover', (e) => {
+      const hot  = e.target.closest('a, button, .frame');
+      const size = hot ? 68.4 : 36;
+      gsap.to(ring, {
+        width:      size,
+        height:     size,
+        marginTop:  -size / 2,
+        marginLeft: -size / 2,
+        duration:   0.3,
+        ease:       'power3.out',
+      });
+    });
+    document.addEventListener('mouseleave', () => gsap.to(ring, { opacity: 0, duration: 0.2 }));
+  }
 }
 
 /* ------------------------------------------------------------
-   Layout settles after webfonts + images
+   Layout settles after webfonts + images — HOME ONLY
    ------------------------------------------------------------ */
-// Card heights depend on the webfonts, so re-decide whether the cards can stack once they are in.
-document.fonts && document.fonts.ready.then(() => {
-  setupStack();
-  ScrollTrigger.refresh();
-});
-window.addEventListener('load', () => {
-  setupStack();
-  ScrollTrigger.refresh();
-});
+if (isHome && stackEl) {
+  document.fonts && document.fonts.ready.then(() => {
+    setupStack();
+    ScrollTrigger.refresh();
+  });
+  window.addEventListener('load', () => {
+    setupStack();
+    ScrollTrigger.refresh();
+  });
+}
