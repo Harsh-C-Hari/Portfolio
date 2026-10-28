@@ -4,3 +4,5 @@ PORTFOLIO-REBUILD-PLAN.md
 .od-skills
 .file-versions
 *.artifact.json
+reference/
+_handoff/

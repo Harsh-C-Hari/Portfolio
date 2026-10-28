@@ -1,0 +1,84 @@
+{
+  "_note": "Single source of truth for the home Work list AND the case-study page headers. Any value equal to the string CONFIRM_WITH_HARSH must make the build print a loud warning (and fail when BUILD_STRICT=1). Never invent a replacement value.",
+  "projects": [
+    {
+      "slug": "pcgo",
+      "index": "01",
+      "title": "Personal Cloud Gaming Orchestrator",
+      "shortTitle": "PCGO",
+      "kind": "Independent, in progress",
+      "summary": "A self-hosted cloud gaming platform for one Windows PC: a React dashboard, a FastAPI backend and a Python host layer that supervises Sunshine streaming and Tailscale networking, with watchdogs that recover failures on their own.",
+      "facts": [
+        { "label": "Role", "value": "Design & full-stack build" },
+        { "label": "Status", "value": "v0.1 live · Phase 26 next" },
+        { "label": "API routes", "value": "74" },
+        { "label": "Year", "value": "CONFIRM_WITH_HARSH" }
+      ],
+      "stack": ["React", "Vite", "FastAPI", "Python", "SQLite", "WebSockets", "JWT", "Sunshine", "Tailscale"],
+      "thumb": { "src": "/admin_home_page.webp", "alt": "PCGO admin dashboard home page", "width": 1919, "height": 942 },
+      "page": { "href": "/work/pcgo", "cta": "View case study" },
+      "links": [
+        { "label": "GitHub", "href": "https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator", "external": true }
+      ]
+    },
+    {
+      "slug": "productivity-dashboard",
+      "index": "02",
+      "title": "Productivity Dashboard",
+      "shortTitle": "Productivity Dashboard",
+      "kind": "Independent, live",
+      "summary": "One app for tasks, timetable, study sessions, projects and an AI workspace. Tasks get an urgency score from deadline, effort left and progress, and it installs as a PWA with Web Push alerts that arrive with the app closed.",
+      "facts": [
+        { "label": "Role", "value": "Design & full-stack build" },
+        { "label": "REST endpoints", "value": "226" },
+        { "label": "Database tables", "value": "36" },
+        { "label": "Year", "value": "CONFIRM_WITH_HARSH" }
+      ],
+      "stack": ["React", "TypeScript", "FastAPI", "SQLAlchemy", "PostgreSQL", "JWT", "Tailwind", "Web Push", "Vercel"],
+      "thumb": { "src": "/image-prodash.webp", "alt": "Productivity Dashboard task and study view", "width": 1919, "height": 936 },
+      "page": { "href": "/work/productivity-dashboard", "cta": "View case study" },
+      "links": [
+        { "label": "Open live", "href": "https://productivity-dashboard-phi-navy.vercel.app/", "external": true },
+        { "label": "GitHub", "href": "https://github.com/Harsh-C-Hari/Productivity-Dashboard", "external": true }
+      ]
+    },
+    {
+      "slug": "future-of-cec",
+      "index": "03",
+      "title": "Future of CEC",
+      "shortTitle": "Future of CEC",
+      "kind": "Team of four",
+      "summary": "A Student Portal, admin dashboard and Lift Access system. Google sign-in is restricted to institutional email, students and lift operators get role-based access, and a local Gemma model served through Ollama answers student queries.",
+      "facts": [
+        { "label": "Team", "value": "4 people" },
+        { "label": "Sign-in", "value": "Google, institutional email only" },
+        { "label": "Assistant", "value": "Gemma, local via Ollama" }
+      ],
+      "stack": ["PostgreSQL", "Prisma", "Express", "FastAPI", "JWT", "Ollama", "Gemma"],
+      "thumb": { "src": "/image-2.webp", "alt": "Future of CEC smart campus platform", "width": 1919, "height": 938 },
+      "page": null,
+      "links": [
+        { "label": "GitHub", "href": "https://github.com/Harsh-C-Hari/Minions--Future_of_CEC", "external": true }
+      ]
+    },
+    {
+      "slug": "smart-farming-dashboard",
+      "index": "04",
+      "title": "Smart Farming Dashboard",
+      "shortTitle": "Smart Farming Dashboard",
+      "kind": "Hackathon, team of three",
+      "summary": "Built in 24 hours: a dashboard that charts simulated soil and weather sensor trends with Chart.js, backed by Firebase, with the Gemini API generating crop-care recommendations.",
+      "facts": [
+        { "label": "Build time", "value": "24 hours" },
+        { "label": "Team", "value": "3 people" },
+        { "label": "Advice from", "value": "Gemini, crop-care recommendations" }
+      ],
+      "stack": ["FastAPI", "Python", "Chart.js", "Firebase", "Gemini API"],
+      "thumb": { "src": "/image-1.webp", "alt": "Smart Farming Dashboard sensor charts", "width": 1280, "height": 668 },
+      "page": null,
+      "links": [
+        { "label": "GitHub", "href": "https://github.com/Harsh-C-Hari/build-with-ai-chn-kokachiz", "external": true }
+      ]
+    }
+  ]
+}
