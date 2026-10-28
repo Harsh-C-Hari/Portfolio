@@ -554,6 +554,43 @@ if (track && !reduceMotion) {
 })();
 
 /* ------------------------------------------------------------
+   Case study tabs  (.cs-tabs / .cs-tab / .cs-tab-panel)
+   ARIA tab pattern. Keyboard: Left/Right arrow, Home, End.
+   ------------------------------------------------------------ */
+(function setupCSTabs() {
+  const tabLists = $$('.cs-tabs[role="tablist"]');
+  if (!tabLists.length) return;
+
+  tabLists.forEach((tabList) => {
+    const tabs   = $$('.cs-tab', tabList);
+    const panels = tabs.map((t) => $(('#' + t.getAttribute('aria-controls').replace(/^#/, ''))));
+
+    function activate(tab) {
+      tabs.forEach((t, i) => {
+        const isTarget = t === tab;
+        t.setAttribute('aria-selected', String(isTarget));
+        t.classList.toggle('is-active', isTarget);
+        t.tabIndex = isTarget ? 0 : -1;
+        const panel = panels[i];
+        if (panel) panel.hidden = !isTarget;
+      });
+      tab.focus();
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab));
+      tab.addEventListener('keydown', (e) => {
+        const idx = tabs.indexOf(tab);
+        if (e.key === 'ArrowRight') { e.preventDefault(); activate(tabs[(idx + 1) % tabs.length]); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); activate(tabs[(idx - 1 + tabs.length) % tabs.length]); }
+        if (e.key === 'Home')       { e.preventDefault(); activate(tabs[0]); }
+        if (e.key === 'End')        { e.preventDefault(); activate(tabs[tabs.length - 1]); }
+      });
+    });
+  });
+})();
+
+/* ------------------------------------------------------------
    About: pin + fill-in — HOME ONLY
    Do not refactor or touch the About pin logic.
    ------------------------------------------------------------ */

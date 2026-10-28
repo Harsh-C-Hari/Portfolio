@@ -251,16 +251,18 @@ function buildCasePages(projects) {
     const bodyHtml   = fs.readFileSync(bodyPath, 'utf8');
 
     const vars = {
-      home:            '/',
-      base:            '/',
-      page_title:      title,
+      home:             '/',
+      base:             '/',
+      page_type:        'case',
+      page_title:       title,
       page_description: desc,
-      page_canonical:  pageHref,
-      page_og_image:   ogImage,
-      page_slug:       slug,
-      page_body:       bodyHtml,
-      css_version:     versionOf('styles.css'),
-      js_version:      versionOf('animation.bundle.js'),
+      page_canonical:   pageHref,
+      page_og_image:    ogImage,
+      page_slug:        slug,
+      page_body:        bodyHtml,
+      page_jsonld:      '',
+      css_version:      versionOf('styles.css'),
+      js_version:       versionOf('animation.bundle.js'),
     };
 
     let html = assemble(LAYOUT_PAGE, vars);

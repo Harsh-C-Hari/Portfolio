@@ -16,7 +16,12 @@
       ],
       "stack": ["React", "Vite", "FastAPI", "Python", "SQLite", "WebSockets", "JWT", "Sunshine", "Tailscale"],
       "thumb": { "src": "/admin_home_page.webp", "alt": "PCGO admin dashboard home page", "width": 1919, "height": 942 },
-      "page": { "href": "/work/pcgo", "cta": "View case study" },
+      "page": {
+        "href": "/work/pcgo",
+        "cta": "View case study",
+        "title": "Personal Cloud Gaming Orchestrator: case study | Harsh C Hari",
+        "description": "A self-hosted cloud gaming platform: React, FastAPI, a Python host layer, Sunshine and Tailscale, with watchdogs that recover failures on their own."
+      },
       "links": [
         { "label": "GitHub", "href": "https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator", "external": true }
       ]
