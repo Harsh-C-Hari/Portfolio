@@ -2223,3 +2223,124 @@ html.pt-enter .pt__ink {
 html.pt-enter .loader {
   display: none;
 }
+
+/* ============================================================
+   Dashboard case study additions
+   ============================================================ */
+
+/* Long title: allow wrapping gracefully at br tag */
+.cs-title--wrap {
+  font-size: clamp(40px, 8vw, 110px);
+}
+
+/* App areas list */
+.cs-areas {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+@media (min-width: 640px) {
+  .cs-areas { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .cs-areas { grid-template-columns: repeat(3, 1fr); }
+}
+
+.cs-area {
+  display: flex;
+  gap: 1rem;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 1.25rem;
+  align-items: flex-start;
+}
+
+.cs-area__num {
+  font-family: var(--f-display);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--muted);
+  flex-shrink: 0;
+  min-width: 1.5ch;
+}
+
+.cs-area__name {
+  font-family: var(--f-display);
+  font-size: 18px;
+  margin: 0 0 0.3rem;
+}
+
+.cs-area__desc {
+  font-size: var(--t-small);
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Urgency section layout */
+.cs-urgency {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* Code block */
+.cs-codeblock {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  line-height: 1.65;
+  padding: 1.25rem 1.5rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0;
+  tab-size: 2;
+}
+
+.cs-codeblock code {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Urgency badges */
+.cs-urgency-badge {
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  font-weight: 600;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.cs-urgency-badge--critical { background: #fde8e8; color: #b91c1c; }
+.cs-urgency-badge--high     { background: #fef3c7; color: #92400e; }
+.cs-urgency-badge--medium   { background: #e0f2fe; color: #0369a1; }
+.cs-urgency-badge--low      { background: var(--paper-2); color: var(--muted); }
+
+.cs-footnote {
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  color: var(--muted);
+  margin-top: 0.75rem;
+}
+
+/* Security / push / limits bullet list */
+.cs-security-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 1.25rem;
+  font-size: var(--t-body);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cs-security-list li::marker {
+  color: var(--muted);
+}

@@ -41,7 +41,12 @@
       ],
       "stack": ["React", "TypeScript", "FastAPI", "SQLAlchemy", "PostgreSQL", "JWT", "Tailwind", "Web Push", "Vercel"],
       "thumb": { "src": "/image-prodash.webp", "alt": "Productivity Dashboard task and study view", "width": 1919, "height": 936 },
-      "page": { "href": "/work/productivity-dashboard", "cta": "View case study" },
+      "page": {
+        "href": "/work/productivity-dashboard",
+        "cta": "View case study",
+        "title": "Productivity Dashboard: case study | Harsh C Hari",
+        "description": "A full-stack productivity app with a smart urgency engine, role-based projects and Web Push reminders that arrive with the app closed. React, TypeScript, FastAPI, PostgreSQL."
+      },
       "links": [
         { "label": "Open live", "href": "https://productivity-dashboard-phi-navy.vercel.app/", "external": true },
         { "label": "GitHub", "href": "https://github.com/Harsh-C-Hari/Productivity-Dashboard", "external": true }
