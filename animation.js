@@ -487,62 +487,71 @@ if (track && !reduceMotion) {
 }
 
 /* ------------------------------------------------------------
-   Work: cards stack — HOME ONLY
-   (Removed in Phase 3 when the new work list lands)
+   Work list accordion  (.wrow) — HOME ONLY
+   One row open at a time. First open by default.
+   Desktop: hover with 120ms intent delay, focusin opens.
+   Touch: IntersectionObserver at viewport middle.
    ------------------------------------------------------------ */
-const stackEl = $('.work__stack');
-const stackMQ  = window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
-let stackTweens = [];
+(function setupWorkList() {
+  const rows = $$('.wrow');
+  if (!rows.length) return;
 
-function teardownStack() {
-  stackTweens.forEach((t) => {
-    if (t.scrollTrigger) t.scrollTrigger.kill();
-    t.kill();
-  });
-  stackTweens = [];
-  if (stackEl) stackEl.classList.remove('is-stacking');
-  gsap.set($$('.project__card'), { clearProps: 'transform,scale' });
-}
+  const isFine  = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const isTouch = !isFine;
 
-function setupStack() {
-  teardownStack();
-  if (!stackEl || !stackMQ.matches) return;
-  const projects = $$('.project');
-  if (!projects.length) return;
-  const fits = projects.every((p, i) => {
-    const card = $('.project__card', p);
-    return card && card.offsetHeight + navH() + 20 + i * 16 + 12 <= window.innerHeight;
-  });
-  if (!fits) return;
+  function openRow(row) {
+    rows.forEach((r) => {
+      const isTarget = r === row;
+      r.dataset.open = String(isTarget);
+      const panel    = r.querySelector('.wrow__panel');
+      if (!panel) return;
+      if (isTarget) {
+        panel.removeAttribute('inert');
+      } else {
+        panel.setAttribute('inert', '');
+      }
+    });
+  }
 
-  stackEl.classList.add('is-stacking');
-  projects.forEach((p, i) => {
-    const next = projects[i + 1];
-    if (!next) return;
-    stackTweens.push(
-      gsap.to($('.project__card', p), {
-        scale: 0.94,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: next,
-          start: () => `top ${Math.round(window.innerHeight * 0.9)}`,
-          end:   () => `top ${navH() + 20 + (i + 1) * 16}`,
-          scrub: true,
-        },
-      })
+  // Default: first row open
+  openRow(rows[0]);
+
+  if (isFine) {
+    /* ---- Desktop: hover with 120ms intent delay ---- */
+    let intentTimer = null;
+
+    rows.forEach((row) => {
+      row.addEventListener('pointerenter', () => {
+        clearTimeout(intentTimer);
+        intentTimer = setTimeout(() => openRow(row), 120);
+      });
+
+      // Focus on the title link also opens the row
+      const link = row.querySelector('.wrow__link');
+      if (link) {
+        link.addEventListener('focusin', () => {
+          clearTimeout(intentTimer);
+          openRow(row);
+        });
+      }
+    });
+
+    // Pointer leave from the whole list does NOT collapse — last hovered stays open.
+  }
+
+  if (isTouch) {
+    /* ---- Touch: IntersectionObserver at ~42% from top and bottom ---- */
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (en.isIntersecting) openRow(en.target);
+        });
+      },
+      { rootMargin: '-42% 0px -42% 0px' }
     );
-  });
-}
-
-if (isHome && stackEl) {
-  setupStack();
-  let stackResizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(stackResizeTimer);
-    stackResizeTimer = setTimeout(setupStack, 200);
-  });
-  stackMQ.addEventListener('change', setupStack);
-}
+    rows.forEach((row) => io.observe(row));
+  }
+})();
 
 /* ------------------------------------------------------------
    About: pin + fill-in — HOME ONLY

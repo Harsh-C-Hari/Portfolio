@@ -124,21 +124,93 @@ async function bundleJS() {
 }
 
 /* ----------------------------------------------------------------
+   Work list HTML (generated from projects.json into work.html)
+   ---------------------------------------------------------------- */
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function generateWorkRows(projects) {
+  return projects.map((p, i) => {
+    const hasPage  = !!p.page;
+    const isFirst  = i === 0;
+    // Primary link: page href if it has a case study, else first external link
+    const primaryHref = hasPage ? p.page.href : (p.links[0]?.href || '#');
+    const ctaLabel    = hasPage ? `${p.page.cta} →` : `${p.links[0]?.label || 'GitHub'} ↗`;
+    const ctaExternal = !hasPage;
+
+    // Facts dl items (up to 4, 2×2 grid on desktop)
+    const factsHtml = (p.facts || []).map(f =>
+      `<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`
+    ).join('\n            ');
+
+    // Stack chips
+    const stackHtml = (p.stack || []).map(s =>
+      `<li>${esc(s)}</li>`
+    ).join('');
+
+    // Secondary links (all links except the primary for rows with pages;
+    // for no-page rows, already using links[0] as CTA so show the rest)
+    const secondaryLinks = hasPage
+      ? p.links
+      : p.links.slice(1);
+    const linksHtml = secondaryLinks.length
+      ? secondaryLinks.map(l =>
+          `<a class="btn" href="${esc(l.href)}"${l.external ? ' rel="noopener" target="_blank"' : ''}>${esc(l.label)} ↗</a>`
+        ).join('\n          ')
+      : '';
+
+    // Thumb
+    const t = p.thumb;
+    const thumbEl = t
+      ? `<a class="wrow__thumb" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''} tabindex="-1" aria-hidden="true">
+          <img src="${esc(t.src)}" alt="${esc(t.alt)}" width="${t.width}" height="${t.height}" loading="lazy" decoding="async">
+        </a>`
+      : '';
+
+    return `<article class="wrow" data-open="${isFirst}" data-has-page="${hasPage}">
+  <h3 class="wrow__head">
+    <a class="wrow__link" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''}>
+      <span class="wrow__idx">${esc(p.index)}</span>
+      <span class="wrow__title">${esc(p.title)}</span>
+    </a>
+    <span class="wrow__kind">${esc(p.kind)}</span>
+    <a class="btn wrow__cta" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''}>${esc(ctaLabel)}</a>
+  </h3>
+  <div class="wrow__panel"${isFirst ? '' : ' inert'}>
+    <div class="wrow__body">
+      <p class="wrow__summary">${esc(p.summary)}</p>
+      <dl class="wrow__facts">
+        ${factsHtml}
+      </dl>
+      <ul class="wrow__stack">${stackHtml}</ul>
+      ${linksHtml ? `<div class="wrow__links">${linksHtml}</div>` : ''}
+    </div>
+    ${thumbEl}
+  </div>
+</article>`;
+  }).join('\n\n');
+}
+
+/* ----------------------------------------------------------------
    Home page (index.html)
    ---------------------------------------------------------------- */
 function buildHome(projects) {
   const vars = {
-    home: '',   // on home, hash links are just #section
-    base: '/',
+    home:      '',   // on home, hash links are just #section
+    base:      '/',
+    work_rows: generateWorkRows(projects),
   };
 
   let html = assemble(LAYOUT_HOME, vars);
 
   // Cache-bust versioned assets
   html = html
-    .replace('href="styles.css"',         `href="styles.css?v=${versionOf('styles.css')}"`)
     .replace('href="/styles.css"',        `href="/styles.css?v=${versionOf('styles.css')}"`)
-    .replace('src="animation.bundle.js"', `src="animation.bundle.js?v=${versionOf('animation.bundle.js')}"`)
     .replace('src="/animation.bundle.js"',`src="/animation.bundle.js?v=${versionOf('animation.bundle.js')}"`);
 
   writeFile(OUTPUT_HOME, html);
