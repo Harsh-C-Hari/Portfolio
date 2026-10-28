@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-internal-event-authentication">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>Internal event authentication | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/internal-event-authentication">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Internal event authentication | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/internal-event-authentication">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Internal event authentication | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication" aria-current="page">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">4 min read</p>
+          <h1 class="doc-header__title">Internal event authentication</h1>
+          <p class="doc-header__summary">How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        
+
+        <div class="doc-body">
+          <h1>Internal Event Authentication</h1>
+<p><strong>Status:</strong> Completed</p>
+<hr>
+<h1>Issue Information</h1>
+<p><strong>Category:</strong>
+Security Engineering / Authentication</p>
+<p><strong>Affected Components:</strong></p>
+<ul>
+<li>Sunshine Stream Hook (<code>sunshine_stream_hook.py</code>)</li>
+<li>Sunshine Transport Monitor (<code>host_agent/sunshine_transport_monitor.py</code>)</li>
+<li>Host API (<code>api/routes/host.py</code>)</li>
+<li>Startup Initializer (<code>host_agent/startup_initializer.py</code>)</li>
+</ul>
+<p><strong>Severity:</strong>
+High (unauthenticated write path into session/stream state)</p>
+<hr>
+<h1>Overview</h1>
+<p>Once user authentication (JWT bearer tokens) was introduced, every dashboard and session API required a logged-in user. Four endpoints, however, cannot be called by a user at all:</p>
+<pre class="hljs"><code>POST /host/sunshine/stream-started
+POST /host/sunshine/stream-ended
+POST /host/sunshine/transport-connected
+POST /host/sunshine/transport-disconnected
+</code></pre>
+<p>These endpoints exist purely so that two non-interactive callers can report what Sunshine is actually doing right now:</p>
+<ul>
+<li><strong><code>sunshine_stream_hook.py</code></strong> — an external script that Sunshine itself invokes on stream start/stop.</li>
+<li><strong><code>SunshineTransportMonitor</code></strong> — an in-process background thread that tails Sunshine’s log file for <code>CLIENT CONNECTED</code> / <code>CLIENT DISCONNECTED</code> lines.</li>
+</ul>
+<p>Neither caller is a logged-in user or a request originating from the frontend, so neither carries — or should carry — a user JWT. Leaving these endpoints open to any bearer token (or unauthenticated entirely) would let a user spoof stream/transport state.</p>
+<hr>
+<h1>The Problem With a Code-Level Check</h1>
+<p>For most internal-only logic, “only module X may call this” can be enforced in Python by checking the call stack or restricting an import. That model breaks down here:</p>
+<ul>
+<li><code>sunshine_stream_hook.py</code> runs as a <strong>separate OS process</strong>, invoked directly by Sunshine.</li>
+<li>By the time its HTTP request reaches the FastAPI server, there is no Python call stack left to inspect.</li>
+</ul>
+<p>The only enforcement point that still exists across that process boundary is the network request itself. That means the credential has to travel with the request, the same way a webhook signing secret does.</p>
+<hr>
+<h1>Design</h1>
+<p>A single shared secret — <code>backend.internal_event_token</code> — is:</p>
+<ul>
+<li>Generated once, using <code>secrets.token_urlsafe(32)</code>, at first startup (<code>host_agent/startup_initializer.py: _ensure_internal_event_token</code>).</li>
+<li>Persisted in <code>config.json</code>, alongside <code>backend.internal_api_url</code>.</li>
+<li>Read by <code>sunshine_stream_hook.py</code> and <code>SunshineTransportMonitor</code> and sent on every event call as the <code>X-Internal-Event-Token</code> header.</li>
+<li>Verified server-side by <code>api/internal_event_auth.py: require_internal_event_token</code>, a FastAPI dependency attached only to the four event routes via <code>dependencies=[...]</code>.</li>
+<li>Compared using <code>hmac.compare_digest</code>, so a timing attack cannot be used to recover it byte-by-byte.</li>
+<li>Never issued to the frontend, never accepted on any admin or user route, and never duplicated elsewhere in the backend — any other module that needs stream state reads it from <code>sunshine_stream_tracker</code>’s read-only getters instead of re-implementing this check.</li>
+</ul>
+<pre class="hljs"><code>Sunshine (external process)
+        │
+        ▼
+sunshine_stream_hook.py  ──┐
+                             │  X-Internal-Event-Token: &lt;shared secret&gt;
+SunshineTransportMonitor ───┤
+   (log-tailing thread)     │
+                             ▼
+                 require_internal_event_token()
+                             │
+                             ▼
+              /host/sunshine/stream-started, etc.
+</code></pre>
+<hr>
+<h1>Backward Compatibility</h1>
+<p>Existing installations from before this token existed would have a <code>config.json</code> without <code>backend.internal_event_token</code>. <code>_ensure_internal_event_token</code> treats a missing/blank token as a one-time backfill: it generates and persists a token on the next startup, logging a warning that any already-running hook script or transport monitor needs to be restarted to pick up the new value. In normal operation (fresh install, or an install that already has the token) this is a no-op.</p>
+<hr>
+<h1>Why Not Just Reuse the User JWT System</h1>
+<ul>
+<li>The hook script and transport monitor are not users; they have no username, no role, and no session to authenticate as.</li>
+<li>Giving them a JWT would mean minting and rotating a “service account” token indistinguishable from a real user’s credentials, widening the blast radius if it ever leaked into a log or crash dump.</li>
+<li>A single-purpose, single-scope secret keeps the trust boundary narrow: this token can do exactly four things, and nothing else in the system will accept it.</li>
+</ul>
+<hr>
+<h1>Verification</h1>
+<p>Verified scenarios include:</p>
+<ul>
+<li>Stream-hook events accepted with a valid token.</li>
+<li>Stream-hook / transport-monitor events rejected (<code>403</code>) with a missing or incorrect token.</li>
+<li>Fresh install: token generated automatically on first startup, hook/monitor pick it up from <code>config.json</code> without manual configuration.</li>
+<li>Upgrade from a pre-token <code>config.json</code>: token backfilled on next startup, warning logged.</li>
+<li>User JWTs rejected on the four event endpoints (they are not accepted as a substitute for the internal token).</li>
+</ul>
+<hr>
+<h1>Impact</h1>
+<ul>
+<li>Closed an unauthenticated write path into session/stream state that existed briefly during the authentication rollout.</li>
+<li>Established a reusable pattern (shared secret + <code>hmac.compare_digest</code> + a single dependency function) for any future process-boundary caller that isn’t a logged-in user.</li>
+<li>Kept the check centralized in one file (<code>api/internal_event_auth.py</code>) rather than duplicated across routes.</li>
+</ul>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/tailscale-state-recovery"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Tailscale state-aware recovery</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/live-sync-architecture-migration"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">Live sync that stopped running</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>

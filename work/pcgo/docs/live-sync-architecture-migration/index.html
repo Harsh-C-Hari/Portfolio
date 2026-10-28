@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-live-sync-architecture-migration">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>Live sync that stopped running | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/live-sync-architecture-migration">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Live sync that stopped running | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/live-sync-architecture-migration">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Live sync that stopped running | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration" aria-current="page">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">5 min read</p>
+          <h1 class="doc-header__title">Live sync that stopped running</h1>
+          <p class="doc-header__summary">Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#symptoms">Symptoms</a></li><li><a href="#initial-hypothesis">Initial Hypothesis</a></li><li><a href="#investigation">Investigation</a></li>  <li><a href="#hash-verification">Hash Verification</a></li>  <li><a href="#live-sync-thread-investigation">Live Sync Thread Investigation</a></li><li><a href="#root-cause%3A-incomplete-architecture-migration">Root Cause: Incomplete Architecture Migration</a></li><li><a href="#missing-migration-logic">Missing Migration Logic</a></li><li><a href="#final-fix">Final Fix</a></li><li><a href="#additional-live-sync-improvements">Additional Live Sync Improvements</a></li>  <li><a href="#session-timer-reset">Session Timer Reset</a></li>  <li><a href="#proper-state-cleanup">Proper State Cleanup</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul></nav>
+
+        <div class="doc-body">
+          <h1>Live Sync Architecture Migration Bug Investigation</h1>
+<h2 id="issue-information" tabindex="-1">Issue Information</h2>
+<p>Category:
+Architecture Migration Regression</p>
+<p>Affected Component:
+Live Sync Lifecycle</p>
+<p>Severity:
+High</p>
+<p>Status:
+Resolved</p>
+<hr>
+<h2 id="overview" tabindex="-1">Overview</h2>
+<p>The goal of the Live Sync system was to continuously monitor game save files during an active gaming session and update the user’s latest save without waiting for the session to end.</p>
+<p>After implementing configurable <code>whitelist_prefixes</code> through <code>games.json</code>, Live Sync appeared to stop working.</p>
+<p>Initially, the new save hashing system was suspected to be the cause.</p>
+<p>After extensive debugging, the actual problem was discovered to be an architecture migration issue between the old CLI-based session runner and the newer FastAPI-based host service.</p>
+<hr>
+<h2 id="symptoms" tabindex="-1">Symptoms</h2>
+<p>During active gaming sessions, modifying save files did not trigger Live Sync updates.</p>
+<p>Expected logs such as:</p>
+<pre class="hljs"><code>Live sync change detected.
+Live latest sync completed.
+</code></pre>
+<p>never appeared.</p>
+<p>However, the final session cleanup still correctly detected changed saves, captured them, created backups, and generated archives.</p>
+<p>This indicated that:</p>
+<ul>
+<li>Save hashing worked.</li>
+<li>Save capture worked.</li>
+<li>Final integrity verification worked.</li>
+<li>Live Sync itself was not executing.</li>
+</ul>
+<hr>
+<h2 id="initial-hypothesis" tabindex="-1">Initial Hypothesis</h2>
+<p>The first suspicion was that replacing hardcoded whitelist prefixes had broken save hashing.</p>
+<p>Previously, save hashing used:</p>
+<pre class="hljs"><code>whitelist_prefixes=[<span class="hljs-string">&quot;GOWRSAVE&quot;</span>]
+</code></pre>
+<p>This was replaced with game-specific configuration:</p>
+<pre class="hljs"><code><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;whitelist_prefixes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-string">&quot;GOWRSAVE&quot;</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>The whitelist was loaded dynamically through:</p>
+<pre class="hljs"><code>save_manager._get_whitelist_prefixes(game_id)
+</code></pre>
+<hr>
+<h2 id="investigation" tabindex="-1">Investigation</h2>
+<h3 id="hash-verification" tabindex="-1">Hash Verification</h3>
+<p>Temporary debug logging was added inside:</p>
+<pre class="hljs"><code>IntegrityManager.calculate_directory_hash()
+</code></pre>
+<p>The system logged every file being evaluated:</p>
+<pre class="hljs"><code>Checking: GOWRSAVE0
+Included: GOWRSAVE0
+
+Checking: GOWRSAVE1
+Included: GOWRSAVE1
+
+...
+
+Checking: userpreferences
+Ignored: userpreferences
+</code></pre>
+<p>The investigation confirmed:</p>
+<ul>
+<li>Valid save files were included.</li>
+<li>Non-save files were correctly ignored.</li>
+<li>Dynamic <code>whitelist_prefixes</code> worked correctly.</li>
+<li>Save hashing was functioning as expected.</li>
+</ul>
+<p>The hashing system was therefore ruled out as the source of the problem.</p>
+<blockquote>
+<p><strong>Note:</strong> This section documents the previous <code>whitelist_prefixes</code> implementation. The current implementation uses the <code>save_filters</code> system introduced in the Save Filter System Migration.</p>
+</blockquote>
+<hr>
+<h3 id="live-sync-thread-investigation" tabindex="-1">Live Sync Thread Investigation</h3>
+<p>Additional temporary logs were added inside the Live Sync loop:</p>
+<pre class="hljs"><code>Live sync tick
+Live sync checking saves
+</code></pre>
+<p>Expected behavior:</p>
+<pre class="hljs"><code>Live sync started
+        |
+        v
+Live sync tick
+        |
+        v
+Live sync checking saves
+</code></pre>
+<p>However, these logs never appeared during gameplay.</p>
+<p>The only Live Sync-related log observed was:</p>
+<pre class="hljs"><code>Live sync stopped.
+</code></pre>
+<p>during session cleanup.</p>
+<p>This revealed a critical inconsistency:</p>
+<ul>
+<li>Live Sync was being stopped correctly.</li>
+<li>Live Sync was never being started.</li>
+</ul>
+<hr>
+<h2 id="root-cause%3A-incomplete-architecture-migration" tabindex="-1">Root Cause: Incomplete Architecture Migration</h2>
+<p>The project originally used a CLI-based session runner:</p>
+<pre class="hljs"><code>python main.py
+</code></pre>
+<p>The original session lifecycle contained:</p>
+<pre class="hljs"><code>Inject saves
+        |
+        v
+Launch game
+        |
+        v
+Set GAME_RUNNING state
+        |
+        v
+Start Live Sync
+        |
+        v
+Monitor gameplay
+        |
+        v
+Cleanup
+        |
+        v
+Stop Live Sync
+</code></pre>
+<p>The project later migrated to a FastAPI-based host agent:</p>
+<pre class="hljs"><code>uvicorn api.app:app
+</code></pre>
+<p>The actual execution path became:</p>
+<pre class="hljs"><code>FastAPI Routes
+        |
+        v
+SessionService
+        |
+        v
+Game Session Lifecycle
+</code></pre>
+<p>The old <code>main.py</code> was no longer used.</p>
+<p>Evidence for this discovery:</p>
+<ul>
+<li>Introducing intentional errors in <code>main.py</code> did not prevent the backend from starting.</li>
+<li>No logs from <code>main.py</code> appeared during sessions.</li>
+<li>The <code>GAME_RUNNING</code> state transition was missing.</li>
+<li>Live Sync startup logs never appeared.</li>
+</ul>
+<hr>
+<h2 id="missing-migration-logic" tabindex="-1">Missing Migration Logic</h2>
+<p>The original CLI implementation contained:</p>
+<pre class="hljs"><code>save_manager._set_state(
+    session_id,
+    SessionState.GAME_RUNNING,
+)
+
+save_manager.live_sync.start(
+    session_id
+)
+</code></pre>
+<p>During the migration to FastAPI, this logic was never moved into the new session execution flow.</p>
+<p>As a result:</p>
+<pre class="hljs"><code>Session Start
+        |
+        v
+Game Launch
+        |
+        v
+No Live Sync Thread
+        |
+        v
+Gameplay continues without synchronization
+        |
+        v
+Cleanup stops a Live Sync instance that was never started
+</code></pre>
+<hr>
+<h2 id="final-fix" tabindex="-1">Final Fix</h2>
+<p>The missing lifecycle steps were added to the FastAPI session execution flow inside:</p>
+<pre class="hljs"><code>SessionService._run_session()
+</code></pre>
+<p>After the game launch, the following actions are now performed:</p>
+<pre class="hljs"><code>save_manager._set_state(
+    session_id,
+    SessionState.GAME_RUNNING,
+)
+
+save_manager.live_sync.start(
+    session_id
+)
+</code></pre>
+<p>The corrected architecture became:</p>
+<pre class="hljs"><code>Inject saves
+        |
+        v
+Launch game
+        |
+        v
+GAME_RUNNING state
+        |
+        v
+Start Live Sync
+        |
+        v
+Monitor save changes
+        |
+        v
+Update latest saves during gameplay
+        |
+        v
+Game exit / timeout / manual stop
+        |
+        v
+CleanupManager
+        |
+        v
+Stop Live Sync
+        |
+        v
+Final save capture and backup
+</code></pre>
+<hr>
+<h2 id="additional-live-sync-improvements" tabindex="-1">Additional Live Sync Improvements</h2>
+<p>During debugging, several improvements were made to the Live Sync lifecycle.</p>
+<h3 id="session-timer-reset" tabindex="-1">Session Timer Reset</h3>
+<p>Originally:</p>
+<pre class="hljs"><code>started_at
+</code></pre>
+<p>was initialized inside the constructor.</p>
+<p>This caused the timer to represent the lifetime of the object rather than the lifetime of an individual session.</p>
+<p>It was moved to:</p>
+<pre class="hljs"><code>LiveSyncManager.start()
+</code></pre>
+<p>ensuring every session receives a fresh runtime timer.</p>
+<hr>
+<h3 id="proper-state-cleanup" tabindex="-1">Proper State Cleanup</h3>
+<p><code>LiveSyncManager.stop()</code> was updated to reset all runtime state:</p>
+<pre class="hljs"><code>thread
+session_id
+started_at
+last_hash
+injected_save_hash
+pending_hash
+pending_count
+</code></pre>
+<p>This prevents stale state from affecting future sessions.</p>
+<hr>
+<h2 id="verification" tabindex="-1">Verification</h2>
+<p>After the fix, the system successfully demonstrated:</p>
+<ul>
+<li>Live Sync starts automatically when a session begins.</li>
+<li>Save files are monitored during gameplay.</li>
+<li>Dynamic whitelist filtering works correctly.</li>
+<li>Valid save modifications are detected.</li>
+<li>Latest saves are updated without waiting for session termination.</li>
+<li>Live Sync shuts down correctly during cleanup.</li>
+<li>Final save capture, backup creation, archive creation, and restoration continue to function normally.</li>
+</ul>
+<hr>
+<h2 id="lessons-learned" tabindex="-1">Lessons Learned</h2>
+<ul>
+<li>Large architecture migrations can leave behind critical lifecycle logic.</li>
+<li>A component being stopped does not guarantee it was ever started.</li>
+<li>Debugging execution flow is as important as debugging algorithms.</li>
+<li>Configuration refactoring should be verified before assuming it introduced a failure.</li>
+<li>Temporary diagnostic logging can be extremely valuable for isolating complex lifecycle issues.</li>
+</ul>
+<hr>
+<h2 id="impact" tabindex="-1">Impact</h2>
+<p>This investigation resolved a hidden architecture regression caused by the transition from a CLI-based session controller to a FastAPI-driven host agent.</p>
+<p>The fix restored the intended Live Sync lifecycle and ensured real-time save synchronization functions correctly during active cloud gaming sessions.</p>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/internal-event-authentication"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Internal event authentication</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/dashboard-cache-investigation"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">Stale dashboard, correct backend</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>

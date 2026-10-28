@@ -1,6 +1,7 @@
 // Assembles index.html from src/layout.html + src/partials/*.html,
 // then bundles animation.js -> animation.bundle.js via esbuild.
 // Also generates case-study pages from layout-page.html + src/projects/*.html.
+// Also generates /work/pcgo/docs/<slug> pages from scripts/build-docs.mjs.
 //
 // Template variables available in any included partial or layout:
 //   {{home}}  - empty string on home page, "/" on every sub-page
@@ -307,6 +308,18 @@ async function build() {
   await bundleJS();           // JS first so HTML can hash the bundle
   buildHome(projects);
   const pagesBuilt = buildCasePages(projects) || [];
+
+  // Phase 6: PCGO docs reader
+  try {
+    const { buildDocs } = await import('./scripts/build-docs.mjs');
+    const originMatch  = fs.readFileSync(LAYOUT_HOME, 'utf8').match(/rel="canonical"\s+href="(https?:\/\/[^/"]+)/);
+    const origin       = originMatch ? originMatch[1] : 'https://harshchari.vercel.app';
+    const { built }    = await buildDocs(origin);
+    built.forEach((slug) => pagesBuilt.push(`/work/pcgo/docs/${slug}`));
+  } catch (err) {
+    console.warn(`[build] Docs build skipped: ${err.message}`);
+  }
+
   printSummary(pagesBuilt);
 }
 

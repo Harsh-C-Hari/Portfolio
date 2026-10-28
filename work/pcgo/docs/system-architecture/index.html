@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-system-architecture">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>System architecture | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="The layers from dashboard to Windows host, and the design principles behind them.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/system-architecture">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="System architecture | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="The layers from dashboard to Windows host, and the design principles behind them.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/system-architecture">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="System architecture | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="The layers from dashboard to Windows host, and the design principles behind them.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture" aria-current="page">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">2 min read</p>
+          <h1 class="doc-header__title">System architecture</h1>
+          <p class="doc-header__summary">The layers from dashboard to Windows host, and the design principles behind them.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#authentication-layer">Authentication Layer</a></li><li><a href="#frontend-layer">Frontend Layer</a></li><li><a href="#backend-layer">Backend Layer</a></li><li><a href="#host-agent-layer">Host Agent Layer</a></li><li><a href="#infrastructure-layer">Infrastructure Layer</a></li>  <li><a href="#sunshine">Sunshine</a></li>  <li><a href="#tailscale">Tailscale</a></li><li><a href="#persistence-layer">Persistence Layer</a></li><li><a href="#reliability">Reliability</a></li><li><a href="#modularity">Modularity</a></li><li><a href="#observability">Observability</a></li><li><a href="#extensibility">Extensibility</a></li></ul></nav>
+
+        <div class="doc-body">
+          <h1>System Architecture</h1>
+<h2 id="overview" tabindex="-1">Overview</h2>
+<p>Personal Cloud Gaming Orchestrator v0.1 is designed as a single-host cloud gaming orchestration platform.</p>
+<p>The architecture separates user interaction, backend orchestration, host management, monitoring, and recovery systems into distinct layers.</p>
+<hr>
+<h1>High-Level Architecture</h1>
+<pre class="hljs"><code>React Dashboard (Login / Bootstrap → Admin or User shell)
+        ↓
+FastAPI Backend  (JWT authentication on every route)
+        ↓
+Controllers / Services
+        ↓
+Python Host Agent
+        ↓
+Sunshine
+Tailscale
+        ↓
+Windows Gaming Host
+</code></pre>
+<p>A separate, narrower authentication path (a shared internal event token, not a user JWT) authorizes two non-interactive callers — the Sunshine stream hook script and the transport-monitoring background thread — to report stream state directly into the backend. See <a href="/work/pcgo/docs/internal-event-authentication">Internal Event Authentication</a>.</p>
+<hr>
+<h1>Architectural Layers</h1>
+<h2 id="authentication-layer" tabindex="-1">Authentication Layer</h2>
+<p>Every dashboard and API request, except the bootstrap/login endpoints themselves, requires a valid JWT bearer token.</p>
+<p>Responsibilities:</p>
+<ul>
+<li>First-run admin bootstrap</li>
+<li>Login and JWT issuance</li>
+<li>Role enforcement (admin / user) on every route</li>
+<li>User account management (admin only)</li>
+<li>Self-service password change</li>
+</ul>
+<p>Technology:</p>
+<ul>
+<li>python-jose (JWT)</li>
+<li>passlib + bcrypt (password hashing)</li>
+</ul>
+<p>See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/features/authentication.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Authentication &amp; Role-Based Access</a>.</p>
+<hr>
+<h2 id="frontend-layer" tabindex="-1">Frontend Layer</h2>
+<p>The frontend provides the user-facing dashboard. It renders one of two role-aware experiences after login: the full Admin Dashboard, or a scoped User Dashboard limited to the logged-in account’s own sessions, analytics, history, and logs.</p>
+<p>Responsibilities:</p>
+<ul>
+<li>Host monitoring (full for admins, reduced for users)</li>
+<li>Session monitoring</li>
+<li>Recovery monitoring (admin only)</li>
+<li>Sunshine client management (admin only)</li>
+<li>User management (admin only)</li>
+<li>Analytics visualization</li>
+<li>Real-time status updates</li>
+</ul>
+<p>Technology:</p>
+<ul>
+<li>React</li>
+<li>Vite</li>
+</ul>
+<hr>
+<h2 id="backend-layer" tabindex="-1">Backend Layer</h2>
+<p>The backend acts as the central orchestration layer.</p>
+<p>Responsibilities:</p>
+<ul>
+<li>API endpoints</li>
+<li>Authentication and authorization</li>
+<li>Validation</li>
+<li>Session orchestration</li>
+<li>Save orchestration</li>
+<li>Sunshine client/stream orchestration</li>
+<li>Monitoring coordination</li>
+<li>Recovery coordination</li>
+<li>WebSocket communication</li>
+</ul>
+<p>Technology:</p>
+<ul>
+<li>FastAPI</li>
+<li>Uvicorn</li>
+</ul>
+<hr>
+<h2 id="host-agent-layer" tabindex="-1">Host Agent Layer</h2>
+<p>The Host Agent provides direct interaction with the Windows host.</p>
+<p>Responsibilities:</p>
+<ul>
+<li>Session execution</li>
+<li>Save injection</li>
+<li>Save backup</li>
+<li>Monitoring</li>
+<li>Validation</li>
+<li>Recovery actions</li>
+</ul>
+<p>Technology:</p>
+<ul>
+<li>Python</li>
+</ul>
+<hr>
+<h2 id="infrastructure-layer" tabindex="-1">Infrastructure Layer</h2>
+<p>External services used by the platform.</p>
+<h3 id="sunshine" tabindex="-1">Sunshine</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Game streaming</li>
+<li>Client connectivity</li>
+</ul>
+<h3 id="tailscale" tabindex="-1">Tailscale</h3>
+<p>Responsibilities:</p>
+<ul>
+<li>Secure remote networking</li>
+<li>Connectivity management</li>
+</ul>
+<hr>
+<h2 id="persistence-layer" tabindex="-1">Persistence Layer</h2>
+<p>Historical and analytical data is stored in a SQLite database, accessed through a repository layer.</p>
+<p>Stored Data (SQLite, <code>host-agent/data/pcgo.db</code>):</p>
+<ul>
+<li>Session history and session events</li>
+<li>Session metadata</li>
+<li>Recovery events</li>
+<li>Sunshine stream history and current stream state</li>
+<li>Session statistics</li>
+<li>User accounts</li>
+</ul>
+<p>Stored Data (JSON, kept intentionally file-based):</p>
+<ul>
+<li>Host configuration (<code>config.json</code>)</li>
+<li>Game library (<code>games.json</code>)</li>
+<li>Active-session runtime/crash-recovery snapshot (<code>data/active_sessions.json</code>)</li>
+</ul>
+<p>Technology:</p>
+<ul>
+<li>SQLite (via the Python standard library <code>sqlite3</code>)</li>
+<li>JSON storage for configuration and runtime recovery state</li>
+</ul>
+<hr>
+<h1>Design Principles</h1>
+<h2 id="reliability" tabindex="-1">Reliability</h2>
+<p>Recovery systems and watchdogs help maintain service availability.</p>
+<h2 id="modularity" tabindex="-1">Modularity</h2>
+<p>Major systems are separated into dedicated components.</p>
+<h2 id="observability" tabindex="-1">Observability</h2>
+<p>System state is visible through monitoring and analytics systems.</p>
+<h2 id="extensibility" tabindex="-1">Extensibility</h2>
+<p>Future features can be added without major architectural redesign.</p>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/project-overview"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Project overview</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/backend-architecture"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">Backend architecture</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>

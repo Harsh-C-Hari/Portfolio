@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-dashboard-cache-investigation">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>Stale dashboard, correct backend | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/dashboard-cache-investigation">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Stale dashboard, correct backend | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/dashboard-cache-investigation">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Stale dashboard, correct backend | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation" aria-current="page">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">2 min read</p>
+          <h1 class="doc-header__title">Stale dashboard, correct backend</h1>
+          <p class="doc-header__summary">The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#initial-hypothesis">Initial Hypothesis</a></li><li><a href="#symptoms">Symptoms</a></li><li><a href="#investigation">Investigation</a></li><li><a href="#root-cause">Root Cause</a></li><li><a href="#solution">Solution</a></li>  <li><a href="#backend">Backend</a></li>  <li><a href="#frontend">Frontend</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul></nav>
+
+        <div class="doc-body">
+          <h1>Dashboard Synchronization &amp; Browser Cache Investigation</h1>
+<h2 id="issue-information" tabindex="-1">Issue Information</h2>
+<p>Category:
+Frontend-Backend Synchronization</p>
+<p>Affected Component:
+Real-Time Dashboard Monitoring</p>
+<p>Severity:
+Medium</p>
+<p>Status:
+Resolved</p>
+<hr>
+<h2 id="overview" tabindex="-1">Overview</h2>
+<p>The dashboard was designed to display real-time host information including:</p>
+<ul>
+<li>Session analytics</li>
+<li>Host metrics</li>
+<li>Recovery events</li>
+<li>Recovery statistics</li>
+<li>Session history</li>
+<li>Host status</li>
+</ul>
+<p>During development, some sections occasionally displayed outdated information despite backend data being updated correctly.</p>
+<hr>
+<h2 id="initial-hypothesis" tabindex="-1">Initial Hypothesis</h2>
+<p>The first suspected causes included:</p>
+<ul>
+<li>WebSocket synchronization problems</li>
+<li>Backend update failures</li>
+<li>React state synchronization issues</li>
+</ul>
+<hr>
+<h2 id="symptoms" tabindex="-1">Symptoms</h2>
+<p>The dashboard displayed stale information despite the backend maintaining the correct and updated system state.</p>
+<p>Affected components included:</p>
+<ul>
+<li>Session analytics</li>
+<li>Host metrics</li>
+<li>Recovery events</li>
+<li>Session history</li>
+</ul>
+<hr>
+<h2 id="investigation" tabindex="-1">Investigation</h2>
+<p>API testing showed that backend endpoints returned correct and updated data.</p>
+<p>However, browser requests for frequently called monitoring APIs were returning cached responses.</p>
+<p>This caused the dashboard to display stale information.</p>
+<hr>
+<h2 id="root-cause" tabindex="-1">Root Cause</h2>
+<p>The browser cached responses from high-frequency monitoring endpoints.</p>
+<p>The backend state was correct, but the frontend was receiving outdated cached data.</p>
+<hr>
+<h2 id="solution" tabindex="-1">Solution</h2>
+<p>Caching was disabled on both sides.</p>
+<h3 id="backend" tabindex="-1">Backend</h3>
+<p>Frequently updated APIs returned cache-control headers:</p>
+<pre class="hljs"><code><span class="hljs-keyword">return</span> JSONResponse(
+    content=data,
+    headers={
+        <span class="hljs-string">&quot;Cache-Control&quot;</span>:
+            <span class="hljs-string">&quot;no-store, no-cache, must-revalidate&quot;</span>
+    },
+)
+</code></pre>
+<h3 id="frontend" tabindex="-1">Frontend</h3>
+<p>The API wrapper was updated:</p>
+<pre class="hljs"><code><span class="hljs-title function_">fetch</span>(url, {
+    <span class="hljs-attr">cache</span>: <span class="hljs-string">&quot;no-store&quot;</span>
+})
+</code></pre>
+<hr>
+<h2 id="verification" tabindex="-1">Verification</h2>
+<p>After disabling caching:</p>
+<ul>
+<li>Session analytics updated correctly</li>
+<li>Host metrics synchronized correctly</li>
+<li>Recovery events updated immediately</li>
+<li>Dashboard state matched backend state</li>
+</ul>
+<hr>
+<h2 id="lessons-learned" tabindex="-1">Lessons Learned</h2>
+<ul>
+<li>Incorrect data does not always indicate a backend failure.</li>
+<li>Browser behavior can affect real-time systems.</li>
+<li>End-to-end debugging is required for distributed applications.</li>
+</ul>
+<hr>
+<h2 id="impact" tabindex="-1">Impact</h2>
+<p>The fix restored reliable real-time monitoring without requiring architectural changes to the WebSocket or backend systems.</p>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/live-sync-architecture-migration"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Live sync that stopped running</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/release-hardening-and-reliability"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">Release hardening and reliability</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>

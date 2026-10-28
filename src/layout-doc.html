@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en" data-page="{{page_type}}" data-slug="{{page_slug}}">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>{{page_title}}</title>
+  <meta name="description" content="{{page_description}}">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="{{page_canonical}}">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="{{page_title}}">
+  <meta property="og:description" content="{{page_description}}">
+  <meta property="og:url" content="{{page_canonical}}">
+  <meta property="og:image" content="{{page_og_image}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{page_title}}">
+  <meta name="twitter:description" content="{{page_description}}">
+  <meta name="twitter:image" content="{{page_og_image}}">
+
+  {{page_jsonld}}
+
+  <link rel="stylesheet" href="/styles.css?v={{css_version}}">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      {{doc_sidebar}}
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">{{doc_reading_time}}</p>
+          <h1 class="doc-header__title">{{doc_title}}</h1>
+          <p class="doc-header__summary">{{doc_summary}}</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        {{doc_toc}}
+
+        <div class="doc-body">
+          {{doc_body}}
+        </div>
+
+        {{doc_prevnext}}
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v={{js_version}}" defer></script>
+</body>
+
+</html>

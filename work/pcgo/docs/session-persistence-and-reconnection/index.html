@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-session-persistence-and-reconnection">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>Session persistence and reconnection | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="Keeping sessions consistent across crashes and reconnects.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/session-persistence-and-reconnection">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Session persistence and reconnection | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="Keeping sessions consistent across crashes and reconnects.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/session-persistence-and-reconnection">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Session persistence and reconnection | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="Keeping sessions consistent across crashes and reconnects.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection" aria-current="page">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">3 min read</p>
+          <h1 class="doc-header__title">Session persistence and reconnection</h1>
+          <p class="doc-header__summary">Keeping sessions consistent across crashes and reconnects.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        
+
+        <div class="doc-body">
+          <h1>Session Persistence &amp; Reconnection Architecture</h1>
+<p><strong>Phase:</strong> Phase 23</p>
+<p><strong>Status:</strong> Completed</p>
+<hr>
+<h1>Issue Information</h1>
+<p><strong>Category:</strong>
+Reliability Engineering / Recovery Systems / Session Management</p>
+<p><strong>Affected Components:</strong></p>
+<ul>
+<li>Session Manager</li>
+<li>Session Registry</li>
+<li>Startup Recovery</li>
+<li>Cleanup Manager</li>
+<li>Live Sync Manager</li>
+<li>Sunshine Integration</li>
+<li>Recovery Event System</li>
+</ul>
+<p><strong>Severity:</strong>
+Critical</p>
+<hr>
+<h1>Overview</h1>
+<p>Phase 23 introduced persistent session infrastructure capable of surviving backend failures while preserving active gameplay sessions.</p>
+<p>The original objective was simple reconnect support:</p>
+<pre class="hljs"><code>Disconnect
+    ↓
+Reconnect
+    ↓
+Continue Playing
+</code></pre>
+<p>During implementation it became clear that reconnect support required solving a more fundamental problem:</p>
+<pre class="hljs"><code>Backend Crash
+    ↓
+Backend Restart
+    ↓
+Game Still Running
+    ↓
+Restore Session State
+    ↓
+Continue Session
+</code></pre>
+<p>The final implementation evolved into a full session persistence architecture.</p>
+<hr>
+<h1>Architectural Problem</h1>
+<p>Early versions treated the session as a single object.</p>
+<pre class="hljs"><code>Session
+ ├─ Game Process
+ ├─ Timer
+ ├─ Live Sync
+ ├─ Stream State
+ └─ Monitoring
+</code></pre>
+<p>If the backend process terminated unexpectedly:</p>
+<ul>
+<li>timers disappeared</li>
+<li>monitoring stopped</li>
+<li>live sync stopped</li>
+<li>ownership information was lost</li>
+</ul>
+<p>The game process itself continued running but became orphaned.</p>
+<hr>
+<h1>Architectural Redesign</h1>
+<p>Phase 23 separated multiple independent lifecycles.</p>
+<pre class="hljs"><code>Game Process
+    ↓
+Session Lifecycle
+    ↓
+Stream Lifecycle
+    ↓
+Transport Lifecycle
+</code></pre>
+<p>This architecture allows failures to occur independently.</p>
+<p>Examples:</p>
+<pre class="hljs"><code>Game Alive
+Session Alive
+Stream Dead
+Transport Dead
+</code></pre>
+<p>or</p>
+<pre class="hljs"><code>Game Alive
+Session Alive
+Stream Alive
+Transport Dead
+</code></pre>
+<hr>
+<h1>Persistent Session Registry</h1>
+<p>Active sessions are persisted to disk.</p>
+<p>Stored information includes:</p>
+<ul>
+<li>session id</li>
+<li>user id</li>
+<li>game id</li>
+<li>process id</li>
+<li>start time</li>
+<li>expiration time</li>
+<li>warning state</li>
+<li>cleanup state</li>
+</ul>
+<p>This registry becomes the source of truth during startup recovery.</p>
+<hr>
+<h1>Session Resurrection</h1>
+<p>During startup the backend performs recovery validation.</p>
+<p>Recovery sequence:</p>
+<pre class="hljs"><code>Load Active Sessions
+        ↓
+Verify Process Exists
+        ↓
+Verify Session Ownership
+        ↓
+Restore Timers
+        ↓
+Restore Monitoring
+        ↓
+Restore Live Sync
+        ↓
+Resume Session
+</code></pre>
+<p>Sessions whose processes no longer exist are finalized automatically.</p>
+<hr>
+<h1>Persistent Timers</h1>
+<p>Earlier implementations stored relative durations.</p>
+<p>Example:</p>
+<pre class="hljs"><code>60 minutes remaining
+</code></pre>
+<p>Backend restart would lose this information.</p>
+<p>Phase 23 migrated to absolute expiration timestamps.</p>
+<p>Example:</p>
+<pre class="hljs"><code>expires_at:
+2026-07-12T18:45:00
+</code></pre>
+<p>This allows timers to survive restart events.</p>
+<hr>
+<h1>Shared Session Finalization</h1>
+<p>Cleanup logic previously existed in multiple locations.</p>
+<p>Examples:</p>
+<ul>
+<li>timeout expiration</li>
+<li>manual stop</li>
+<li>crash recovery</li>
+</ul>
+<p>This created inconsistent cleanup behavior.</p>
+<p>Phase 23 introduced a shared finalization workflow.</p>
+<p>All session termination paths now use the same cleanup pipeline.</p>
+<hr>
+<h1>Live Sync Resurrection</h1>
+<p>Recovered sessions automatically restore:</p>
+<ul>
+<li>Live Sync</li>
+<li>monitoring</li>
+<li>ownership tracking</li>
+<li>warning timers</li>
+</ul>
+<p>This prevents save synchronization from silently stopping after backend restart.</p>
+<hr>
+<h1>Verification</h1>
+<p>Verified scenarios include:</p>
+<ul>
+<li>backend restart during active session</li>
+<li>backend crash during active session</li>
+<li>timer restoration</li>
+<li>live sync restoration</li>
+<li>session expiration after restart</li>
+<li>stale session cleanup</li>
+<li>orphan process cleanup</li>
+</ul>
+<hr>
+<h1>Lessons Learned</h1>
+<p>Reconnect support was not primarily a networking problem.</p>
+<p>The underlying challenge was preserving ownership and lifecycle state across backend failure.</p>
+<p>Solving persistence first made reconnect support significantly simpler.</p>
+<hr>
+<h1>Impact</h1>
+<p>Phase 23 introduced:</p>
+<ul>
+<li>session resurrection</li>
+<li>persistent timers</li>
+<li>startup recovery</li>
+<li>shared finalization</li>
+<li>lifecycle separation</li>
+<li>restart resilience</li>
+</ul>
+<p>These systems provide the foundation for future reconnect support and cloud gaming functionality.</p>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/release-hardening-and-reliability"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Release hardening and reliability</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/problems-solved"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">Major problems solved</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>

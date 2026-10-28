@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-roadmap">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>Roadmap | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/roadmap">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Roadmap | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/roadmap">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Roadmap | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap" aria-current="page">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">4 min read</p>
+          <h1 class="doc-header__title">Roadmap</h1>
+          <p class="doc-header__summary">Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#session-persistence-%26-reconnection">Session Persistence &amp; Reconnection</a></li><li><a href="#authentication-%26-authorization">Authentication &amp; Authorization</a></li><li><a href="#database-migration">Database Migration</a></li><li><a href="#user-app-foundation">User App Foundation</a></li><li><a href="#embedded-tailscale">Embedded Tailscale</a></li><li><a href="#moonlight-automation">Moonlight Automation</a></li><li><a href="#production-user-experience">Production User Experience</a></li><li><a href="#production-host-dashboard">Production Host Dashboard</a></li><li><a href="#security-%26-audit-logging">Security &amp; Audit Logging</a></li><li><a href="#deployment-%26-packaging">Deployment &amp; Packaging</a></li></ul></nav>
+
+        <div class="doc-body">
+          <h1>Development Roadmap</h1>
+<h2 id="overview" tabindex="-1">Overview</h2>
+<p>This roadmap outlines the planned development phases following completion of the current MVP foundation.</p>
+<p>The goal is to evolve the platform from a host-focused management system into a complete personal cloud gaming ecosystem.</p>
+<hr>
+<h1>Current Status</h1>
+<p>Current Progress:</p>
+<pre class="hljs"><code>The v0.1 Host Foundation Release is complete.
+
+Phase 23 Session Persistence &amp; Reconnection has been completed.
+
+Phase 24 Authentication &amp; Authorization has been completed.
+
+Phase 25 Database Migration has been completed.
+</code></pre>
+<p>Completed:</p>
+<ul>
+<li>Session System</li>
+<li>Save Management</li>
+<li>Session Analytics</li>
+<li>Session Event Logging</li>
+<li>Live Save Synchronization</li>
+<li>Stale Session Recovery</li>
+<li>Sunshine Integration</li>
+<li>Sunshine Watchdog</li>
+<li>Sunshine Client Pairing &amp; Stream Tracking</li>
+<li>Tailscale Diagnostics</li>
+<li>Tailscale Recovery</li>
+<li>Host Monitoring</li>
+<li>Startup Validation</li>
+<li>Lifecycle Manager</li>
+<li>Dashboard (Admin and User)</li>
+<li>Recovery Infrastructure</li>
+<li>Authentication &amp; Role-Based Authorization</li>
+<li>Internal Event Authentication</li>
+<li>SQLite Database Migration</li>
+</ul>
+<hr>
+<h1>v0.1 Host Foundation Release</h1>
+<p>The initial public release concludes the implementation of the single-host orchestration platform.</p>
+<p>Completed milestones include:</p>
+<ul>
+<li>Session orchestration</li>
+<li>Save synchronization</li>
+<li>Dynamic game management</li>
+<li>Host monitoring</li>
+<li>Sunshine integration</li>
+<li>State-aware Tailscale recovery</li>
+<li>Dashboard implementation</li>
+<li>Administrative configuration</li>
+<li>Reliability engineering</li>
+<li>Release stabilization</li>
+</ul>
+<p>Subsequent phases focus on extending the platform beyond a host-only administrative system toward a complete cloud gaming experience.</p>
+<hr>
+<h1>Phase 23 — Completed</h1>
+<h2 id="session-persistence-%26-reconnection" tabindex="-1">Session Persistence &amp; Reconnection</h2>
+<p>See <a href="/work/pcgo/docs/session-persistence-and-reconnection">Session Persistence &amp; Reconnection Architecture</a> for the full engineering write-up.</p>
+<p>Completed capabilities:</p>
+<ul>
+<li>Backend restart resilience</li>
+<li>Session resurrection</li>
+<li>Live Sync restoration</li>
+<li>Persistent session timers</li>
+<li>Stream lifecycle tracking</li>
+<li>Transport monitoring</li>
+<li>Disconnect detection</li>
+<li>Reconnect detection</li>
+<li>Session and stream ownership separation</li>
+</ul>
+<p>Architectural achievement:</p>
+<pre class="hljs"><code>Game Process
+    ↓
+Session Lifecycle
+    ↓
+Stream Lifecycle
+    ↓
+Transport Lifecycle
+</code></pre>
+<hr>
+<h1>Phase 24 — Completed</h1>
+<h2 id="authentication-%26-authorization" tabindex="-1">Authentication &amp; Authorization</h2>
+<p>See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/features/authentication.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Authentication &amp; Role-Based Access</a> and <a href="/work/pcgo/docs/internal-event-authentication">Internal Event Authentication</a> for the full engineering write-up.</p>
+<p>Delivered capabilities:</p>
+<ul>
+<li>JWT-based user authentication with first-run admin bootstrap</li>
+<li>bcrypt password hashing</li>
+<li>Two roles (admin, user) enforced on every API route</li>
+<li>Admin-only user management (create, list, delete, bulk cleanup)</li>
+<li>Self-service password change</li>
+<li>Role-aware dashboard routing (Admin Dashboard vs. User Dashboard)</li>
+<li>Session ownership validation (users see only their own sessions, analytics, history, and logs)</li>
+<li>A separate shared-secret channel (internal event token) for the two non-user callers — the Sunshine stream hook and transport monitor — that must report state without holding a user credential</li>
+</ul>
+<p>Not yet delivered (carried forward to later phases):</p>
+<ul>
+<li>Refresh tokens</li>
+<li>Login rate limiting / account lockout</li>
+<li>Structured security audit logging (Phase 31)</li>
+</ul>
+<p>Benefits realized:</p>
+<ul>
+<li>Security: no endpoint is reachable without authentication</li>
+<li>Multi-user readiness: distinct admin and user experiences on a shared host</li>
+</ul>
+<hr>
+<h1>Phase 25 — Completed</h1>
+<h2 id="database-migration" tabindex="-1">Database Migration</h2>
+<p>Session history, session events, session metadata, recovery events, Sunshine stream history/state, and user accounts were migrated from JSON files to a SQLite database (<code>host-agent/data/pcgo.db</code>), accessed through a dedicated repository layer (<code>host_agent/repositories/</code>).</p>
+<p>Host configuration (<code>config.json</code>), the game library (<code>games.json</code>), and the active-session runtime/crash-recovery snapshot (<code>data/active_sessions.json</code>) were intentionally kept as JSON files rather than migrated. Log files remain plain rotating log files.</p>
+<p>Delivered:</p>
+<ul>
+<li>SQLite-backed repositories for the data listed above</li>
+<li>Structured storage layer with indexes supporting existing query patterns</li>
+<li>Aggregate SQL queries for recovery statistics (replacing in-Python tallying)</li>
+</ul>
+<p>See <code>docs/phase25/</code> for the full engineering design and schema documentation.</p>
+<hr>
+<h1>Phase 26</h1>
+<h2 id="user-app-foundation" tabindex="-1">User App Foundation</h2>
+<p>A scoped, role-aware <strong>User Dashboard</strong> already ships as part of the Phase 24 authentication work (Home, Analytics, Session History, Logs, Change Password, restricted to the logged-in user’s own data). Phase 26 goes further: a dedicated, purpose-built application rather than a role-restricted view of the same web dashboard.</p>
+<p>Goals:</p>
+<ul>
+<li>Dedicated user application (distinct from the admin dashboard codebase)</li>
+<li>User-focused workflows</li>
+<li>Remote access experience</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Improved usability</li>
+<li>Better user experience</li>
+</ul>
+<hr>
+<h1>Phase 27</h1>
+<h2 id="embedded-tailscale" tabindex="-1">Embedded Tailscale</h2>
+<p>Goals:</p>
+<ul>
+<li>Integrated connectivity setup</li>
+<li>Simplified onboarding</li>
+<li>Reduced manual networking steps</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Easier deployment</li>
+<li>Better user experience</li>
+</ul>
+<hr>
+<h1>Phase 28</h1>
+<h2 id="moonlight-automation" tabindex="-1">Moonlight Automation</h2>
+<p>Goals:</p>
+<ul>
+<li>Stream launch automation</li>
+<li>Client workflow automation</li>
+<li>Reduced manual interaction</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Faster session startup</li>
+<li>Improved usability</li>
+</ul>
+<hr>
+<h1>Phase 29</h1>
+<h2 id="production-user-experience" tabindex="-1">Production User Experience</h2>
+<p>The initial User Dashboard (session visibility, analytics, history, logs) was delivered as part of Phase 24. Phase 29 focuses on maturing it into a production-grade player experience.</p>
+<p>Goals:</p>
+<ul>
+<li>Save visibility for end users</li>
+<li>Connection management (client/stream status from the user’s perspective)</li>
+<li>Refined, production-quality UI for the existing User Dashboard</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Better remote experience</li>
+</ul>
+<hr>
+<h1>Phase 30</h1>
+<h2 id="production-host-dashboard" tabindex="-1">Production Host Dashboard</h2>
+<p>Goals:</p>
+<ul>
+<li>Production-ready monitoring</li>
+<li>Improved observability</li>
+<li>Operational tooling</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Better reliability management</li>
+</ul>
+<hr>
+<h1>Phase 31</h1>
+<h2 id="security-%26-audit-logging" tabindex="-1">Security &amp; Audit Logging</h2>
+<p>Goals:</p>
+<ul>
+<li>Security event tracking</li>
+<li>Audit trails</li>
+<li>Administrative visibility</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Accountability</li>
+<li>Security</li>
+</ul>
+<hr>
+<h1>Phase 32</h1>
+<h2 id="deployment-%26-packaging" tabindex="-1">Deployment &amp; Packaging</h2>
+<p>Goals:</p>
+<ul>
+<li>Simplified installation</li>
+<li>Distribution packaging</li>
+<li>Deployment automation</li>
+</ul>
+<p>Expected Benefits:</p>
+<ul>
+<li>Easier adoption</li>
+<li>Production readiness</li>
+</ul>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/v0-limitations"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Known limitations</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>

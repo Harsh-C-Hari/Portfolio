@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en" data-page="doc" data-slug="pcgo-doc-tailscale-state-recovery">
+
+<head>
+  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>Tailscale state-aware recovery | PCGO docs | Harsh C Hari</title>
+  <meta name="description" content="A week spent learning that "restart the service" is not a recovery strategy: Tailscale fails in distinct states that each need a different fix.">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <link rel="canonical" href="https://harshchari.vercel.app/work/pcgo/docs/tailscale-state-recovery">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="Tailscale state-aware recovery | PCGO docs | Harsh C Hari">
+  <meta property="og:description" content="A week spent learning that "restart the service" is not a recovery strategy: Tailscale fails in distinct states that each need a different fix.">
+  <meta property="og:url" content="https://harshchari.vercel.app/work/pcgo/docs/tailscale-state-recovery">
+  <meta property="og:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Tailscale state-aware recovery | PCGO docs | Harsh C Hari">
+  <meta name="twitter:description" content="A week spent learning that "restart the service" is not a recovery strategy: Tailscale fails in distinct states that each need a different fix.">
+  <meta name="twitter:image" content="https://harshchari.vercel.app/img/work/pcgo/og.jpg">
+
+  
+
+  <link rel="stylesheet" href="/styles.css?v=mvsbrhy9.qbc">
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar">
+      <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery" aria-current="page">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main-content" class="doc-layout__main" tabindex="-1">
+      <article class="doc-article">
+        <header class="doc-header">
+          <p class="doc-header__reading-time">2 min read</p>
+          <h1 class="doc-header__title">Tailscale state-aware recovery</h1>
+          <p class="doc-header__summary">A week spent learning that &quot;restart the service&quot; is not a recovery strategy: Tailscale fails in distinct states that each need a different fix.</p>
+        </header>
+
+        <!-- TOC — inserted only on desktop, hidden on mobile -->
+        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#initial-hypothesis">Initial Hypothesis</a></li><li><a href="#symptoms">Symptoms</a></li><li><a href="#investigation">Investigation</a></li>  <li><a href="#service-stopped">Service stopped</a></li>  <li><a href="#service-unavailable-%2F-unknown-state">Service unavailable / unknown state</a></li>  <li><a href="#nostate-condition">NoState condition</a></li><li><a href="#root-cause">Root Cause</a></li><li><a href="#solution">Solution</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul></nav>
+
+        <div class="doc-body">
+          <h1>Tailscale State-Aware Recovery Investigation</h1>
+<h2 id="issue-information" tabindex="-1">Issue Information</h2>
+<p>Category:
+Infrastructure Recovery Design</p>
+<p>Affected Component:
+Tailscale Watchdog</p>
+<p>Severity:
+High</p>
+<p>Status:
+Resolved</p>
+<hr>
+<h2 id="overview" tabindex="-1">Overview</h2>
+<p>The goal of the Tailscale watchdog was to automatically recover connectivity failures without requiring manual intervention.</p>
+<p>Initial assumptions treated Tailscale like a normal Windows service that could be restarted using a single recovery action.</p>
+<p>During testing, this assumption proved incorrect.</p>
+<hr>
+<h2 id="initial-hypothesis" tabindex="-1">Initial Hypothesis</h2>
+<p>The initial recovery design assumed Tailscale could be treated as a traditional Windows service with a simple restart strategy.</p>
+<hr>
+<h2 id="symptoms" tabindex="-1">Symptoms</h2>
+<p>The Tailscale service could appear to be running while the overall Tailscale connection was unhealthy.</p>
+<p>Simple restart-based recovery was unreliable because different failure conditions required different actions.</p>
+<hr>
+<h2 id="investigation" tabindex="-1">Investigation</h2>
+<p>Approximately one week was spent investigating Tailscale’s internal behavior and failure states.</p>
+<p>Testing revealed that Tailscale consists of multiple components:</p>
+<ul>
+<li>Tailscale service</li>
+<li>Tailscale IPN backend process</li>
+</ul>
+<p>A healthy Tailscale connection requires both components to operate correctly.</p>
+<p>The investigation identified multiple states requiring different handling.</p>
+<p>Examples:</p>
+<h3 id="service-stopped" tabindex="-1">Service stopped</h3>
+<p>Recovery action:</p>
+<pre class="hljs"><code>tailscale up
+</code></pre>
+<hr>
+<h3 id="service-unavailable-%2F-unknown-state" tabindex="-1">Service unavailable / unknown state</h3>
+<p>Recovery action:</p>
+<pre class="hljs"><code>Start-Process Tailscale
+</code></pre>
+<hr>
+<h3 id="nostate-condition" tabindex="-1">NoState condition</h3>
+<p>Recovery action:</p>
+<pre class="hljs"><code>Start tailscale-ipn.exe
+</code></pre>
+<hr>
+<p>Authentication-related states such as login failures are currently considered non-recoverable automatically because they require user intervention.</p>
+<hr>
+<h2 id="root-cause" tabindex="-1">Root Cause</h2>
+<p>The original recovery concept assumed a single restart strategy.</p>
+<p>The real behavior was state-dependent:</p>
+<p>Different Tailscale failures require different recovery workflows.</p>
+<hr>
+<h2 id="solution" tabindex="-1">Solution</h2>
+<p>The final watchdog became a diagnostic-driven recovery system:</p>
+<pre class="hljs"><code>Detect Failure
+        |
+        v
+Diagnose State
+        |
+        v
+Classify Failure
+        |
+        v
+Select Recovery Strategy
+        |
+        v
+Execute Recovery
+        |
+        v
+Verify Health
+        |
+        v
+Log Recovery Event
+</code></pre>
+<hr>
+<h2 id="verification" tabindex="-1">Verification</h2>
+<p>The final system was tested against known recoverable states.</p>
+<p>Verified capabilities:</p>
+<ul>
+<li>Detect unhealthy Tailscale conditions</li>
+<li>Identify failure categories</li>
+<li>Execute targeted recovery actions</li>
+<li>Verify post-recovery health</li>
+<li>Record recovery history and statistics</li>
+</ul>
+<hr>
+<h2 id="lessons-learned" tabindex="-1">Lessons Learned</h2>
+<ul>
+<li>External services may have internal states not visible through standard service checks.</li>
+<li>Recovery systems should be diagnostic-driven rather than relying on simple restarts.</li>
+<li>Understanding the lifecycle of third-party services is critical for reliable automation.</li>
+</ul>
+<hr>
+<h2 id="impact" tabindex="-1">Impact</h2>
+<p>This transformed the Tailscale watchdog from a basic availability checker into a state-aware recovery system and became one of the most complex reliability components of the project.</p>
+
+        </div>
+
+        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/recovery-architecture"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">Recovery architecture</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/internal-event-authentication"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">Internal event authentication</span></a></nav>
+      </article>
+    </main>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v=mvsbro2z.73o" defer></script>
+</body>
+
+</html>
