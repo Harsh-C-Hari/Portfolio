@@ -114,94 +114,98 @@
       <h2 class="cs-section__title" id="arch-title">Four layers, one host.</h2>
     </header>
 
-    <div class="cs-arch">
-      <!-- Inline SVG diagram -->
-      <figure class="cs-arch__diagram" aria-label="System architecture diagram showing four layers">
-        <svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" fill="none">
-          <!-- Layer boxes -->
-          <rect x="20" y="10" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-          <text x="110" y="28" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">React dashboard</text>
-          <text x="110" y="44" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Admin and user views, gated by login</text>
+    <div class="cs-section__content">
+      <div class="cs-arch">
+        <!-- Inline SVG diagram -->
+        <figure class="cs-arch__diagram" aria-label="System architecture diagram showing four layers">
+          <svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" fill="none">
+            <!-- Layer boxes -->
+            <rect x="20" y="10" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
+            <text x="110" y="28" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">React dashboard</text>
+            <text x="110" y="44" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Admin and user views</text>
 
-          <!-- Arrow -->
-          <line x1="110" y1="54" x2="110" y2="74" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- Arrow -->
+            <line x1="110" y1="54" x2="110" y2="74" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <rect x="20" y="74" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-          <text x="110" y="92" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">FastAPI backend</text>
-          <text x="110" y="108" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">JWT on every route, orchestrates everything</text>
+            <rect x="20" y="74" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
+            <text x="110" y="92" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">FastAPI backend</text>
+            <text x="110" y="108" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">JWT on every route</text>
 
-          <!-- Arrow -->
-          <line x1="110" y1="118" x2="110" y2="138" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- Arrow -->
+            <line x1="110" y1="118" x2="110" y2="138" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <rect x="20" y="138" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-          <text x="110" y="156" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">Controllers &amp; services</text>
-          <text x="110" y="172" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Sessions, saves, monitoring, recovery</text>
+            <rect x="20" y="138" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
+            <text x="110" y="156" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">Controllers &amp; services</text>
+            <text x="110" y="172" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Sessions, saves, monitoring, recovery</text>
 
-          <!-- Arrow -->
-          <line x1="110" y1="182" x2="110" y2="202" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- Arrow -->
+            <line x1="110" y1="182" x2="110" y2="202" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <rect x="20" y="202" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-          <text x="110" y="220" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">Python host agent</text>
-          <text x="110" y="236" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Does the work on the Windows machine</text>
+            <rect x="20" y="202" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
+            <text x="110" y="220" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">Python host agent</text>
+            <text x="110" y="236" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Does the work on the Windows PC</text>
 
-          <!-- Arrow -->
-          <line x1="110" y1="246" x2="110" y2="266" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- Arrow -->
+            <line x1="110" y1="246" x2="110" y2="266" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <!-- Sunshine + Tailscale side by side -->
-          <rect x="20" y="266" width="84" height="40" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
-          <text x="62" y="282" text-anchor="middle" font-family="var(--f-display)" font-size="11" fill="var(--ink)">Sunshine</text>
-          <text x="62" y="298" text-anchor="middle" font-family="var(--f-mono)" font-size="8" fill="var(--muted)">streaming</text>
+            <!-- Sunshine + Tailscale side by side -->
+            <rect x="20" y="266" width="84" height="40" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="62" y="282" text-anchor="middle" font-family="var(--f-display)" font-size="11" fill="var(--ink)">Sunshine</text>
+            <text x="62" y="298" text-anchor="middle" font-family="var(--f-mono)" font-size="8" fill="var(--muted)">streaming</text>
 
-          <rect x="116" y="266" width="84" height="40" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
-          <text x="158" y="282" text-anchor="middle" font-family="var(--f-display)" font-size="11" fill="var(--ink)">Tailscale</text>
-          <text x="158" y="298" text-anchor="middle" font-family="var(--f-mono)" font-size="8" fill="var(--muted)">networking</text>
+            <rect x="116" y="266" width="84" height="40" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
+            <text x="158" y="282" text-anchor="middle" font-family="var(--f-display)" font-size="11" fill="var(--ink)">Tailscale</text>
+            <text x="158" y="298" text-anchor="middle" font-family="var(--f-mono)" font-size="8" fill="var(--muted)">networking</text>
 
-          <!-- Arrow -->
-          <line x1="110" y1="306" x2="110" y2="326" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
+            <!-- Arrow -->
+            <line x1="110" y1="306" x2="110" y2="326" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
 
-          <!-- Base -->
-          <rect x="20" y="326" width="180" height="40" rx="4" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
-          <text x="110" y="344" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--ink)">Windows gaming host</text>
-          <text x="110" y="358" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">the machine</text>
+            <!-- Base -->
+            <rect x="20" y="326" width="180" height="40" rx="4" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text x="110" y="344" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--ink)">Windows gaming host</text>
+            <text x="110" y="358" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">the machine</text>
 
-          <!-- Internal event token side channel -->
-          <line x1="200" y1="96" x2="245" y2="96" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
-          <line x1="200" y1="224" x2="245" y2="224" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
-          <line x1="245" y1="96" x2="245" y2="224" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
-          <text x="248" y="165" font-family="var(--f-mono)" font-size="8" fill="var(--muted)" writing-mode="vertical-rl" text-anchor="middle">internal event token</text>
+            <!-- Internal event token side channel (dashed, right side) -->
+            <line x1="200" y1="96" x2="245" y2="96" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line x1="200" y1="224" x2="245" y2="224" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
+            <line x1="245" y1="96" x2="245" y2="224" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
+            <!-- Pill label (horizontal) -->
+            <rect x="236" y="152" width="58" height="14" rx="7" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.75"/>
+            <text x="265" y="163" text-anchor="middle" font-family="var(--f-mono)" font-size="7" fill="var(--muted)">internal event token</text>
 
-          <defs>
-            <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-              <path d="M0,0 L6,3 L0,6 Z" fill="var(--ink)"/>
-            </marker>
-          </defs>
-        </svg>
-        <figcaption class="cs-arch__caption">
-          <span class="cs-mono">internal event token</span>: Sunshine's hook script and a log-tailing monitor report stream state straight into the backend. They get a separate, narrower credential.
-        </figcaption>
-      </figure>
+            <defs>
+              <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="var(--ink)"/>
+              </marker>
+            </defs>
+          </svg>
+          <figcaption class="cs-arch__caption">
+            <span class="cs-mono">internal event token</span>: Sunshine's hook script and a log-tailing monitor report stream state straight into the backend. They get a separate, narrower credential.
+          </figcaption>
+        </figure>
 
-      <!-- Text descriptions -->
-      <div class="cs-arch__text">
-        <dl class="cs-arch__dl">
-          <div>
-            <dt>Dashboard.</dt>
-            <dd>One React app. After login it shows the full admin dashboard or a scoped user dashboard limited to that account's own sessions, analytics, history and logs.</dd>
-          </div>
-          <div>
-            <dt>Backend.</dt>
-            <dd>FastAPI. Every route except login and first-run bootstrap needs a valid JWT, and roles are enforced per route.</dd>
-          </div>
-          <div>
-            <dt>Host agent.</dt>
-            <dd>The Python layer that touches the machine: runs sessions, injects and backs up saves, monitors, validates and performs recovery actions.</dd>
-          </div>
-          <div>
-            <dt>Storage.</dt>
-            <dd>History, users and recovery events live in SQLite. Host config, the game library and the active-session crash snapshot stay as JSON on purpose, so the host can still recover when the database is the thing that broke.</dd>
-          </div>
-        </dl>
-        <p class="cs-honesty">Single host today. A multi-host design exists as a document, not as code.</p>
+        <!-- Text descriptions -->
+        <div class="cs-arch__text">
+          <dl class="cs-arch__dl">
+            <div>
+              <dt>Dashboard.</dt>
+              <dd>One React app. After login it shows the full admin dashboard or a scoped user dashboard limited to that account's own sessions, analytics, history and logs.</dd>
+            </div>
+            <div>
+              <dt>Backend.</dt>
+              <dd>FastAPI. Every route except login and first-run bootstrap needs a valid JWT, and roles are enforced per route.</dd>
+            </div>
+            <div>
+              <dt>Host agent.</dt>
+              <dd>The Python layer that touches the machine: runs sessions, injects and backs up saves, monitors, validates and performs recovery actions.</dd>
+            </div>
+            <div>
+              <dt>Storage.</dt>
+              <dd>History, users and recovery events live in SQLite. Host config, the game library and the active-session crash snapshot stay as JSON on purpose, so the host can still recover when the database is the thing that broke.</dd>
+            </div>
+          </dl>
+          <p class="cs-honesty">Single host today. A multi-host design exists as a document, not as code.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -448,24 +452,26 @@
       <h2 class="cs-section__title" id="status-title">Honest status.</h2>
     </header>
 
-    <div class="cs-status">
-      <div class="cs-status__col">
-        <h3 class="cs-status__head">Done</h3>
-        <p>v0.1 host foundation, then Phase 23 session persistence and reconnection, Phase 24 authentication and roles, Phase 25 the move from JSON files to SQLite.</p>
-      </div>
-      <div class="cs-status__col">
-        <h3 class="cs-status__head">Next</h3>
-        <p>Phase 26 a dedicated user app, 27 embedded Tailscale, 28 Moonlight automation, 29 production player experience, 30 production host dashboard, 31 security and audit logging, 32 deployment and packaging.</p>
-      </div>
-      <div class="cs-status__col cs-status__col--full">
-        <h3 class="cs-status__head">Not done yet</h3>
-        <ul class="cs-status__list">
-          <li>No refresh tokens: sessions expire and need a new login.</li>
-          <li>No login rate limiting or account lockout.</li>
-          <li>No audit log of logins or admin actions (planned, Phase 31).</li>
-          <li>The API only allows localhost origins until it is deployed somewhere else.</li>
-          <li>No automated backend tests yet.</li>
-        </ul>
+    <div class="cs-section__content">
+      <div class="cs-status">
+        <div class="cs-status__col">
+          <h3 class="cs-status__head">Done</h3>
+          <p>v0.1 host foundation, then Phase 23 session persistence and reconnection, Phase 24 authentication and roles, Phase 25 the move from JSON files to SQLite.</p>
+        </div>
+        <div class="cs-status__col">
+          <h3 class="cs-status__head">Next</h3>
+          <p>Phase 26 a dedicated user app, 27 embedded Tailscale, 28 Moonlight automation, 29 production player experience, 30 production host dashboard, 31 security and audit logging, 32 deployment and packaging.</p>
+        </div>
+        <div class="cs-status__col cs-status__col--full">
+          <h3 class="cs-status__head">Not done yet</h3>
+          <ul class="cs-status__list">
+            <li>No refresh tokens: sessions expire and need a new login.</li>
+            <li>No login rate limiting or account lockout.</li>
+            <li>No audit log of logins or admin actions (planned, Phase 31).</li>
+            <li>The API only allows localhost origins until it is deployed somewhere else.</li>
+            <li>No automated backend tests yet.</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
