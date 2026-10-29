@@ -1942,8 +1942,8 @@ main[tabindex="-1"]:focus-visible,
 
 .cs-next__title {
   font-family: var(--f-display);
-  font-size: clamp(40px, 7vw, 96px);
-  line-height: 0.98;
+  font-size: clamp(32px, 4.5vw, 64px);
+  line-height: 1.05;
   color: var(--ink);
   font-weight: 400;
   display: inline-block;
@@ -1987,7 +1987,7 @@ main[tabindex="-1"]:focus-visible,
 
 .cs-next__link:hover .mark,
 .cs-next__link:focus-visible .mark {
-  background-size: 100% 0.36em;
+  background-size: 100% 100%;
 }
 
 .cs-next__link:hover .cs-next__arrow,
@@ -2032,12 +2032,14 @@ main[tabindex="-1"]:focus-visible,
    Mobile: wrapped block layout without hover logic.
    ============================================================ */
 
-/* Reusable marker highlight (Task 2 & 3: height <= 0.38em) */
+/* Reusable marker highlight: full-height text highlight covering the words cleanly */
 .mark {
-  background: linear-gradient(var(--pink), var(--pink)) 0 88% / 0% 0.36em no-repeat;
+  display: inline;
+  background: linear-gradient(var(--pink), var(--pink)) 0 50% / 0% 100% no-repeat;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  transition: background-size 0.3s ease;
+  padding: 0.04em 0.12em;
+  transition: background-size 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .section.work {
@@ -2154,11 +2156,12 @@ main[tabindex="-1"]:focus-visible,
     font-weight: normal;
     line-height: 1.1;
     overflow: hidden;
+    padding-right: 16px;
   }
 
   .wrow__title {
     font-family: var(--f-display);
-    font-size: clamp(26px, 2.6vw, 40px);
+    font-size: clamp(20px, 1.8vw, 27px);
     line-height: 1.1;
     color: var(--muted);
     white-space: nowrap;
@@ -2180,7 +2183,7 @@ main[tabindex="-1"]:focus-visible,
   .wrow.is-active .mark,
   .wrow:hover .mark,
   .wrow:focus-within .mark {
-    background-size: 100% 0.36em;
+    background-size: 100% 100%;
   }
 
   .wrow__tagline {

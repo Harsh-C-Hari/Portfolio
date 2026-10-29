@@ -101,7 +101,7 @@ async function runTests() {
     const title = document.querySelector('.cs-next__title');
     const arrow = document.querySelector('.cs-next__arrow');
     const thumb = document.querySelector('.cs-next__thumb');
-    const mark = document.querySelector('.cs-next__title.mark');
+    const mark = document.querySelector('.cs-next .mark');
 
     const titleStyle = window.getComputedStyle(title);
     const arrowStyle = window.getComputedStyle(arrow);
