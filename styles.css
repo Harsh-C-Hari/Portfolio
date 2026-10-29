@@ -1921,12 +1921,14 @@ ul {
    Work list accordion  (.wlist / .wrow)
    Replaces old stacking cards. Generated from data/projects.json.
    ============================================================ */
+
 .wlist {
   border-top: 2px solid var(--ink);
   margin-top: clamp(2rem, 5vw, 4rem);
 }
 
 .wrow {
+  --wrow-pad: clamp(0.9rem, 1.6vw, 1.5rem);
   border-bottom: 2px solid var(--ink);
 }
 
@@ -1935,9 +1937,15 @@ ul {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.1rem 0;
+  padding: 1.1rem var(--wrow-pad);
   font-weight: 400;
   font-size: inherit;
+  transition: background 0.18s;
+}
+
+/* Hover affordance on closed rows — colour change only, fine to keep under reduced-motion */
+.wrow:not([data-open="true"]) .wrow__head:hover {
+  background: color-mix(in srgb, var(--pink) 30%, transparent);
 }
 
 .wrow__link {
@@ -1951,7 +1959,7 @@ ul {
   transition: color 0.18s;
 }
 
-[data-open="true"] .wrow__link {
+.wrow[data-open="true"] .wrow__link {
   color: var(--ink);
 }
 
@@ -1983,7 +1991,7 @@ ul {
   color: inherit;
 }
 
-[data-open="true"] .wrow__title {
+.wrow[data-open="true"] .wrow__title {
   color: var(--ink);
 }
 
@@ -2006,73 +2014,60 @@ ul {
   font-size: var(--t-small);
 }
 
-/* Open row: pink background behind the head */
-[data-open="true"] {
+/* Open row: pink fill behind the entire row */
+.wrow[data-open="true"] {
   background: var(--pink);
 }
 
-[data-open="true"] .wrow__head {
-  /* slight indent to breathe */
-  padding-left: 0;
-}
-
-/* --- Panel: collapses to 0 height via grid trick, no JS measurement --- */
+/* --- Panel: one direct child (.wrow__inner) collapses via grid trick --- */
 .wrow__panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  transition:
+    grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s 0.35s;   /* hide after collapse completes */
+  visibility: hidden;
 }
 
-[data-open="true"] .wrow__panel {
+.wrow[data-open="true"] .wrow__panel {
   grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s 0s;     /* show immediately on open */
+  visibility: visible;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wrow__panel {
+  .wrow__panel,
+  .wrow[data-open="true"] .wrow__panel {
     transition: none;
   }
 }
 
-.wrow__panel > * {
-  overflow: hidden;
-}
-
-/* Inner body: two columns on desktop (body left, thumb right) */
-.wrow__body-wrap {
-  display: contents; /* panels only have .wrow__body + .wrow__thumb */
-}
-
-/* panel inner layout */
-.wrow__panel {
-  /* Override: the grid inner is a flex row */
-}
-
-[data-open="true"] .wrow__panel > div,
-.wrow__panel > div {
+/* Single child — required by the grid-template-rows trick */
+.wrow__inner {
   min-height: 0;
+  overflow: hidden;
+  display: grid;
+  gap: 1.25rem 2.5rem;
+  padding-block: 0.75rem 1.75rem;
+  padding-inline: var(--wrow-pad);
 }
 
-/* .wrow__panel direct children = .wrow__body + .wrow__thumb  */
-.wrow__panel {
-  /* Panel uses a nested flex row inside the grid-template-rows trick */
+/* Desktop two-column: body left, thumb right */
+@media (min-width: 900px) {
+  .wrow__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+    align-items: start;
+  }
 }
 
-/* The actual panel content (body + thumb) sits in the first grid child */
+/* Panel body: summary + facts + stack + links */
 .wrow__body {
-  padding: 1rem 0 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-/* Two-col layout on desktop: facts+summary left, thumb right */
-@media (min-width: 900px) {
-  /* Override: panel is a flex row at desktop */
-  [data-open="true"] .wrow__panel,
-  .wrow__panel {
-    /* Keep grid outer, but inner div becomes a flex container */
-  }
+  min-width: 0;
 }
 
 .wrow__summary {
@@ -2136,51 +2131,23 @@ ul {
   gap: 0.5rem;
 }
 
-/* Thumbnail */
+/* Thumbnail: fills grid cell, 16:9 */
 .wrow__thumb {
   display: block;
-  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin: 0;
   border-radius: 4px;
   overflow: hidden;
   border: 1.5px solid var(--ink);
-  margin-bottom: 1.5rem;
-  align-self: flex-start;
-  max-width: 100%;
+  align-self: start;
 }
 
 .wrow__thumb img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
-}
-
-@media (min-width: 900px) {
-  .wrow__thumb {
-    width: 340px;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
-    margin-left: 2rem;
-  }
-
-  .wrow__thumb img {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-  }
-
-  /* Desktop: panel shows body + thumb side by side */
-  .wrow__panel > div {
-    display: flex;
-    align-items: flex-start;
-  }
-
-  .wrow__body {
-    flex: 1;
-    min-width: 0;
-  }
 }
 
 /* ============================================================

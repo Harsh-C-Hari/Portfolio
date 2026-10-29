@@ -183,15 +183,17 @@ function generateWorkRows(projects) {
     <a class="btn wrow__cta" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''}>${esc(ctaLabel)}</a>
   </h3>
   <div class="wrow__panel"${isFirst ? '' : ' inert'}>
-    <div class="wrow__body">
-      <p class="wrow__summary">${esc(p.summary)}</p>
-      <dl class="wrow__facts">
-        ${factsHtml}
-      </dl>
-      <ul class="wrow__stack">${stackHtml}</ul>
-      ${linksHtml ? `<div class="wrow__links">${linksHtml}</div>` : ''}
+    <div class="wrow__inner">
+      <div class="wrow__body">
+        <p class="wrow__summary">${esc(p.summary)}</p>
+        <dl class="wrow__facts">
+          ${factsHtml}
+        </dl>
+        <ul class="wrow__stack">${stackHtml}</ul>
+        ${linksHtml ? `<div class="wrow__links">${linksHtml}</div>` : ''}
+      </div>
+      ${thumbEl}
     </div>
-    ${thumbEl}
   </div>
 </article>`;
   }).join('\n\n');
