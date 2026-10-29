@@ -9,7 +9,10 @@
     "check-pink": "node scripts/check-pink.mjs",
     "check-links": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
     "check": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
-    "test": "node scripts/check-links.mjs && node scripts/check-pink.mjs"
+    "test": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
+    "audit:pink": "node scripts/audit-pink-area.mjs",
+    "audit:qa": "node scripts/test-task7-qa.mjs",
+    "audit:lighthouse": "node scripts/run-lighthouse.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",
