@@ -48,7 +48,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=269c0482">
+  <link rel="stylesheet" href="/styles.css?v=acf8d380">
 </head>
 
 <body>
@@ -208,68 +208,84 @@
     <div class="cs-section__content">
       <div class="cs-arch">
         <!-- Inline SVG diagram -->
-        <figure class="cs-arch__diagram" aria-label="System architecture diagram showing four layers">
-          <svg viewBox="0 0 300 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true" fill="none">
-            <!-- Layer boxes -->
-            <rect x="20" y="10" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-            <text x="110" y="28" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">React dashboard</text>
-            <text x="110" y="44" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Admin and user views</text>
-
-            <!-- Arrow -->
-            <line x1="110" y1="54" x2="110" y2="74" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <rect x="20" y="74" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-            <text x="110" y="92" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">FastAPI backend</text>
-            <text x="110" y="108" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">JWT on every route</text>
-
-            <!-- Arrow -->
-            <line x1="110" y1="118" x2="110" y2="138" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <rect x="20" y="138" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-            <text x="110" y="156" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">Controllers &amp; services</text>
-            <text x="110" y="172" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Sessions, saves, monitoring, recovery</text>
-
-            <!-- Arrow -->
-            <line x1="110" y1="182" x2="110" y2="202" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <rect x="20" y="202" width="180" height="44" rx="4" fill="var(--ink)" stroke="var(--ink)"/>
-            <text x="110" y="220" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--paper)">Python host agent</text>
-            <text x="110" y="236" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--pink)">Does the work on the Windows PC</text>
-
-            <!-- Arrow -->
-            <line x1="110" y1="246" x2="110" y2="266" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- Sunshine + Tailscale side by side -->
-            <rect x="20" y="266" width="84" height="40" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
-            <text x="62" y="282" text-anchor="middle" font-family="var(--f-display)" font-size="11" fill="var(--ink)">Sunshine</text>
-            <text x="62" y="298" text-anchor="middle" font-family="var(--f-mono)" font-size="8" fill="var(--muted)">streaming</text>
-
-            <rect x="116" y="266" width="84" height="40" rx="4" stroke="var(--ink)" stroke-width="1.5"/>
-            <text x="158" y="282" text-anchor="middle" font-family="var(--f-display)" font-size="11" fill="var(--ink)">Tailscale</text>
-            <text x="158" y="298" text-anchor="middle" font-family="var(--f-mono)" font-size="8" fill="var(--muted)">networking</text>
-
-            <!-- Arrow -->
-            <line x1="110" y1="306" x2="110" y2="326" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr)"/>
-
-            <!-- Base -->
-            <rect x="20" y="326" width="180" height="40" rx="4" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
-            <text x="110" y="344" text-anchor="middle" font-family="var(--f-display)" font-size="13" fill="var(--ink)">Windows gaming host</text>
-            <text x="110" y="358" text-anchor="middle" font-family="var(--f-mono)" font-size="9" fill="var(--muted)">the machine</text>
-
-            <!-- Internal event token side channel (dashed, right side) -->
-            <line x1="200" y1="96" x2="245" y2="96" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
-            <line x1="200" y1="224" x2="245" y2="224" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
-            <line x1="245" y1="96" x2="245" y2="224" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
-            <!-- Pill label (horizontal) -->
-            <rect x="236" y="152" width="58" height="14" rx="7" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.75"/>
-            <text x="265" y="163" text-anchor="middle" font-family="var(--f-mono)" font-size="7" fill="var(--muted)">internal event token</text>
-
+        <figure class="cs-arch__diagram" role="group" aria-labelledby="pcgo-arch-title">
+          <svg viewBox="0 0 560 600" class="pcgo-arch-svg" role="img" aria-labelledby="pcgo-arch-title pcgo-arch-desc" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <title id="pcgo-arch-title">PCGO System Architecture Diagram</title>
+            <desc id="pcgo-arch-desc">Layered architecture diagram: React Dashboard at top connects to FastAPI Backend, Controllers &amp; Services, Python Host Agent, Sunshine &amp; Tailscale, down to Windows Gaming Host, with an internal event token side channel.</desc>
             <defs>
-              <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                <path d="M0,0 L6,3 L0,6 Z" fill="var(--ink)"/>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                <path d="M 0 1 L 7 4 L 0 7 Z" fill="var(--ink)"/>
               </marker>
             </defs>
+
+            <!-- Level 1: React dashboard -->
+            <rect id="box1" x="16" y="24" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t1" x="216" y="49" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--paper)">React dashboard</text>
+            <text id="c1" x="216" y="69" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">Admin and user views</text>
+
+            <!-- Arrow 1 -> 2 -->
+            <line x1="216" y1="84" x2="216" y2="112" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 2: FastAPI backend -->
+            <rect id="box2" x="16" y="112" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t2" x="216" y="137" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--paper)">FastAPI backend</text>
+            <text id="c2" x="216" y="157" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">JWT on every route</text>
+
+            <!-- Arrow 2 -> 3 -->
+            <line x1="216" y1="172" x2="216" y2="200" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 3: Controllers & services -->
+            <rect id="box3" x="16" y="200" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t3" x="216" y="225" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--paper)">Controllers &amp; services</text>
+            <text id="c3" x="216" y="245" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">Sessions, saves, monitoring, recovery</text>
+
+            <!-- Arrow 3 -> 4 -->
+            <line x1="216" y1="260" x2="216" y2="288" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 4: Python host agent -->
+            <rect id="box4" x="16" y="288" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t4" x="216" y="313" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--paper)">Python host agent</text>
+            <text id="c4" x="216" y="333" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">Does the work on the Windows PC</text>
+
+            <!-- Arrow 4 -> 5 -->
+            <line x1="112" y1="348" x2="112" y2="376" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+            <line x1="320" y1="348" x2="320" y2="376" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 5: Sunshine & Tailscale -->
+            <rect id="box5a" x="16" y="376" width="192" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text id="t5a" x="112" y="401" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--ink)">Sunshine</text>
+            <text id="c5a" x="112" y="421" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--ink)">streaming</text>
+
+            <rect id="box5b" x="224" y="376" width="192" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text id="t5b" x="320" y="401" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--ink)">Tailscale</text>
+            <text id="c5b" x="320" y="421" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--ink)">networking</text>
+
+            <!-- Arrow 5 -> 6 -->
+            <line x1="112" y1="436" x2="112" y2="464" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+            <line x1="320" y1="436" x2="320" y2="464" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 6: Windows gaming host -->
+            <rect id="box6" x="16" y="464" width="400" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text id="t6" x="216" y="489" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="700" fill="var(--ink)">Windows gaming host</text>
+            <text id="c6" x="216" y="509" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--ink)">the machine</text>
+
+            <!-- Side channel: dashed path between Host Agent and Backend -->
+            <path d="M 416 318 H 486 V 142 H 416" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+            <!-- Horizontal pill label -->
+            <rect id="box_pill" x="420" y="217" width="132" height="26" rx="13" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text id="t_pill" x="486" y="234" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="500" fill="var(--ink)">internal event token</text>
           </svg>
+
+          <!-- Accessible ordered list describing the flow -->
+          <ol class="sr-only">
+            <li><strong>React dashboard:</strong> Admin and user views</li>
+            <li><strong>FastAPI backend:</strong> JWT on every route</li>
+            <li><strong>Controllers &amp; services:</strong> Sessions, saves, monitoring, recovery</li>
+            <li><strong>Python host agent:</strong> Does the work on the Windows PC; connects to FastAPI backend via an internal event token</li>
+            <li><strong>Sunshine &amp; Tailscale:</strong> Streaming and secure mesh networking</li>
+            <li><strong>Windows gaming host:</strong> The machine</li>
+          </ol>
+
           <figcaption class="cs-arch__caption">
             <span class="cs-mono">internal event token</span>: Sunshine's hook script and a log-tailing monitor report stream state straight into the backend. They get a separate, narrower credential.
           </figcaption>
