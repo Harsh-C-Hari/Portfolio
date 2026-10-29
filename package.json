@@ -6,8 +6,10 @@
   "scripts": {
     "build": "node build.js",
     "dev": "node dev.js",
-    "check-links": "node scripts/check-links.mjs",
-    "test": "node scripts/check-links.mjs"
+    "check-pink": "node scripts/check-pink.mjs",
+    "check-links": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
+    "check": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
+    "test": "node scripts/check-links.mjs && node scripts/check-pink.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

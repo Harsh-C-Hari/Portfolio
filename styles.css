@@ -1913,11 +1913,12 @@ main[tabindex="-1"]:focus-visible,
   border: 1.5px solid var(--ink);
   border-radius: 8px;
   overflow: hidden;
-  transition: background 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .cs-next__card:hover {
-  background: var(--pink);
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 var(--ink);
 }
 
 .cs-next__label {
@@ -1969,10 +1970,6 @@ main[tabindex="-1"]:focus-visible,
   min-height: 84px;
 }
 
-.wrow:hover,
-.wrow:focus-within {
-  background: var(--pink);
-}
 
 /* Stretched main link filling the row */
 .wrow__main {
@@ -2675,10 +2672,13 @@ html.pt-enter .loader {
   padding: 0.75rem 1rem;
   flex: 1;
   min-width: 180px;
-  transition: background 0.15s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.doc-prevnext:hover { background: var(--pink); }
+.doc-prevnext:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
 
 .doc-prevnext--next { text-align: right; }
 

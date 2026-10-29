@@ -4,6 +4,15 @@ Paper-and-ink design: Anton (display), Bricolage Grotesque (reading), Sometype M
 One accent colour (`--pink`), used only as a fill behind black or as text on black.
 Design tokens live at the top of `styles.css`.
 
+## Accent policy: pink is a spice, not a surface
+
+| | Rule |
+|---|---|
+| Budget | At rest, pink covers no more than ~2% of the viewport. During hover, no more than ~4%. No single pink-filled element larger than 20,000 px² (about 140 x 140), except the page-transition cover (transient motion). |
+| Allowed | Text marker highlight (height no more than 0.38em, behind a word or title) · small chips and badges (nav current item, tags) · 2 to 4px rules, underlines, progress bar · the single primary button per view (existing `.btn--pink`, about 140 x 52) · the existing hero `.hl` signature highlight (one per page, kept as is) · text selection · a tiny arrow chip (<= 44px) on hover |
+| Forbidden | Pink backgrounds on rows, cards, sections or bands · hover fills on any container · pink behind more than one line of body text |
+| Hover vocabulary instead | Ink underline draw · title nudge 8 to 12px · offset ink shadow (the site's existing 4px shadow language) · ink border · sibling dimming · arrow nudge · a thin pink marker. |
+
 ## Structure
 
 ```
