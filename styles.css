@@ -72,12 +72,15 @@ nav *,
   -webkit-user-select: none;
   user-select: none;
 }
-/* Hide the ring only when focus did NOT come from the keyboard (tap / click).
-   Plain `a:focus` here would out-rank :focus-visible and strip it for keyboard users too. */
+/* Hide the ring only when focus did NOT come from the keyboard (tap / click / programmatic).
+   Plain `a:focus` here would out-rank :focus-visible and strip it for keyboard users too.
+   [tabindex="-1"] covers <main> and other programmatic-only focus targets. */
 a:focus:not(:focus-visible),
 button:focus:not(:focus-visible),
-[role="button"]:focus:not(:focus-visible) {
+[role="button"]:focus:not(:focus-visible),
+[tabindex="-1"]:focus:not(:focus-visible) {
   outline: none;
+  box-shadow: none;
 }
 
 body {
