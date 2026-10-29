@@ -72,13 +72,9 @@ nav *,
   -webkit-user-select: none;
   user-select: none;
 }
-/* Hide the ring only when focus did NOT come from the keyboard (tap / click / programmatic).
-   Plain `a:focus` here would out-rank :focus-visible and strip it for keyboard users too.
-   [tabindex="-1"] covers <main> and other programmatic-only focus targets. */
 a:focus:not(:focus-visible),
 button:focus:not(:focus-visible),
-[role="button"]:focus:not(:focus-visible),
-[tabindex="-1"]:focus:not(:focus-visible) {
+[role="button"]:focus:not(:focus-visible) {
   outline: none;
   box-shadow: none;
 }
@@ -135,6 +131,18 @@ ul {
   outline: 3px solid var(--ink);
   outline-offset: 3px;
   box-shadow: 0 0 0 6px var(--pink);
+}
+
+/* Suppress focus ring on programmatic-only focus targets (main, skip-link destination).
+   main.focus() in Chromium IS treated as :focus-visible, so :not(:focus-visible) never
+   matches. This explicit override wins by specificity and selector order. */
+main[tabindex="-1"],
+main[tabindex="-1"]:focus,
+main[tabindex="-1"]:focus-visible,
+.doc-body [tabindex="-1"]:focus,
+.doc-body [tabindex="-1"]:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .sr-only {
