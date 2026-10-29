@@ -148,9 +148,10 @@ async function runAudit() {
     const interactiveSelectors = [
       '.wrow',
       '.wrow__main',
+      '.wrow__title-link',
       '.btn',
       '.btn--pink',
-      '.cs-next__card',
+      '.cs-next__link',
       '.cs-next',
       '.doc-prevnext',
     ];

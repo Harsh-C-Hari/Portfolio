@@ -249,8 +249,8 @@ function prevNextLinks(allDocs, currentSlug) {
   const idx  = allDocs.findIndex(d => d.slug === currentSlug);
   const prev = idx > 0 ? allDocs[idx - 1] : null;
   const next = idx < allDocs.length - 1 ? allDocs[idx + 1] : null;
-  const prevHtml = prev ? `<a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/${prev.slug}"><span class="doc-prevnext__dir">Previous</span><span class="doc-prevnext__title">${escapeHtml(prev.title)}</span></a>` : '';
-  const nextHtml = next ? `<a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/${next.slug}"><span class="doc-prevnext__dir">Next</span><span class="doc-prevnext__title">${escapeHtml(next.title)}</span></a>` : '';
+  const prevHtml = prev ? `<a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/${prev.slug}"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">${escapeHtml(prev.title)}</span></a>` : '';
+  const nextHtml = next ? `<a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/${next.slug}"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">${escapeHtml(next.title)}</span></a>` : '';
   return `<nav class="doc-prevnext-row" aria-label="Doc navigation">${prevHtml}${nextHtml}</nav>`;
 }
 
