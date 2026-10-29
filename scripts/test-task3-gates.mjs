@@ -101,19 +101,16 @@ async function runTests() {
     const title = document.querySelector('.cs-next__title');
     const arrow = document.querySelector('.cs-next__arrow');
     const thumb = document.querySelector('.cs-next__thumb');
-    const mark = document.querySelector('.cs-next .mark');
 
     const titleStyle = window.getComputedStyle(title);
     const arrowStyle = window.getComputedStyle(arrow);
     const thumbStyle = window.getComputedStyle(thumb);
-    const markStyle = window.getComputedStyle(mark);
 
     return {
       titleTransform: titleStyle.transform,
       arrowTransform: arrowStyle.transform,
       thumbTransform: thumbStyle.transform,
       thumbShadow: thumbStyle.boxShadow,
-      markBgSize: markStyle.backgroundSize,
     };
   });
 
@@ -122,7 +119,6 @@ async function runTests() {
   console.log('  Arrow transform:', hoverStyles.arrowTransform);
   console.log('  Thumb transform:', hoverStyles.thumbTransform);
   console.log('  Thumb shadow:', hoverStyles.thumbShadow);
-  console.log('  Marker background size:', hoverStyles.markBgSize);
 
   await page1440.screenshot({ path: path.join(ROOT, 'task3-pcgo-next-hover-1440.png') });
   console.log('  Captured screenshot: task3-pcgo-next-hover-1440.png');

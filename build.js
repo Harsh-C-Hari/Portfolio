@@ -160,7 +160,7 @@ function generateWorkRows(projects) {
     <div class="wrow__content">
       <h3 class="wrow__title-wrap">
         <a class="wrow__title-link" href="${esc(primaryHref)}"${extAttrs}>
-          <span class="wrow__title mark">${esc(p.title)}</span>
+          <span class="wrow__title">${esc(p.title)}</span>
         </a>
       </h3>
       <p class="wrow__tagline">${esc(p.tagline || '')}</p>

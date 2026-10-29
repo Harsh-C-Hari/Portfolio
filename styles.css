@@ -1985,10 +1985,6 @@ main[tabindex="-1"]:focus-visible,
   transform: translateX(10px);
 }
 
-.cs-next__link:hover .mark,
-.cs-next__link:focus-visible .mark {
-  background-size: 100% 100%;
-}
 
 .cs-next__link:hover .cs-next__arrow,
 .cs-next__link:focus-visible .cs-next__arrow {
@@ -2026,21 +2022,10 @@ main[tabindex="-1"]:focus-visible,
 }
 
 /* ============================================================
-/* ============================================================
    Work list index v3  (.work-index / .wlist / .wrow / .wpanel)
    Desktop: 2-column layout with fixed 112px rows and sticky preview panel.
    Mobile: wrapped block layout without hover logic.
    ============================================================ */
-
-/* Reusable marker highlight: full-height text highlight covering the words cleanly */
-.mark {
-  display: inline;
-  background: linear-gradient(var(--pink), var(--pink)) 0 50% / 0% 100% no-repeat;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  padding: 0.04em 0.12em;
-  transition: background-size 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
 .section.work {
   padding-block: clamp(64px, 8vw, 120px);
@@ -2180,11 +2165,6 @@ main[tabindex="-1"]:focus-visible,
     transform: translateX(10px);
   }
 
-  .wrow.is-active .mark,
-  .wrow:hover .mark,
-  .wrow:focus-within .mark {
-    background-size: 100% 100%;
-  }
 
   .wrow__tagline {
     font-family: var(--f-body);
@@ -2419,9 +2399,6 @@ main[tabindex="-1"]:focus-visible,
 
 /* Reduced motion overrides */
 @media (prefers-reduced-motion: reduce) {
-  .mark {
-    transition: none !important;
-  }
 
   .wpanel__img {
     transition: none !important;

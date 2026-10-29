@@ -28,7 +28,6 @@ const ALLOWED_SELECTORS = new Set([
   '.hl',
   '.ticker__sep',
   '.pt__pink',
-  '.mark',
   'mark',
 ]);
 
