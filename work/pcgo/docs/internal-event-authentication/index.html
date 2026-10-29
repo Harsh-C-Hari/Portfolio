@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,22 +64,28 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication" aria-current="page">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">3 min read</p>
-          <h1 class="doc-header__title">Internal event authentication</h1>
-          <p class="doc-header__summary">How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">4 min read</p>
+            <h1 class="doc-header__title">Internal event authentication</h1>
+            <p class="doc-header__summary">How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#the-problem-with-a-code-level-check">The Problem With a Code-Level Check</a></li><li><a href="#design">Design</a></li><li><a href="#backward-compatibility">Backward Compatibility</a></li><li><a href="#why-not-just-reuse-the-user-jwt-system">Why Not Just Reuse the User JWT System</a></li><li><a href="#verification">Verification</a></li><li><a href="#impact">Impact</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <p><strong>Status:</strong> Completed</p>
+          <div class="doc-body">
+            <p><strong>Status:</strong> Completed</p>
 <hr>
-<h1>Issue Information</h1>
+<h2 id="issue-information" tabindex="-1">Issue Information</h2>
 <p><strong>Category:</strong>
 Security Engineering / Authentication</p>
 <p><strong>Affected Components:</strong></p>
@@ -92,7 +98,7 @@ Security Engineering / Authentication</p>
 <p><strong>Severity:</strong>
 High (unauthenticated write path into session/stream state)</p>
 <hr>
-<h1>Overview</h1>
+<h2 id="overview" tabindex="-1">Overview</h2>
 <p>Once user authentication (JWT bearer tokens) was introduced, every dashboard and session API required a logged-in user. Four endpoints, however, cannot be called by a user at all:</p>
 <pre class="hljs"><code>POST /host/sunshine/stream-started
 POST /host/sunshine/stream-ended
@@ -106,7 +112,7 @@ POST /host/sunshine/transport-disconnected
 </ul>
 <p>Neither caller is a logged-in user or a request originating from the frontend, so neither carries — or should carry — a user JWT. Leaving these endpoints open to any bearer token (or unauthenticated entirely) would let a user spoof stream/transport state.</p>
 <hr>
-<h1>The Problem With a Code-Level Check</h1>
+<h2 id="the-problem-with-a-code-level-check" tabindex="-1">The Problem With a Code-Level Check</h2>
 <p>For most internal-only logic, “only module X may call this” can be enforced in Python by checking the call stack or restricting an import. That model breaks down here:</p>
 <ul>
 <li><code>sunshine_stream_hook.py</code> runs as a <strong>separate OS process</strong>, invoked directly by Sunshine.</li>
@@ -114,7 +120,7 @@ POST /host/sunshine/transport-disconnected
 </ul>
 <p>The only enforcement point that still exists across that process boundary is the network request itself. That means the credential has to travel with the request, the same way a webhook signing secret does.</p>
 <hr>
-<h1>Design</h1>
+<h2 id="design" tabindex="-1">Design</h2>
 <p>A single shared secret — <code>backend.internal_event_token</code> — is:</p>
 <ul>
 <li>Generated once, using <code>secrets.token_urlsafe(32)</code>, at first startup (<code>host_agent/startup_initializer.py: _ensure_internal_event_token</code>).</li>
@@ -138,17 +144,17 @@ SunshineTransportMonitor ───┤
               /host/sunshine/stream-started, etc.
 </code></pre>
 <hr>
-<h1>Backward Compatibility</h1>
+<h2 id="backward-compatibility" tabindex="-1">Backward Compatibility</h2>
 <p>Existing installations from before this token existed would have a <code>config.json</code> without <code>backend.internal_event_token</code>. <code>_ensure_internal_event_token</code> treats a missing/blank token as a one-time backfill: it generates and persists a token on the next startup, logging a warning that any already-running hook script or transport monitor needs to be restarted to pick up the new value. In normal operation (fresh install, or an install that already has the token) this is a no-op.</p>
 <hr>
-<h1>Why Not Just Reuse the User JWT System</h1>
+<h2 id="why-not-just-reuse-the-user-jwt-system" tabindex="-1">Why Not Just Reuse the User JWT System</h2>
 <ul>
 <li>The hook script and transport monitor are not users; they have no username, no role, and no session to authenticate as.</li>
 <li>Giving them a JWT would mean minting and rotating a “service account” token indistinguishable from a real user’s credentials, widening the blast radius if it ever leaked into a log or crash dump.</li>
 <li>A single-purpose, single-scope secret keeps the trust boundary narrow: this token can do exactly four things, and nothing else in the system will accept it.</li>
 </ul>
 <hr>
-<h1>Verification</h1>
+<h2 id="verification" tabindex="-1">Verification</h2>
 <p>Verified scenarios include:</p>
 <ul>
 <li>Stream-hook events accepted with a valid token.</li>
@@ -158,23 +164,34 @@ SunshineTransportMonitor ───┤
 <li>User JWTs rejected on the four event endpoints (they are not accepted as a substitute for the internal token).</li>
 </ul>
 <hr>
-<h1>Impact</h1>
+<h2 id="impact" tabindex="-1">Impact</h2>
 <ul>
 <li>Closed an unauthenticated write path into session/stream state that existed briefly during the authentication rollout.</li>
 <li>Established a reusable pattern (shared secret + <code>hmac.compare_digest</code> + a single dependency function) for any future process-boundary caller that isn’t a logged-in user.</li>
 <li>Kept the check centralized in one file (<code>api/internal_event_auth.py</code>) rather than duplicated across routes.</li>
 </ul>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/tailscale-state-recovery"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Tailscale state-aware recovery</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/live-sync-architecture-migration"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Live sync that stopped running</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/tailscale-state-recovery"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Tailscale state-aware recovery</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/live-sync-architecture-migration"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Live sync that stopped running</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#the-problem-with-a-code-level-check">The Problem With a Code-Level Check</a></li><li><a href="#design">Design</a></li><li><a href="#backward-compatibility">Backward Compatibility</a></li><li><a href="#why-not-just-reuse-the-user-jwt-system">Why Not Just Reuse the User JWT System</a></li><li><a href="#verification">Verification</a></li><li><a href="#impact">Impact</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,23 +64,29 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection" aria-current="page">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">3 min read</p>
-          <h1 class="doc-header__title">Session persistence and reconnection</h1>
-          <p class="doc-header__summary">Keeping sessions consistent across crashes and reconnects.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">3 min read</p>
+            <h1 class="doc-header__title">Session persistence and reconnection</h1>
+            <p class="doc-header__summary">Keeping sessions consistent across crashes and reconnects.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#architectural-problem">Architectural Problem</a></li><li><a href="#architectural-redesign">Architectural Redesign</a></li><li><a href="#persistent-session-registry">Persistent Session Registry</a></li><li><a href="#session-resurrection">Session Resurrection</a></li><li><a href="#persistent-timers">Persistent Timers</a></li><li><a href="#shared-session-finalization">Shared Session Finalization</a></li><li><a href="#live-sync-resurrection">Live Sync Resurrection</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <p><strong>Phase:</strong> Phase 23</p>
+          <div class="doc-body">
+            <p><strong>Phase:</strong> Phase 23</p>
 <p><strong>Status:</strong> Completed</p>
 <hr>
-<h1>Issue Information</h1>
+<h2 id="issue-information" tabindex="-1">Issue Information</h2>
 <p><strong>Category:</strong>
 Reliability Engineering / Recovery Systems / Session Management</p>
 <p><strong>Affected Components:</strong></p>
@@ -96,7 +102,7 @@ Reliability Engineering / Recovery Systems / Session Management</p>
 <p><strong>Severity:</strong>
 Critical</p>
 <hr>
-<h1>Overview</h1>
+<h2 id="overview" tabindex="-1">Overview</h2>
 <p>Phase 23 introduced persistent session infrastructure capable of surviving backend failures while preserving active gameplay sessions.</p>
 <p>The original objective was simple reconnect support:</p>
 <pre class="hljs"><code>Disconnect
@@ -118,7 +124,7 @@ Continue Session
 </code></pre>
 <p>The final implementation evolved into a full session persistence architecture.</p>
 <hr>
-<h1>Architectural Problem</h1>
+<h2 id="architectural-problem" tabindex="-1">Architectural Problem</h2>
 <p>Early versions treated the session as a single object.</p>
 <pre class="hljs"><code>Session
  ├─ Game Process
@@ -136,7 +142,7 @@ Continue Session
 </ul>
 <p>The game process itself continued running but became orphaned.</p>
 <hr>
-<h1>Architectural Redesign</h1>
+<h2 id="architectural-redesign" tabindex="-1">Architectural Redesign</h2>
 <p>Phase 23 separated multiple independent lifecycles.</p>
 <pre class="hljs"><code>Game Process
     ↓
@@ -160,7 +166,7 @@ Stream Alive
 Transport Dead
 </code></pre>
 <hr>
-<h1>Persistent Session Registry</h1>
+<h2 id="persistent-session-registry" tabindex="-1">Persistent Session Registry</h2>
 <p>Active sessions are persisted to disk.</p>
 <p>Stored information includes:</p>
 <ul>
@@ -175,7 +181,7 @@ Transport Dead
 </ul>
 <p>This registry becomes the source of truth during startup recovery.</p>
 <hr>
-<h1>Session Resurrection</h1>
+<h2 id="session-resurrection" tabindex="-1">Session Resurrection</h2>
 <p>During startup the backend performs recovery validation.</p>
 <p>Recovery sequence:</p>
 <pre class="hljs"><code>Load Active Sessions
@@ -194,7 +200,7 @@ Resume Session
 </code></pre>
 <p>Sessions whose processes no longer exist are finalized automatically.</p>
 <hr>
-<h1>Persistent Timers</h1>
+<h2 id="persistent-timers" tabindex="-1">Persistent Timers</h2>
 <p>Earlier implementations stored relative durations.</p>
 <p>Example:</p>
 <pre class="hljs"><code>60 minutes remaining
@@ -207,7 +213,7 @@ Resume Session
 </code></pre>
 <p>This allows timers to survive restart events.</p>
 <hr>
-<h1>Shared Session Finalization</h1>
+<h2 id="shared-session-finalization" tabindex="-1">Shared Session Finalization</h2>
 <p>Cleanup logic previously existed in multiple locations.</p>
 <p>Examples:</p>
 <ul>
@@ -219,7 +225,7 @@ Resume Session
 <p>Phase 23 introduced a shared finalization workflow.</p>
 <p>All session termination paths now use the same cleanup pipeline.</p>
 <hr>
-<h1>Live Sync Resurrection</h1>
+<h2 id="live-sync-resurrection" tabindex="-1">Live Sync Resurrection</h2>
 <p>Recovered sessions automatically restore:</p>
 <ul>
 <li>Live Sync</li>
@@ -229,7 +235,7 @@ Resume Session
 </ul>
 <p>This prevents save synchronization from silently stopping after backend restart.</p>
 <hr>
-<h1>Verification</h1>
+<h2 id="verification" tabindex="-1">Verification</h2>
 <p>Verified scenarios include:</p>
 <ul>
 <li>backend restart during active session</li>
@@ -241,12 +247,12 @@ Resume Session
 <li>orphan process cleanup</li>
 </ul>
 <hr>
-<h1>Lessons Learned</h1>
+<h2 id="lessons-learned" tabindex="-1">Lessons Learned</h2>
 <p>Reconnect support was not primarily a networking problem.</p>
 <p>The underlying challenge was preserving ownership and lifecycle state across backend failure.</p>
 <p>Solving persistence first made reconnect support significantly simpler.</p>
 <hr>
-<h1>Impact</h1>
+<h2 id="impact" tabindex="-1">Impact</h2>
 <p>Phase 23 introduced:</p>
 <ul>
 <li>session resurrection</li>
@@ -258,16 +264,27 @@ Resume Session
 </ul>
 <p>These systems provide the foundation for future reconnect support and cloud gaming functionality.</p>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/release-hardening-and-reliability"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Release hardening and reliability</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/problems-solved"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Major problems solved</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/release-hardening-and-reliability"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Release hardening and reliability</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/problems-solved"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Major problems solved</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#architectural-problem">Architectural Problem</a></li><li><a href="#architectural-redesign">Architectural Redesign</a></li><li><a href="#persistent-session-registry">Persistent Session Registry</a></li><li><a href="#session-resurrection">Session Resurrection</a></li><li><a href="#persistent-timers">Persistent Timers</a></li><li><a href="#shared-session-finalization">Shared Session Finalization</a></li><li><a href="#live-sync-resurrection">Live Sync Resurrection</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

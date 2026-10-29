@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,20 +64,26 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation" aria-current="page">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">2 min read</p>
-          <h1 class="doc-header__title">Stale dashboard, correct backend</h1>
-          <p class="doc-header__summary">The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">2 min read</p>
+            <h1 class="doc-header__title">Stale dashboard, correct backend</h1>
+            <p class="doc-header__summary">The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#initial-hypothesis">Initial Hypothesis</a></li><li><a href="#symptoms">Symptoms</a></li><li><a href="#investigation">Investigation</a></li><li><a href="#root-cause">Root Cause</a></li><li><a href="#solution">Solution</a></li>  <li><a href="#backend">Backend</a></li>  <li><a href="#frontend">Frontend</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#initial-hypothesis">Initial Hypothesis</a></li><li><a href="#symptoms">Symptoms</a></li><li><a href="#investigation">Investigation</a></li><li><a href="#root-cause">Root Cause</a></li><li><a href="#solution">Solution</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="issue-information" tabindex="-1">Issue Information</h2>
+          <div class="doc-body">
+            <h2 id="issue-information" tabindex="-1">Issue Information</h2>
 <p>Category:
 Frontend-Backend Synchronization</p>
 <p>Affected Component:
@@ -164,16 +170,27 @@ Resolved</p>
 <h2 id="impact" tabindex="-1">Impact</h2>
 <p>The fix restored reliable real-time monitoring without requiring architectural changes to the WebSocket or backend systems.</p>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/live-sync-architecture-migration"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Live sync that stopped running</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/release-hardening-and-reliability"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Release hardening and reliability</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/live-sync-architecture-migration"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Live sync that stopped running</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/release-hardening-and-reliability"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Release hardening and reliability</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#initial-hypothesis">Initial Hypothesis</a></li><li><a href="#symptoms">Symptoms</a></li><li><a href="#investigation">Investigation</a></li><li><a href="#root-cause">Root Cause</a></li><li><a href="#solution">Solution</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

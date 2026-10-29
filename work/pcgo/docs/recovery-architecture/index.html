@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,24 +64,30 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture" aria-current="page">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">1 min read</p>
-          <h1 class="doc-header__title">Recovery architecture</h1>
-          <p class="doc-header__summary">How the Sunshine and Tailscale watchdogs detect failures and recover.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">1 min read</p>
+            <h1 class="doc-header__title">Recovery architecture</h1>
+            <p class="doc-header__summary">How the Sunshine and Tailscale watchdogs detect failures and recover.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#recovery-event-system">Recovery Event System</a></li><li><a href="#recovery-statistics">Recovery Statistics</a></li><li><a href="#persistence">Persistence</a></li><li><a href="#visibility">Visibility</a></li><li><a href="#automation">Automation</a></li><li><a href="#reliability">Reliability</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#overview">Overview</a></li><li><a href="#recovery-components">Recovery Components</a></li><li><a href="#sunshine-watchdog">Sunshine Watchdog</a></li><li><a href="#tailscale-recovery-system">Tailscale Recovery System</a></li><li><a href="#session-recovery">Session Recovery</a></li><li><a href="#recovery-design-principles">Recovery Design Principles</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="overview" tabindex="-1">Overview</h2>
+          <div class="doc-body">
+            <h2 id="overview" tabindex="-1">Overview</h2>
 <p>The recovery subsystem improves platform reliability through monitoring, event logging, diagnostics, and automated recovery workflows.</p>
 <hr>
-<h1>Recovery Components</h1>
-<h2 id="recovery-event-system" tabindex="-1">Recovery Event System</h2>
+<h2 id="recovery-components" tabindex="-1">Recovery Components</h2>
+<h3 id="recovery-event-system" tabindex="-1">Recovery Event System</h3>
 <p>Persistent event storage.</p>
 <p>Tracks:</p>
 <ul>
@@ -94,7 +100,7 @@
 <pre class="hljs"><code>data/pcgo.db (Database)
 </code></pre>
 <hr>
-<h2 id="recovery-statistics" tabindex="-1">Recovery Statistics</h2>
+<h3 id="recovery-statistics" tabindex="-1">Recovery Statistics</h3>
 <p>Tracks:</p>
 <ul>
 <li>Sunshine restarts</li>
@@ -103,7 +109,7 @@
 <li>Tailscale failures</li>
 </ul>
 <hr>
-<h1>Sunshine Watchdog</h1>
+<h2 id="sunshine-watchdog" tabindex="-1">Sunshine Watchdog</h2>
 <p>Responsibilities:</p>
 <ul>
 <li>Detect outages</li>
@@ -123,7 +129,7 @@ Verify Success
 Log Result
 </code></pre>
 <hr>
-<h1>Tailscale Recovery System</h1>
+<h2 id="tailscale-recovery-system" tabindex="-1">Tailscale Recovery System</h2>
 <p>Responsibilities:</p>
 <ul>
 <li>Diagnostics</li>
@@ -144,7 +150,7 @@ Validate State
 Log Result
 </code></pre>
 <hr>
-<h1>Session Recovery</h1>
+<h2 id="session-recovery" tabindex="-1">Session Recovery</h2>
 <p>The recovery subsystem also handles interrupted session workflows.</p>
 <p>Capabilities:</p>
 <ul>
@@ -154,26 +160,37 @@ Log Result
 <li>Startup cleanup</li>
 </ul>
 <hr>
-<h1>Recovery Design Principles</h1>
-<h2 id="persistence" tabindex="-1">Persistence</h2>
+<h2 id="recovery-design-principles" tabindex="-1">Recovery Design Principles</h2>
+<h3 id="persistence" tabindex="-1">Persistence</h3>
 <p>Recovery history survives application restarts.</p>
-<h2 id="visibility" tabindex="-1">Visibility</h2>
+<h3 id="visibility" tabindex="-1">Visibility</h3>
 <p>Recovery activity is visible through the dashboard.</p>
-<h2 id="automation" tabindex="-1">Automation</h2>
+<h3 id="automation" tabindex="-1">Automation</h3>
 <p>Common failure conditions are handled automatically.</p>
-<h2 id="reliability" tabindex="-1">Reliability</h2>
+<h3 id="reliability" tabindex="-1">Reliability</h3>
 <p>Recovery actions are verified before being considered successful.</p>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/backend-architecture"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Backend architecture</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/tailscale-state-recovery"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Tailscale state-aware recovery</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/backend-architecture"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Backend architecture</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/tailscale-state-recovery"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Tailscale state-aware recovery</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#overview">Overview</a></li><li><a href="#recovery-components">Recovery Components</a></li><li><a href="#sunshine-watchdog">Sunshine Watchdog</a></li><li><a href="#tailscale-recovery-system">Tailscale Recovery System</a></li><li><a href="#session-recovery">Session Recovery</a></li><li><a href="#recovery-design-principles">Recovery Design Principles</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

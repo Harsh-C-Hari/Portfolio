@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,24 +64,30 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture" aria-current="page">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">2 min read</p>
-          <h1 class="doc-header__title">System architecture</h1>
-          <p class="doc-header__summary">The layers from dashboard to Windows host, and the design principles behind them.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">3 min read</p>
+            <h1 class="doc-header__title">System architecture</h1>
+            <p class="doc-header__summary">The layers from dashboard to Windows host, and the design principles behind them.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#authentication-layer">Authentication Layer</a></li><li><a href="#frontend-layer">Frontend Layer</a></li><li><a href="#backend-layer">Backend Layer</a></li><li><a href="#host-agent-layer">Host Agent Layer</a></li><li><a href="#infrastructure-layer">Infrastructure Layer</a></li>  <li><a href="#sunshine">Sunshine</a></li>  <li><a href="#tailscale">Tailscale</a></li><li><a href="#persistence-layer">Persistence Layer</a></li><li><a href="#reliability">Reliability</a></li><li><a href="#modularity">Modularity</a></li><li><a href="#observability">Observability</a></li><li><a href="#extensibility">Extensibility</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#overview">Overview</a></li><li><a href="#high-level-architecture">High-Level Architecture</a></li><li><a href="#architectural-layers">Architectural Layers</a></li><li><a href="#design-principles">Design Principles</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="overview" tabindex="-1">Overview</h2>
+          <div class="doc-body">
+            <h2 id="overview" tabindex="-1">Overview</h2>
 <p>Personal Cloud Gaming Orchestrator v0.1 is designed as a single-host cloud gaming orchestration platform.</p>
 <p>The architecture separates user interaction, backend orchestration, host management, monitoring, and recovery systems into distinct layers.</p>
 <hr>
-<h1>High-Level Architecture</h1>
+<h2 id="high-level-architecture" tabindex="-1">High-Level Architecture</h2>
 <pre class="hljs"><code>React Dashboard (Login / Bootstrap → Admin or User shell)
         ↓
 FastAPI Backend  (JWT authentication on every route)
@@ -97,8 +103,8 @@ Windows Gaming Host
 </code></pre>
 <p>A separate, narrower authentication path (a shared internal event token, not a user JWT) authorizes two non-interactive callers — the Sunshine stream hook script and the transport-monitoring background thread — to report stream state directly into the backend. See <a href="/work/pcgo/docs/internal-event-authentication">Internal Event Authentication</a>.</p>
 <hr>
-<h1>Architectural Layers</h1>
-<h2 id="authentication-layer" tabindex="-1">Authentication Layer</h2>
+<h2 id="architectural-layers" tabindex="-1">Architectural Layers</h2>
+<h3 id="authentication-layer" tabindex="-1">Authentication Layer</h3>
 <p>Every dashboard and API request, except the bootstrap/login endpoints themselves, requires a valid JWT bearer token.</p>
 <p>Responsibilities:</p>
 <ul>
@@ -115,7 +121,7 @@ Windows Gaming Host
 </ul>
 <p>See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/features/authentication.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Authentication &amp; Role-Based Access</a>.</p>
 <hr>
-<h2 id="frontend-layer" tabindex="-1">Frontend Layer</h2>
+<h3 id="frontend-layer" tabindex="-1">Frontend Layer</h3>
 <p>The frontend provides the user-facing dashboard. It renders one of two role-aware experiences after login: the full Admin Dashboard, or a scoped User Dashboard limited to the logged-in account’s own sessions, analytics, history, and logs.</p>
 <p>Responsibilities:</p>
 <ul>
@@ -133,7 +139,7 @@ Windows Gaming Host
 <li>Vite</li>
 </ul>
 <hr>
-<h2 id="backend-layer" tabindex="-1">Backend Layer</h2>
+<h3 id="backend-layer" tabindex="-1">Backend Layer</h3>
 <p>The backend acts as the central orchestration layer.</p>
 <p>Responsibilities:</p>
 <ul>
@@ -153,7 +159,7 @@ Windows Gaming Host
 <li>Uvicorn</li>
 </ul>
 <hr>
-<h2 id="host-agent-layer" tabindex="-1">Host Agent Layer</h2>
+<h3 id="host-agent-layer" tabindex="-1">Host Agent Layer</h3>
 <p>The Host Agent provides direct interaction with the Windows host.</p>
 <p>Responsibilities:</p>
 <ul>
@@ -169,22 +175,22 @@ Windows Gaming Host
 <li>Python</li>
 </ul>
 <hr>
-<h2 id="infrastructure-layer" tabindex="-1">Infrastructure Layer</h2>
+<h3 id="infrastructure-layer" tabindex="-1">Infrastructure Layer</h3>
 <p>External services used by the platform.</p>
-<h3 id="sunshine" tabindex="-1">Sunshine</h3>
+<h4 id="sunshine" tabindex="-1">Sunshine</h4>
 <p>Responsibilities:</p>
 <ul>
 <li>Game streaming</li>
 <li>Client connectivity</li>
 </ul>
-<h3 id="tailscale" tabindex="-1">Tailscale</h3>
+<h4 id="tailscale" tabindex="-1">Tailscale</h4>
 <p>Responsibilities:</p>
 <ul>
 <li>Secure remote networking</li>
 <li>Connectivity management</li>
 </ul>
 <hr>
-<h2 id="persistence-layer" tabindex="-1">Persistence Layer</h2>
+<h3 id="persistence-layer" tabindex="-1">Persistence Layer</h3>
 <p>Historical and analytical data is stored in a SQLite database, accessed through a repository layer.</p>
 <p>Stored Data (SQLite, <code>host-agent/data/pcgo.db</code>):</p>
 <ul>
@@ -207,26 +213,37 @@ Windows Gaming Host
 <li>JSON storage for configuration and runtime recovery state</li>
 </ul>
 <hr>
-<h1>Design Principles</h1>
-<h2 id="reliability" tabindex="-1">Reliability</h2>
+<h2 id="design-principles" tabindex="-1">Design Principles</h2>
+<h3 id="reliability" tabindex="-1">Reliability</h3>
 <p>Recovery systems and watchdogs help maintain service availability.</p>
-<h2 id="modularity" tabindex="-1">Modularity</h2>
+<h3 id="modularity" tabindex="-1">Modularity</h3>
 <p>Major systems are separated into dedicated components.</p>
-<h2 id="observability" tabindex="-1">Observability</h2>
+<h3 id="observability" tabindex="-1">Observability</h3>
 <p>System state is visible through monitoring and analytics systems.</p>
-<h2 id="extensibility" tabindex="-1">Extensibility</h2>
+<h3 id="extensibility" tabindex="-1">Extensibility</h3>
 <p>Future features can be added without major architectural redesign.</p>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/project-overview"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Project overview</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/backend-architecture"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Backend architecture</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/project-overview"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Project overview</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/backend-architecture"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Backend architecture</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#overview">Overview</a></li><li><a href="#high-level-architecture">High-Level Architecture</a></li><li><a href="#architectural-layers">Architectural Layers</a></li><li><a href="#design-principles">Design Principles</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

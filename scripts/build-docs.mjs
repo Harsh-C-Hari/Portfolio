@@ -87,15 +87,82 @@ function readingTime(text) {
 }
 
 /* ----------------------------------------------------------------
-   TOC builder (from heading tokens)
+   Heading normalization
+   - Strips the leading H1 and directly following <hr> (if present)
+   - Normalizes misleveled headings (e.g. # Release Stabilization Phase, leading ## Overview)
+   - Shifts headings so smallest level present becomes h2 (capped at h6)
    ---------------------------------------------------------------- */
-function buildTOC(env) {
-  if (!env.toc || !env.toc.length) return '';
-  const items = env.toc.map(({ level, slug, title }) => {
-    const indent = level === 2 ? '' : '  ';
-    return `${indent}<li><a href="#${slug}">${escapeHtml(title)}</a></li>`;
+function normalizeHeadings(rawMarkdown, docSlug) {
+  const lines = rawMarkdown.split('\n');
+  let firstH1Removed = false;
+  const cleaned = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (!firstH1Removed && l.trim().startsWith('# ')) {
+      firstH1Removed = true;
+      // Skip directly following hr if present
+      if (i + 1 < lines.length && ['---', '***', '___'].includes(lines[i + 1].trim())) {
+        i++;
+      }
+      continue;
+    }
+    cleaned.push(l);
+  }
+
+  let docText = cleaned.join('\n');
+
+  if (docSlug === 'problems-solved') {
+    docText = docText.replace(/^#\s+Release Stabilization Phase\b/m, '## Release Stabilization Phase');
+  } else {
+    // If doc has body H1s and starts with ## Overview, normalize ## Overview -> # Overview
+    // so all top-level sections in the doc are at level 1 before shifting to level 2.
+    const hasBodyH1s = docText.split('\n').some(l => l.trim().startsWith('# '));
+    if (hasBodyH1s) {
+      docText = docText.replace(/^##\s+Overview\b/m, '# Overview');
+    }
+  }
+
+  // Find minimum heading level in remaining document
+  const remainingLines = docText.split('\n');
+  let minLevel = 6;
+  for (const l of remainingLines) {
+    const m = l.match(/^(#{1,6})\s+/);
+    if (m) minLevel = Math.min(minLevel, m[1].length);
+  }
+
+  if (minLevel === 6) return docText; // no headings
+
+  const shift = 2 - minLevel;
+  const shiftedLines = remainingLines.map(l => {
+    const m = l.match(/^(#{1,6})(\s+.*)/);
+    if (m) {
+      const newLevel = Math.min(6, Math.max(2, m[1].length + shift));
+      return '#'.repeat(newLevel) + m[2];
+    }
+    return l;
   });
-  return `<nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul>${items.join('')}</ul></nav>`;
+
+  return shiftedLines.join('\n');
+}
+
+/* ----------------------------------------------------------------
+   TOC links builder (h2 entries only for clean scanning)
+   ---------------------------------------------------------------- */
+function buildTOCLinks(toc) {
+  if (!toc || !toc.length) return '';
+  const h2Items = toc.filter(item => item.level === 2);
+  if (!h2Items.length) return '';
+  const items = h2Items.map(({ slug, title }) => {
+    return `<li><a href="#${slug}">${escapeHtml(title)}</a></li>`;
+  });
+  return `<ul>${items.join('')}</ul>`;
+}
+
+function buildTOC(env) {
+  const links = buildTOCLinks(env.toc);
+  if (!links) return '';
+  return `<nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2>${links}</nav>`;
 }
 
 function escapeHtml(str) {
@@ -166,9 +233,9 @@ function makeRenderer(config, currentSlugSet) {
     },
   });
 
-  // Anchor headings + TOC collection
+  // Anchor headings + TOC collection (levels 2-6)
   md.use(mdAnchor, {
-    level: [2, 3],
+    level: [2, 3, 4, 5, 6],
     callback: (token, info) => { /* toc built via env below */ },
   });
 
@@ -221,12 +288,12 @@ function makeRenderer(config, currentSlugSet) {
 
   function render(markdown, sourceFile) {
     const env = { sourceFile, toc: [] };
-    // Collect headings for TOC by post-processing tokens
+    // Collect headings for TOC by post-processing tokens (h2-h6)
     const tokens = md.parse(markdown, env);
     env.toc = [];
     for (let i = 0; i < tokens.length; i++) {
       const t = tokens[i];
-      if ((t.type === 'heading_open') && (t.tag === 'h2' || t.tag === 'h3')) {
+      if ((t.type === 'heading_open') && ['h2','h3','h4','h5','h6'].includes(t.tag)) {
         const inline = tokens[i + 1];
         if (inline && inline.type === 'inline') {
           const title = inline.children.filter(c => c.type === 'text' || c.type === 'code_inline').map(c => c.content).join('');
@@ -279,7 +346,8 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
   const sidebar = `<nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list">${sidebarGroups}</ul></nav>`;
 
   const prevNext  = prevNextLinks(allDocs, doc.slug);
-  const tocHtml   = buildTOC({ toc });
+  const tocLinks  = buildTOCLinks(toc);
+  const tocHtml   = tocLinks ? `<nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2>${tocLinks}</nav>` : '';
 
   const vars = {
     page_title:       pageTitle,
@@ -297,6 +365,7 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
     doc_summary:      escapeHtml(doc.summary),
     doc_reading_time: rt,
     doc_toc:          tocHtml,
+    doc_toc_links:    tocLinks,
     doc_sidebar:      sidebar,
     doc_body:         body,
     doc_prevnext:     prevNext,
@@ -330,6 +399,7 @@ export function buildDocs(originOverride) {
   const { render, rewriteLog } = makeRenderer(config, slugSet);
   const built = [];
   const missing = [];
+  const headingAudit = [];
 
   for (const doc of allDocs) {
     const contentPath = path.join(CONTENT_ROOT, doc.source);
@@ -338,16 +408,56 @@ export function buildDocs(originOverride) {
       continue;
     }
 
-    const markdown = fs.readFileSync(contentPath, 'utf8');
+    const rawMarkdown = fs.readFileSync(contentPath, 'utf8');
+    const markdown    = normalizeHeadings(rawMarkdown, doc.slug);
     let { html: body, toc } = render(markdown, doc.source);
-    // The layout already renders doc_title as <h1>. Strip any leading <h1>
-    // that came from the Markdown # heading so there is exactly one H1 per page.
-    body = body.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
 
     writeDocPage(doc, allDocs, body, toc, config, { cssVer, jsVer, origin });
     built.push(doc.slug);
+
+    // Audit the written page for h1 count and heading outline
+    const outPath = path.join(OUTPUT_ROOT, doc.slug, 'index.html');
+    const writtenHtml = fs.readFileSync(outPath, 'utf8');
+    const h1Count = (writtenHtml.match(/<h1\b[^>]*>/gi) || []).length;
+
+    // Check heading outline for skipped levels
+    const headingsInPage = [];
+    const headingRe = /<h([1-6])\b[^>]*>(.*?)<\/h\1>/gi;
+    let match;
+    while ((match = headingRe.exec(writtenHtml)) !== null) {
+      headingsInPage.push({ level: parseInt(match[1], 10), title: match[2].replace(/<[^>]+>/g, '').trim() });
+    }
+
+    let skipped = 0;
+    let prevLevel = 1; // Page title h1 is level 1
+    for (const h of headingsInPage) {
+      if (h.level > prevLevel + 1) skipped++;
+      prevLevel = h.level;
+    }
+
+    const levelCounts = {};
+    headingsInPage.forEach(h => {
+      levelCounts[`h${h.level}`] = (levelCounts[`h${h.level}`] || 0) + 1;
+    });
+    const outlineSummary = Object.entries(levelCounts).map(([k, v]) => `${k}:${v}`).join(' ');
+
+    headingAudit.push({
+      slug: doc.slug,
+      h1Count,
+      outline: outlineSummary,
+      skipped,
+    });
+
     console.log(`[docs] Built /work/pcgo/docs/${doc.slug}`);
   }
+
+  // Print Heading Audit table for all 15 docs
+  console.log('\n── Heading Audit (all docs must have exactly 1 h1, no skipped levels) ──');
+  for (const item of headingAudit) {
+    const status = (item.h1Count === 1 && item.skipped === 0) ? '✓ PASS' : '✗ FAIL';
+    console.log(`  ${status}  ${item.slug.padEnd(36)} h1: ${item.h1Count} | ${item.outline} | skipped: ${item.skipped}`);
+  }
+  console.log('────────────────────────────────────────────────────────────────────────\n');
 
   // Step 3: Print link-rewrite table
   if (rewriteLog.length) {

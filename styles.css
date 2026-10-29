@@ -2702,10 +2702,138 @@ html.pt-enter .loader {
   font-weight: 600;
 }
 
-/* Main area */
-.doc-layout__main {
+/* Main + TOC content wrapper (centred in space beside sidebar) */
+.doc-layout__content {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(1.5rem, 3vw, 3rem);
   padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2.5rem);
-  max-width: 780px;
+  min-width: 0;
+  width: 100%;
+}
+
+.doc-layout__main {
+  flex: 1 1 auto;
+  max-width: 72ch;
+  min-width: 0;
+  width: 100%;
+}
+
+.doc-article {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Sticky TOC rail (>= 1200px) */
+.doc-toc-rail {
+  display: none;
+  width: 240px;
+  flex: 0 0 240px;
+  position: sticky;
+  top: calc(var(--nav-h) + 1.5rem);
+  max-height: calc(100dvh - var(--nav-h) - 3rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 1200px) {
+  .doc-toc-rail {
+    display: block;
+  }
+}
+
+.doc-toc-rail__head {
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+.doc-toc-rail ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.doc-toc-rail ul a {
+  display: block;
+  font-size: var(--t-small);
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  line-height: 1.4;
+  border-left: 2px solid transparent;
+  padding-left: 0.65rem;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.doc-toc-rail ul a:hover {
+  color: var(--ink);
+}
+
+.doc-toc-rail ul a.is-active,
+.doc-toc-rail ul a[aria-current="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  border-left-color: var(--ink); /* 2px ink bar, NOT a pink fill */
+}
+
+/* Collapsible TOC (< 1200px) */
+.doc-toc-details {
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 1200px) {
+  .doc-toc-details {
+    display: none;
+  }
+}
+
+.doc-toc-details__summary {
+  font-family: var(--f-mono);
+  font-size: var(--t-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.doc-toc-details[open] .doc-toc-details__summary {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.doc-toc-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.doc-toc-details ul a {
+  font-size: var(--t-small);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.doc-toc-details ul a:hover {
+  text-decoration: underline;
 }
 
 /* Doc header */
@@ -2736,44 +2864,6 @@ html.pt-enter .loader {
   line-height: 1.5;
   margin: 0;
 }
-
-/* TOC */
-.doc-toc {
-  background: var(--paper-2);
-  border: 1.5px solid var(--ink);
-  border-radius: 6px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 2rem;
-}
-
-.doc-toc__head {
-  font-family: var(--f-mono);
-  font-size: var(--t-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--muted);
-  margin: 0 0 0.5rem;
-  font-weight: 600;
-}
-
-.doc-toc ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.doc-toc ul a {
-  font-size: var(--t-small);
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.doc-toc ul a:hover { text-decoration: underline; }
-.doc-toc ul li { padding-left: 0; }
-.doc-toc ul li + li { /* nested indent via  */ }
 
 /* Doc body markdown styles */
 .doc-body {
@@ -2846,6 +2936,10 @@ html.pt-enter .loader {
   font-family: var(--f-mono);
   font-size: var(--t-mono);
   line-height: 1.6;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-width: 100%;
 }
 
 .doc-body .hljs code {
@@ -2866,6 +2960,9 @@ html.pt-enter .loader {
   font-size: var(--t-mono);
   line-height: 1.55;
   white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  max-width: 100%;
   /* Prevent colour from being applied to ASCII diagrams */
   color: var(--ink);
 }
@@ -2874,6 +2971,7 @@ html.pt-enter .loader {
 .doc-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
 }
 
 .doc-body table {

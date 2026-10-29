@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,20 +64,26 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved" aria-current="page">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">3 min read</p>
-          <h1 class="doc-header__title">Major problems solved</h1>
-          <p class="doc-header__summary">A short tour of the hardest problems and how each was solved.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">3 min read</p>
+            <h1 class="doc-header__title">Major problems solved</h1>
+            <p class="doc-header__summary">A short tour of the hardest problems and how each was solved.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#tailscale-state-aware-recovery">Tailscale State-Aware Recovery</a></li>  <li><a href="#problem%3A">Problem:</a></li>  <li><a href="#solution%3A">Solution:</a></li><li><a href="#dashboard-cache-synchronization">Dashboard Cache Synchronization</a></li>  <li><a href="#problem%3A-1">Problem:</a></li>  <li><a href="#solution%3A-1">Solution:</a></li><li><a href="#live-sync-architecture-migration">Live Sync Architecture Migration</a></li><li><a href="#save-synchronization-detection-refinement">Save Synchronization Detection Refinement</a></li>  <li><a href="#problem%3A-2">Problem:</a></li>  <li><a href="#solution%3A-2">Solution:</a></li><li><a href="#save-backup-explosion">Save Backup Explosion</a></li>  <li><a href="#problem">Problem</a></li>  <li><a href="#solution">Solution</a></li>  <li><a href="#result">Result</a></li><li><a href="#sunshine-crash-recovery">Sunshine Crash Recovery</a></li>  <li><a href="#problem-1">Problem</a></li>  <li><a href="#solution-1">Solution</a></li>  <li><a href="#result-1">Result</a></li><li><a href="#host-readiness-validation">Host Readiness Validation</a></li>  <li><a href="#problem-2">Problem</a></li>  <li><a href="#solution-2">Solution</a></li>  <li><a href="#result-2">Result</a></li><li><a href="#save-loss-during-unexpected-failures">Save Loss During Unexpected Failures</a></li>  <li><a href="#problem-3">Problem</a></li>  <li><a href="#solution-3">Solution</a></li>  <li><a href="#result-3">Result</a></li><li><a href="#stale-session-recovery">Stale Session Recovery</a></li>  <li><a href="#problem-4">Problem</a></li>  <li><a href="#solution-4">Solution</a></li>  <li><a href="#result-4">Result</a></li><li><a href="#save-filter-system-generalization">Save Filter System Generalization</a></li><li><a href="#dynamic-game-management-system">Dynamic Game Management System</a></li><li><a href="#settings-validation-system">Settings Validation System</a></li><li><a href="#tailscale-configuration-migration">Tailscale Configuration Migration</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#tailscale-state-aware-recovery">Tailscale State-Aware Recovery</a></li><li><a href="#dashboard-cache-synchronization">Dashboard Cache Synchronization</a></li><li><a href="#live-sync-architecture-migration">Live Sync Architecture Migration</a></li><li><a href="#save-synchronization-detection-refinement">Save Synchronization Detection Refinement</a></li><li><a href="#save-backup-explosion">Save Backup Explosion</a></li><li><a href="#sunshine-crash-recovery">Sunshine Crash Recovery</a></li><li><a href="#host-readiness-validation">Host Readiness Validation</a></li><li><a href="#save-loss-during-unexpected-failures">Save Loss During Unexpected Failures</a></li><li><a href="#stale-session-recovery">Stale Session Recovery</a></li><li><a href="#save-filter-system-generalization">Save Filter System Generalization</a></li><li><a href="#dynamic-game-management-system">Dynamic Game Management System</a></li><li><a href="#settings-validation-system">Settings Validation System</a></li><li><a href="#tailscale-configuration-migration">Tailscale Configuration Migration</a></li><li><a href="#release-stabilization-phase">Release Stabilization Phase</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="tailscale-state-aware-recovery" tabindex="-1">Tailscale State-Aware Recovery</h2>
+          <div class="doc-body">
+            <h2 id="tailscale-state-aware-recovery" tabindex="-1">Tailscale State-Aware Recovery</h2>
 <h3 id="problem%3A" tabindex="-1">Problem:</h3>
 <p>Tailscale could not be reliably recovered using a single restart strategy.</p>
 <h3 id="solution%3A" tabindex="-1">Solution:</h3>
@@ -174,7 +180,7 @@ Integrated Live Sync startup into the FastAPI session lifecycle.</p>
 <p>Detailed Investigation:</p>
 <p><a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/engineering/tailscale-configuration-migration.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Detailed Investigation</a></p>
 <hr>
-<h1>Release Stabilization Phase</h1>
+<h2 id="release-stabilization-phase" tabindex="-1">Release Stabilization Phase</h2>
 <p>Following completion of the MVP implementation, the project entered a dedicated release stabilization phase.</p>
 <p>Rather than introducing new features, this phase focused on improving reliability, robustness, data integrity, and release readiness.</p>
 <p>Major engineering work included:</p>
@@ -194,16 +200,27 @@ Integrated Live Sync startup into the FastAPI session lifecycle.</p>
 <p>For detailed engineering documentation, see:</p>
 <p><a href="/work/pcgo/docs/release-hardening-and-reliability">Detailed Investigation</a></p>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/session-persistence-and-reconnection"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Session persistence and reconnection</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/api-overview"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">API overview</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/session-persistence-and-reconnection"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Session persistence and reconnection</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/api-overview"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">API overview</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#tailscale-state-aware-recovery">Tailscale State-Aware Recovery</a></li><li><a href="#dashboard-cache-synchronization">Dashboard Cache Synchronization</a></li><li><a href="#live-sync-architecture-migration">Live Sync Architecture Migration</a></li><li><a href="#save-synchronization-detection-refinement">Save Synchronization Detection Refinement</a></li><li><a href="#save-backup-explosion">Save Backup Explosion</a></li><li><a href="#sunshine-crash-recovery">Sunshine Crash Recovery</a></li><li><a href="#host-readiness-validation">Host Readiness Validation</a></li><li><a href="#save-loss-during-unexpected-failures">Save Loss During Unexpected Failures</a></li><li><a href="#stale-session-recovery">Stale Session Recovery</a></li><li><a href="#save-filter-system-generalization">Save Filter System Generalization</a></li><li><a href="#dynamic-game-management-system">Dynamic Game Management System</a></li><li><a href="#settings-validation-system">Settings Validation System</a></li><li><a href="#tailscale-configuration-migration">Tailscale Configuration Migration</a></li><li><a href="#release-stabilization-phase">Release Stabilization Phase</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

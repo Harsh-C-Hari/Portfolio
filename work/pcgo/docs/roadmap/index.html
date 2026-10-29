@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,24 +64,30 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap" aria-current="page">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">4 min read</p>
-          <h1 class="doc-header__title">Roadmap</h1>
-          <p class="doc-header__summary">Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">4 min read</p>
+            <h1 class="doc-header__title">Roadmap</h1>
+            <p class="doc-header__summary">Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#session-persistence-%26-reconnection">Session Persistence &amp; Reconnection</a></li><li><a href="#authentication-%26-authorization">Authentication &amp; Authorization</a></li><li><a href="#database-migration">Database Migration</a></li><li><a href="#user-app-foundation">User App Foundation</a></li><li><a href="#embedded-tailscale">Embedded Tailscale</a></li><li><a href="#moonlight-automation">Moonlight Automation</a></li><li><a href="#production-user-experience">Production User Experience</a></li><li><a href="#production-host-dashboard">Production Host Dashboard</a></li><li><a href="#security-%26-audit-logging">Security &amp; Audit Logging</a></li><li><a href="#deployment-%26-packaging">Deployment &amp; Packaging</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#overview">Overview</a></li><li><a href="#current-status">Current Status</a></li><li><a href="#v0.1-host-foundation-release">v0.1 Host Foundation Release</a></li><li><a href="#phase-23-%E2%80%94-completed">Phase 23 — Completed</a></li><li><a href="#phase-24-%E2%80%94-completed">Phase 24 — Completed</a></li><li><a href="#phase-25-%E2%80%94-completed">Phase 25 — Completed</a></li><li><a href="#phase-26">Phase 26</a></li><li><a href="#phase-27">Phase 27</a></li><li><a href="#phase-28">Phase 28</a></li><li><a href="#phase-29">Phase 29</a></li><li><a href="#phase-30">Phase 30</a></li><li><a href="#phase-31">Phase 31</a></li><li><a href="#phase-32">Phase 32</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="overview" tabindex="-1">Overview</h2>
+          <div class="doc-body">
+            <h2 id="overview" tabindex="-1">Overview</h2>
 <p>This roadmap outlines the planned development phases following completion of the current MVP foundation.</p>
 <p>The goal is to evolve the platform from a host-focused management system into a complete personal cloud gaming ecosystem.</p>
 <hr>
-<h1>Current Status</h1>
+<h2 id="current-status" tabindex="-1">Current Status</h2>
 <p>Current Progress:</p>
 <pre class="hljs"><code>The v0.1 Host Foundation Release is complete.
 
@@ -114,7 +120,7 @@ Phase 25 Database Migration has been completed.
 <li>SQLite Database Migration</li>
 </ul>
 <hr>
-<h1>v0.1 Host Foundation Release</h1>
+<h2 id="v0.1-host-foundation-release" tabindex="-1">v0.1 Host Foundation Release</h2>
 <p>The initial public release concludes the implementation of the single-host orchestration platform.</p>
 <p>Completed milestones include:</p>
 <ul>
@@ -131,8 +137,8 @@ Phase 25 Database Migration has been completed.
 </ul>
 <p>Subsequent phases focus on extending the platform beyond a host-only administrative system toward a complete cloud gaming experience.</p>
 <hr>
-<h1>Phase 23 — Completed</h1>
-<h2 id="session-persistence-%26-reconnection" tabindex="-1">Session Persistence &amp; Reconnection</h2>
+<h2 id="phase-23-%E2%80%94-completed" tabindex="-1">Phase 23 — Completed</h2>
+<h3 id="session-persistence-%26-reconnection" tabindex="-1">Session Persistence &amp; Reconnection</h3>
 <p>See <a href="/work/pcgo/docs/session-persistence-and-reconnection">Session Persistence &amp; Reconnection Architecture</a> for the full engineering write-up.</p>
 <p>Completed capabilities:</p>
 <ul>
@@ -156,8 +162,8 @@ Stream Lifecycle
 Transport Lifecycle
 </code></pre>
 <hr>
-<h1>Phase 24 — Completed</h1>
-<h2 id="authentication-%26-authorization" tabindex="-1">Authentication &amp; Authorization</h2>
+<h2 id="phase-24-%E2%80%94-completed" tabindex="-1">Phase 24 — Completed</h2>
+<h3 id="authentication-%26-authorization" tabindex="-1">Authentication &amp; Authorization</h3>
 <p>See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/features/authentication.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Authentication &amp; Role-Based Access</a> and <a href="/work/pcgo/docs/internal-event-authentication">Internal Event Authentication</a> for the full engineering write-up.</p>
 <p>Delivered capabilities:</p>
 <ul>
@@ -182,8 +188,8 @@ Transport Lifecycle
 <li>Multi-user readiness: distinct admin and user experiences on a shared host</li>
 </ul>
 <hr>
-<h1>Phase 25 — Completed</h1>
-<h2 id="database-migration" tabindex="-1">Database Migration</h2>
+<h2 id="phase-25-%E2%80%94-completed" tabindex="-1">Phase 25 — Completed</h2>
+<h3 id="database-migration" tabindex="-1">Database Migration</h3>
 <p>Session history, session events, session metadata, recovery events, Sunshine stream history/state, and user accounts were migrated from JSON files to a SQLite database (<code>host-agent/data/pcgo.db</code>), accessed through a dedicated repository layer (<code>host_agent/repositories/</code>).</p>
 <p>Host configuration (<code>config.json</code>), the game library (<code>games.json</code>), and the active-session runtime/crash-recovery snapshot (<code>data/active_sessions.json</code>) were intentionally kept as JSON files rather than migrated. Log files remain plain rotating log files.</p>
 <p>Delivered:</p>
@@ -194,8 +200,8 @@ Transport Lifecycle
 </ul>
 <p>See <code>docs/phase25/</code> for the full engineering design and schema documentation.</p>
 <hr>
-<h1>Phase 26</h1>
-<h2 id="user-app-foundation" tabindex="-1">User App Foundation</h2>
+<h2 id="phase-26" tabindex="-1">Phase 26</h2>
+<h3 id="user-app-foundation" tabindex="-1">User App Foundation</h3>
 <p>A scoped, role-aware <strong>User Dashboard</strong> already ships as part of the Phase 24 authentication work (Home, Analytics, Session History, Logs, Change Password, restricted to the logged-in user’s own data). Phase 26 goes further: a dedicated, purpose-built application rather than a role-restricted view of the same web dashboard.</p>
 <p>Goals:</p>
 <ul>
@@ -209,8 +215,8 @@ Transport Lifecycle
 <li>Better user experience</li>
 </ul>
 <hr>
-<h1>Phase 27</h1>
-<h2 id="embedded-tailscale" tabindex="-1">Embedded Tailscale</h2>
+<h2 id="phase-27" tabindex="-1">Phase 27</h2>
+<h3 id="embedded-tailscale" tabindex="-1">Embedded Tailscale</h3>
 <p>Goals:</p>
 <ul>
 <li>Integrated connectivity setup</li>
@@ -223,8 +229,8 @@ Transport Lifecycle
 <li>Better user experience</li>
 </ul>
 <hr>
-<h1>Phase 28</h1>
-<h2 id="moonlight-automation" tabindex="-1">Moonlight Automation</h2>
+<h2 id="phase-28" tabindex="-1">Phase 28</h2>
+<h3 id="moonlight-automation" tabindex="-1">Moonlight Automation</h3>
 <p>Goals:</p>
 <ul>
 <li>Stream launch automation</li>
@@ -237,8 +243,8 @@ Transport Lifecycle
 <li>Improved usability</li>
 </ul>
 <hr>
-<h1>Phase 29</h1>
-<h2 id="production-user-experience" tabindex="-1">Production User Experience</h2>
+<h2 id="phase-29" tabindex="-1">Phase 29</h2>
+<h3 id="production-user-experience" tabindex="-1">Production User Experience</h3>
 <p>The initial User Dashboard (session visibility, analytics, history, logs) was delivered as part of Phase 24. Phase 29 focuses on maturing it into a production-grade player experience.</p>
 <p>Goals:</p>
 <ul>
@@ -251,8 +257,8 @@ Transport Lifecycle
 <li>Better remote experience</li>
 </ul>
 <hr>
-<h1>Phase 30</h1>
-<h2 id="production-host-dashboard" tabindex="-1">Production Host Dashboard</h2>
+<h2 id="phase-30" tabindex="-1">Phase 30</h2>
+<h3 id="production-host-dashboard" tabindex="-1">Production Host Dashboard</h3>
 <p>Goals:</p>
 <ul>
 <li>Production-ready monitoring</li>
@@ -264,8 +270,8 @@ Transport Lifecycle
 <li>Better reliability management</li>
 </ul>
 <hr>
-<h1>Phase 31</h1>
-<h2 id="security-%26-audit-logging" tabindex="-1">Security &amp; Audit Logging</h2>
+<h2 id="phase-31" tabindex="-1">Phase 31</h2>
+<h3 id="security-%26-audit-logging" tabindex="-1">Security &amp; Audit Logging</h3>
 <p>Goals:</p>
 <ul>
 <li>Security event tracking</li>
@@ -278,8 +284,8 @@ Transport Lifecycle
 <li>Security</li>
 </ul>
 <hr>
-<h1>Phase 32</h1>
-<h2 id="deployment-%26-packaging" tabindex="-1">Deployment &amp; Packaging</h2>
+<h2 id="phase-32" tabindex="-1">Phase 32</h2>
+<h3 id="deployment-%26-packaging" tabindex="-1">Deployment &amp; Packaging</h3>
 <p>Goals:</p>
 <ul>
 <li>Simplified installation</li>
@@ -292,16 +298,27 @@ Transport Lifecycle
 <li>Production readiness</li>
 </ul>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/v0-limitations"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Known limitations</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/v0-limitations"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Known limitations</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#overview">Overview</a></li><li><a href="#current-status">Current Status</a></li><li><a href="#v0.1-host-foundation-release">v0.1 Host Foundation Release</a></li><li><a href="#phase-23-%E2%80%94-completed">Phase 23 — Completed</a></li><li><a href="#phase-24-%E2%80%94-completed">Phase 24 — Completed</a></li><li><a href="#phase-25-%E2%80%94-completed">Phase 25 — Completed</a></li><li><a href="#phase-26">Phase 26</a></li><li><a href="#phase-27">Phase 27</a></li><li><a href="#phase-28">Phase 28</a></li><li><a href="#phase-29">Phase 29</a></li><li><a href="#phase-30">Phase 30</a></li><li><a href="#phase-31">Phase 31</a></li><li><a href="#phase-32">Phase 32</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

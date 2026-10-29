@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,23 +64,29 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability" aria-current="page">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">9 min read</p>
-          <h1 class="doc-header__title">Release hardening and reliability</h1>
-          <p class="doc-header__summary">Pre-release reliability work: atomic save capture, session locks, cleanup, config updates, integrity checks, and what the audit taught me.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">9 min read</p>
+            <h1 class="doc-header__title">Release hardening and reliability</h1>
+            <p class="doc-header__summary">Pre-release reliability work: atomic save capture, session locks, cleanup, config updates, integrity checks, and what the audit taught me.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#problem">Problem</a></li><li><a href="#solution">Solution</a></li><li><a href="#missing-manifest-files">Missing Manifest Files</a></li><li><a href="#deferred-manifest-repair">Deferred Manifest Repair</a></li><li><a href="#live-sync-shutdown-behavior">Live Sync Shutdown Behavior</a></li><li><a href="#health-endpoint">Health Endpoint</a></li><li><a href="#live-sync-cancellation">Live Sync Cancellation</a></li><li><a href="#manifest-repair-api">Manifest Repair API</a></li><li><a href="#authentication">Authentication</a></li><li><a href="#atomic-games-configuration-updates">Atomic Games Configuration Updates</a></li><li><a href="#corrupt-session-lock-recovery">Corrupt Session Lock Recovery</a></li>  <li><a href="#previous-behavior">Previous Behavior</a></li>  <li><a href="#final-behavior">Final Behavior</a></li><li><a href="#metadata-synchronization-validation">Metadata Synchronization Validation</a></li><li><a href="#cleanup-synchronization-validation">Cleanup Synchronization Validation</a></li><li><a href="#dashboard-organization">Dashboard Organization</a></li><li><a href="#session-management-improvements">Session Management Improvements</a></li><li><a href="#api-error-handling">API Error Handling</a></li><li><a href="#dashboard-refactoring">Dashboard Refactoring</a></li><li><a href="#host-status-component-refactoring">Host Status Component Refactoring</a></li><li><a href="#game-manager-refactoring">Game Manager Refactoring</a></li><li><a href="#settings-panel-refactoring">Settings Panel Refactoring</a></li><li><a href="#manifest-repair-api-1">Manifest Repair API</a></li><li><a href="#health-endpoint-improvements">Health Endpoint Improvements</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#background">Background</a></li><li><a href="#problems-identified">Problems Identified</a></li><li><a href="#1.-atomic-save-capture">1. Atomic Save Capture</a></li><li><a href="#2.-live-sync-reliability">2. Live Sync Reliability</a></li><li><a href="#3.-session-metadata-concurrency">3. Session Metadata Concurrency</a></li><li><a href="#4.-session-lock-reliability">4. Session Lock Reliability</a></li><li><a href="#5.-cleanup-reliability">5. Cleanup Reliability</a></li><li><a href="#6.-file-stability-monitoring">6. File Stability Monitoring</a></li><li><a href="#7.-atomic-configuration-updates">7. Atomic Configuration Updates</a></li><li><a href="#8.-save-integrity-verification">8. Save Integrity Verification</a></li><li><a href="#intentional-design-decisions">Intentional Design Decisions</a></li><li><a href="#deferred-improvements">Deferred Improvements</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li><li><a href="#post-audit-improvements">Post-Audit Improvements</a></li><li><a href="#additional-backend-hardening">Additional Backend Hardening</a></li><li><a href="#frontend-reliability-improvements">Frontend Reliability Improvements</a></li><li><a href="#manual-validation">Manual Validation</a></li><li><a href="#remaining-deferred-improvements">Remaining Deferred Improvements</a></li><li><a href="#final-release-readiness-assessment">Final Release Readiness Assessment</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <p><strong>Phase:</strong> Release Stabilization (Pre-Release Audit)</p>
+          <div class="doc-body">
+            <p><strong>Phase:</strong> Release Stabilization (Pre-Release Audit)</p>
 <p><strong>Status:</strong> Completed</p>
 <hr>
-<h1>Issue Information</h1>
+<h2 id="issue-information" tabindex="-1">Issue Information</h2>
 <p><strong>Category:</strong>
 Release Engineering / Reliability / Data Integrity / Concurrency</p>
 <p><strong>Affected Components:</strong></p>
@@ -100,7 +106,7 @@ High</p>
 <p><strong>Status:</strong>
 Resolved</p>
 <hr>
-<h1>Overview</h1>
+<h2 id="overview" tabindex="-1">Overview</h2>
 <p>As development of Personal Cloud Gaming Orchestrator v0.1 approached its first public release, the project entered a dedicated release stabilization phase.</p>
 <p>Rather than focusing on new functionality, this phase concentrated on improving reliability, robustness, crash recovery, configuration safety, filesystem integrity, and maintainability.</p>
 <p>Multiple independent backend audits, real-world testing, and architecture reviews were performed to identify failure scenarios that were unlikely to appear during normal development but could affect production reliability.</p>
@@ -113,7 +119,7 @@ Resolved</p>
 <p>“The system behaves predictably even when unexpected failures occur.”</p>
 </blockquote>
 <hr>
-<h1>Background</h1>
+<h2 id="background" tabindex="-1">Background</h2>
 <p>Earlier development phases focused primarily on implementing core functionality including:</p>
 <ul>
 <li>Session Management</li>
@@ -138,11 +144,11 @@ Resolved</p>
 <li>Repository release readiness</li>
 </ul>
 <hr>
-<h1>Problems Identified</h1>
+<h2 id="problems-identified" tabindex="-1">Problems Identified</h2>
 <p>The release stabilization phase addressed multiple independent reliability concerns.</p>
 <hr>
-<h1>1. Atomic Save Capture</h1>
-<h2 id="problem" tabindex="-1">Problem</h2>
+<h2 id="1.-atomic-save-capture" tabindex="-1">1. Atomic Save Capture</h2>
+<h3 id="problem" tabindex="-1">Problem</h3>
 <p>Save capture previously copied files directly into the active latest save directory.</p>
 <p>If copying failed midway because of:</p>
 <ul>
@@ -152,7 +158,7 @@ Resolved</p>
 </ul>
 <p>the destination could contain a partially updated save while still appearing valid.</p>
 <hr>
-<h2 id="solution" tabindex="-1">Solution</h2>
+<h3 id="solution" tabindex="-1">Solution</h3>
 <p>A staging directory workflow was implemented.</p>
 <p>The updated process became:</p>
 <pre class="hljs"><code>Capture Save
@@ -172,7 +178,7 @@ Integrity Verification
 </code></pre>
 <p>This prevents incomplete save captures from becoming active.</p>
 <hr>
-<h1>2. Live Sync Reliability</h1>
+<h2 id="2.-live-sync-reliability" tabindex="-1">2. Live Sync Reliability</h2>
 <p>Live Sync underwent several reliability improvements.</p>
 <p>Implemented improvements include:</p>
 <ul>
@@ -186,7 +192,7 @@ Integrity Verification
 <p>Live Sync intentionally waits for save activity to stabilize before replacing the latest save.</p>
 <p>This reduces unnecessary synchronization and avoids copying partially written save files.</p>
 <hr>
-<h1>3. Session Metadata Concurrency</h1>
+<h2 id="3.-session-metadata-concurrency" tabindex="-1">3. Session Metadata Concurrency</h2>
 <p>Session metadata could be updated by multiple execution paths.</p>
 <p>Examples include:</p>
 <ul>
@@ -196,7 +202,7 @@ Integrity Verification
 <p>Concurrent updates could overwrite fields unintentionally.</p>
 <p>A dedicated synchronization mechanism was introduced to ensure metadata updates occur safely.</p>
 <hr>
-<h1>4. Session Lock Reliability</h1>
+<h2 id="4.-session-lock-reliability" tabindex="-1">4. Session Lock Reliability</h2>
 <p>The session locking system was strengthened.</p>
 <p>Improvements include:</p>
 <ul>
@@ -207,7 +213,7 @@ Integrity Verification
 </ul>
 <p>This significantly reduces manual intervention after unexpected crashes.</p>
 <hr>
-<h1>5. Cleanup Reliability</h1>
+<h2 id="5.-cleanup-reliability" tabindex="-1">5. Cleanup Reliability</h2>
 <p>Cleanup ordering was redesigned.</p>
 <p>The finalized workflow is:</p>
 <pre class="hljs"><code>Stop Live Sync
@@ -224,7 +230,7 @@ Release Session
 </code></pre>
 <p>The cleanup capture is intentionally treated as the authoritative save.</p>
 <hr>
-<h1>6. File Stability Monitoring</h1>
+<h2 id="6.-file-stability-monitoring" tabindex="-1">6. File Stability Monitoring</h2>
 <p>Additional safeguards were introduced before reading save files.</p>
 <p>Improvements include:</p>
 <ul>
@@ -235,7 +241,7 @@ Release Session
 </ul>
 <p>These changes reduce failures caused by games writing save files while synchronization is in progress.</p>
 <hr>
-<h1>7. Atomic Configuration Updates</h1>
+<h2 id="7.-atomic-configuration-updates" tabindex="-1">7. Atomic Configuration Updates</h2>
 <p>Configuration management was redesigned to improve consistency.</p>
 <p>Improvements include:</p>
 <ul>
@@ -251,7 +257,7 @@ Release Session
 <li>Runtime settings</li>
 </ul>
 <hr>
-<h1>8. Save Integrity Verification</h1>
+<h2 id="8.-save-integrity-verification" tabindex="-1">8. Save Integrity Verification</h2>
 <p>The save pipeline now verifies multiple stages of the save lifecycle.</p>
 <p>Implemented verification includes:</p>
 <ul>
@@ -262,10 +268,10 @@ Release Session
 </ul>
 <p>Integrity failures are detected before corrupted save data becomes active.</p>
 <hr>
-<h1>Intentional Design Decisions</h1>
+<h2 id="intentional-design-decisions" tabindex="-1">Intentional Design Decisions</h2>
 <p>Several implementation decisions were made deliberately during stabilization.</p>
 <hr>
-<h2 id="missing-manifest-files" tabindex="-1">Missing Manifest Files</h2>
+<h3 id="missing-manifest-files" tabindex="-1">Missing Manifest Files</h3>
 <p>The system intentionally does <strong>not</strong> ignore missing manifests.</p>
 <p>Example:</p>
 <pre class="hljs"><code>latest/
@@ -285,7 +291,7 @@ Release Session
 <li>Future manifest repair functionality</li>
 </ul>
 <hr>
-<h2 id="deferred-manifest-repair" tabindex="-1">Deferred Manifest Repair</h2>
+<h3 id="deferred-manifest-repair" tabindex="-1">Deferred Manifest Repair</h3>
 <p>Automatic manifest reconstruction was intentionally postponed.</p>
 <p>Future administrative endpoints may include:</p>
 <pre class="hljs"><code>POST /system/repair-latest-manifest
@@ -295,7 +301,7 @@ Release Session
 </code></pre>
 <p>Repairing metadata is considered an administrative action rather than an automatic recovery process.</p>
 <hr>
-<h2 id="live-sync-shutdown-behavior" tabindex="-1">Live Sync Shutdown Behavior</h2>
+<h3 id="live-sync-shutdown-behavior" tabindex="-1">Live Sync Shutdown Behavior</h3>
 <p>Live Sync intentionally stops when cleanup begins.</p>
 <p>The shutdown sequence is:</p>
 <pre class="hljs"><code>Stop Live Sync
@@ -311,25 +317,25 @@ Restore Host Saves
 <p>The cleanup capture becomes the authoritative save version.</p>
 <p>This avoids duplicate work while ensuring the latest gameplay state is preserved.</p>
 <hr>
-<h1>Deferred Improvements</h1>
+<h2 id="deferred-improvements" tabindex="-1">Deferred Improvements</h2>
 <p>The following improvements were intentionally postponed.</p>
-<h2 id="health-endpoint" tabindex="-1">Health Endpoint</h2>
+<h3 id="health-endpoint" tabindex="-1">Health Endpoint</h3>
 <p>Current implementation performs temporary write testing.</p>
 <p>Future work may replace temporary test files with unique per-request filenames.</p>
 <p>Priority: Low</p>
 <hr>
-<h2 id="live-sync-cancellation" tabindex="-1">Live Sync Cancellation</h2>
+<h3 id="live-sync-cancellation" tabindex="-1">Live Sync Cancellation</h3>
 <p>Future versions may introduce cooperative thread cancellation.</p>
 <p>Current implementation is considered sufficiently reliable for the v0.1 release.</p>
 <hr>
-<h2 id="manifest-repair-api" tabindex="-1">Manifest Repair API</h2>
+<h3 id="manifest-repair-api" tabindex="-1">Manifest Repair API</h3>
 <p>Deferred until future Host Dashboard development.</p>
 <hr>
-<h2 id="authentication" tabindex="-1">Authentication</h2>
+<h3 id="authentication" tabindex="-1">Authentication</h3>
 <p>Administrative APIs currently assume a trusted local or Tailscale environment.</p>
 <p>Authentication and authorization are scheduled for Phase 24.</p>
 <hr>
-<h1>Verification</h1>
+<h2 id="verification" tabindex="-1">Verification</h2>
 <p>The following scenarios were verified during stabilization.</p>
 <ul>
 <li>Session creation</li>
@@ -353,7 +359,7 @@ Restore Host Saves
 <li>Administrative log viewer</li>
 </ul>
 <hr>
-<h1>Lessons Learned</h1>
+<h2 id="lessons-learned" tabindex="-1">Lessons Learned</h2>
 <p>The majority of production issues discovered during release stabilization were not algorithmic errors.</p>
 <p>Most failures originated from:</p>
 <ul>
@@ -374,7 +380,7 @@ Restore Host Saves
 <p>significantly improved backend robustness before the first public release.</p>
 <p>Independent code audits also proved valuable in identifying technical debt that normal feature development had overlooked.</p>
 <hr>
-<h1>Impact</h1>
+<h2 id="impact" tabindex="-1">Impact</h2>
 <p>The release stabilization phase resulted in:</p>
 <ul>
 <li>Improved crash resilience</li>
@@ -398,7 +404,7 @@ Restore Host Saves
 <li>Future deployment and packaging</li>
 </ul>
 <hr>
-<h1>Post-Audit Improvements</h1>
+<h2 id="post-audit-improvements" tabindex="-1">Post-Audit Improvements</h2>
 <p>Following completion of the initial release hardening work, additional independent backend and frontend audits were performed.</p>
 <p>Unlike the earlier stabilization work, these audits focused on release readiness rather than introducing new functionality.</p>
 <p>Each reported issue was investigated individually and classified as one of the following:</p>
@@ -409,8 +415,8 @@ Restore Host Saves
 </ul>
 <p>The following summarizes the improvements completed after the original stabilization milestone.</p>
 <hr>
-<h1>Additional Backend Hardening</h1>
-<h2 id="atomic-games-configuration-updates" tabindex="-1">Atomic Games Configuration Updates</h2>
+<h2 id="additional-backend-hardening" tabindex="-1">Additional Backend Hardening</h2>
+<h3 id="atomic-games-configuration-updates" tabindex="-1">Atomic Games Configuration Updates</h3>
 <p>The dynamic game management system received additional concurrency protection.</p>
 <p>Improvements include:</p>
 <ul>
@@ -421,11 +427,11 @@ Restore Host Saves
 </ul>
 <p>These improvements ensure that multiple configuration operations cannot corrupt runtime game data.</p>
 <hr>
-<h2 id="corrupt-session-lock-recovery" tabindex="-1">Corrupt Session Lock Recovery</h2>
+<h3 id="corrupt-session-lock-recovery" tabindex="-1">Corrupt Session Lock Recovery</h3>
 <p>Session lock handling was further strengthened during release testing.</p>
-<h3 id="previous-behavior" tabindex="-1">Previous Behavior</h3>
+<h4 id="previous-behavior" tabindex="-1">Previous Behavior</h4>
 <p>A corrupted <code>session.lock</code> file could prevent new sessions from starting.</p>
-<h3 id="final-behavior" tabindex="-1">Final Behavior</h3>
+<h4 id="final-behavior" tabindex="-1">Final Behavior</h4>
 <p>Startup now performs the following recovery sequence:</p>
 <pre class="hljs"><code>Read Lock
       │
@@ -440,7 +446,7 @@ Continue Startup
 </code></pre>
 <p>Testing confirmed successful automatic recovery from intentionally corrupted lock files.</p>
 <hr>
-<h2 id="metadata-synchronization-validation" tabindex="-1">Metadata Synchronization Validation</h2>
+<h3 id="metadata-synchronization-validation" tabindex="-1">Metadata Synchronization Validation</h3>
 <p>Concurrent metadata updates originating from:</p>
 <ul>
 <li>Live Sync</li>
@@ -450,7 +456,7 @@ Continue Startup
 <p>were validated under simultaneous execution.</p>
 <p>Thread-safe synchronization prevents metadata corruption and lost updates.</p>
 <hr>
-<h2 id="cleanup-synchronization-validation" tabindex="-1">Cleanup Synchronization Validation</h2>
+<h3 id="cleanup-synchronization-validation" tabindex="-1">Cleanup Synchronization Validation</h3>
 <p>The interaction between Live Sync and Cleanup was validated through repeated testing.</p>
 <p>The finalized workflow is:</p>
 <pre class="hljs"><code>Stop Live Sync
@@ -467,10 +473,10 @@ Restore Host Saves
 </code></pre>
 <p>If Live Sync is interrupted by cleanup, the cleanup capture intentionally becomes the authoritative save.</p>
 <hr>
-<h1>Frontend Reliability Improvements</h1>
+<h2 id="frontend-reliability-improvements" tabindex="-1">Frontend Reliability Improvements</h2>
 <p>Following backend stabilization, the frontend also underwent reliability improvements.</p>
 <hr>
-<h2 id="dashboard-organization" tabindex="-1">Dashboard Organization</h2>
+<h3 id="dashboard-organization" tabindex="-1">Dashboard Organization</h3>
 <p>Dashboard data loading was reorganized into reusable hooks.</p>
 <p>Benefits include:</p>
 <ul>
@@ -480,7 +486,7 @@ Restore Host Saves
 <li>Easier expansion for future dashboard panels</li>
 </ul>
 <hr>
-<h2 id="session-management-improvements" tabindex="-1">Session Management Improvements</h2>
+<h3 id="session-management-improvements" tabindex="-1">Session Management Improvements</h3>
 <p>Session-related components received several stability improvements.</p>
 <p>Implemented changes include:</p>
 <ul>
@@ -490,7 +496,7 @@ Restore Host Saves
 <li>Cleaner lifecycle management</li>
 </ul>
 <hr>
-<h2 id="api-error-handling" tabindex="-1">API Error Handling</h2>
+<h3 id="api-error-handling" tabindex="-1">API Error Handling</h3>
 <p>Frontend API communication was hardened.</p>
 <p>Improvements include:</p>
 <ul>
@@ -499,7 +505,7 @@ Restore Host Saves
 <li>Improved recovery after backend restarts</li>
 </ul>
 <hr>
-<h1>Manual Validation</h1>
+<h2 id="manual-validation" tabindex="-1">Manual Validation</h2>
 <p>The following scenarios were successfully verified during final release validation.</p>
 <ul>
 <li>Normal session lifecycle</li>
@@ -519,9 +525,9 @@ Restore Host Saves
 </ul>
 <p>These tests confirmed reliable operation during both normal execution and failure scenarios.</p>
 <hr>
-<h1>Remaining Deferred Improvements</h1>
+<h2 id="remaining-deferred-improvements" tabindex="-1">Remaining Deferred Improvements</h2>
 <p>The following work was intentionally postponed because it represents maintainability improvements rather than release blockers.</p>
-<h2 id="dashboard-refactoring" tabindex="-1">Dashboard Refactoring</h2>
+<h3 id="dashboard-refactoring" tabindex="-1">Dashboard Refactoring</h3>
 <p>Planned improvements include:</p>
 <ul>
 <li>useDashboardData()</li>
@@ -529,7 +535,7 @@ Restore Host Saves
 <li>Additional component decomposition</li>
 </ul>
 <hr>
-<h2 id="host-status-component-refactoring" tabindex="-1">Host Status Component Refactoring</h2>
+<h3 id="host-status-component-refactoring" tabindex="-1">Host Status Component Refactoring</h3>
 <p>Future versions may separate the Host Status panel into:</p>
 <ul>
 <li>Host Information</li>
@@ -538,22 +544,22 @@ Restore Host Saves
 <li>Hardware Status</li>
 </ul>
 <hr>
-<h2 id="game-manager-refactoring" tabindex="-1">Game Manager Refactoring</h2>
+<h3 id="game-manager-refactoring" tabindex="-1">Game Manager Refactoring</h3>
 <p>Future improvements may divide the Game Manager into smaller feature-specific components.</p>
 <hr>
-<h2 id="settings-panel-refactoring" tabindex="-1">Settings Panel Refactoring</h2>
+<h3 id="settings-panel-refactoring" tabindex="-1">Settings Panel Refactoring</h3>
 <p>Future versions may introduce reusable configuration update helpers and transactional configuration updates.</p>
 <hr>
-<h2 id="manifest-repair-api-1" tabindex="-1">Manifest Repair API</h2>
+<h3 id="manifest-repair-api-1" tabindex="-1">Manifest Repair API</h3>
 <p>Automatic manifest reconstruction remains intentionally disabled.</p>
 <p>Future administrative endpoints may include:</p>
 <pre class="hljs"><code>POST /saves/{user}/{game}/repair-manifest
 </code></pre>
 <hr>
-<h2 id="health-endpoint-improvements" tabindex="-1">Health Endpoint Improvements</h2>
+<h3 id="health-endpoint-improvements" tabindex="-1">Health Endpoint Improvements</h3>
 <p>Future versions may further optimize filesystem validation performed by the health endpoint.</p>
 <hr>
-<h1>Final Release Readiness Assessment</h1>
+<h2 id="final-release-readiness-assessment" tabindex="-1">Final Release Readiness Assessment</h2>
 <p>Following multiple backend and frontend engineering audits, the project completed a dedicated release stabilization phase.</p>
 <p>The resulting implementation provides:</p>
 <ul>
@@ -574,16 +580,27 @@ Restore Host Saves
 <p>The release stabilization phase successfully transformed the project from a feature-complete prototype into a significantly more resilient software system suitable for its first public GitHub release.</p>
 <p>This concludes the engineering work for the v0.1 Host Foundation Release.</p>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/dashboard-cache-investigation"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Stale dashboard, correct backend</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/session-persistence-and-reconnection"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Session persistence and reconnection</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/dashboard-cache-investigation"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Stale dashboard, correct backend</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/session-persistence-and-reconnection"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Session persistence and reconnection</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#issue-information">Issue Information</a></li><li><a href="#overview">Overview</a></li><li><a href="#background">Background</a></li><li><a href="#problems-identified">Problems Identified</a></li><li><a href="#1.-atomic-save-capture">1. Atomic Save Capture</a></li><li><a href="#2.-live-sync-reliability">2. Live Sync Reliability</a></li><li><a href="#3.-session-metadata-concurrency">3. Session Metadata Concurrency</a></li><li><a href="#4.-session-lock-reliability">4. Session Lock Reliability</a></li><li><a href="#5.-cleanup-reliability">5. Cleanup Reliability</a></li><li><a href="#6.-file-stability-monitoring">6. File Stability Monitoring</a></li><li><a href="#7.-atomic-configuration-updates">7. Atomic Configuration Updates</a></li><li><a href="#8.-save-integrity-verification">8. Save Integrity Verification</a></li><li><a href="#intentional-design-decisions">Intentional Design Decisions</a></li><li><a href="#deferred-improvements">Deferred Improvements</a></li><li><a href="#verification">Verification</a></li><li><a href="#lessons-learned">Lessons Learned</a></li><li><a href="#impact">Impact</a></li><li><a href="#post-audit-improvements">Post-Audit Improvements</a></li><li><a href="#additional-backend-hardening">Additional Backend Hardening</a></li><li><a href="#frontend-reliability-improvements">Frontend Reliability Improvements</a></li><li><a href="#manual-validation">Manual Validation</a></li><li><a href="#remaining-deferred-improvements">Remaining Deferred Improvements</a></li><li><a href="#final-release-readiness-assessment">Final Release Readiness Assessment</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

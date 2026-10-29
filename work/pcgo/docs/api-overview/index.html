@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,26 +64,32 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview" aria-current="page">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">3 min read</p>
-          <h1 class="doc-header__title">API overview</h1>
-          <p class="doc-header__summary">The REST surface: route groups, authentication and conventions.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">3 min read</p>
+            <h1 class="doc-header__title">API overview</h1>
+            <p class="doc-header__summary">The REST surface: route groups, authentication and conventions.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#auth-apis">Auth APIs</a></li><li><a href="#session-apis">Session APIs</a></li><li><a href="#game-apis">Game APIs</a></li><li><a href="#host-apis">Host APIs</a></li><li><a href="#recovery-apis">Recovery APIs</a></li><li><a href="#infrastructure-apis">Infrastructure APIs</a></li><li><a href="#admin-log-apis">Admin Log APIs</a></li><li><a href="#configuration-apis">Configuration APIs</a></li><li><a href="#save-apis">Save APIs</a></li><li><a href="#system-apis">System APIs</a></li><li><a href="#health-api">Health API</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#overview">Overview</a></li><li><a href="#major-api-categories">Major API Categories</a></li><li><a href="#design-goals">Design Goals</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="overview" tabindex="-1">Overview</h2>
+          <div class="doc-body">
+            <h2 id="overview" tabindex="-1">Overview</h2>
 <p>The FastAPI backend exposes APIs used by the dashboard, monitoring systems, recovery systems, session management systems, and infrastructure integrations.</p>
 <p>The API acts as the primary communication layer between the frontend and backend.</p>
 <p>Every route except <code>/auth/login</code> and the first-run bootstrap endpoints requires a valid JWT bearer token (<code>Authorization: Bearer &lt;token&gt;</code>). Admin-only routes additionally reject any authenticated account whose role is not <code>admin</code> (<code>403</code>). See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/features/authentication.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Authentication &amp; Role-Based Access</a>.</p>
 <hr>
-<h1>Major API Categories</h1>
-<h2 id="auth-apis" tabindex="-1">Auth APIs</h2>
+<h2 id="major-api-categories" tabindex="-1">Major API Categories</h2>
+<h3 id="auth-apis" tabindex="-1">Auth APIs</h3>
 <p>Responsibilities:</p>
 <ul>
 <li>First-run admin bootstrap</li>
@@ -103,7 +109,7 @@ DELETE /auth/users           (admin, bulk cleanup)
 PUT  /auth/change-password
 </code></pre>
 <hr>
-<h2 id="session-apis" tabindex="-1">Session APIs</h2>
+<h3 id="session-apis" tabindex="-1">Session APIs</h3>
 <p>Responsibilities:</p>
 <ul>
 <li>Start sessions</li>
@@ -125,7 +131,7 @@ POST /sessions/{session_id}/restart
 POST /sessions/unlock
 </code></pre>
 <hr>
-<h2 id="game-apis" tabindex="-1">Game APIs</h2>
+<h3 id="game-apis" tabindex="-1">Game APIs</h3>
 <p>Responsibilities:</p>
 <ul>
 <li>Game retrieval</li>
@@ -145,7 +151,7 @@ GET /games/{game_id}/validate
 GET /games/list_games
 </code></pre>
 <hr>
-<h2 id="host-apis" tabindex="-1">Host APIs</h2>
+<h3 id="host-apis" tabindex="-1">Host APIs</h3>
 <p>Responsibilities:</p>
 <ul>
 <li>Host readiness</li>
@@ -160,7 +166,7 @@ GET /host/metrics       (admin)
 GET /host/watchdogs     (admin)
 </code></pre>
 <hr>
-<h2 id="recovery-apis" tabindex="-1">Recovery APIs</h2>
+<h3 id="recovery-apis" tabindex="-1">Recovery APIs</h3>
 <p><em>Admin only.</em> Responsibilities:</p>
 <ul>
 <li>Recovery events</li>
@@ -172,7 +178,7 @@ GET /host/watchdogs     (admin)
 GET /host/recovery-stats
 </code></pre>
 <hr>
-<h2 id="infrastructure-apis" tabindex="-1">Infrastructure APIs</h2>
+<h3 id="infrastructure-apis" tabindex="-1">Infrastructure APIs</h3>
 <p><em>Admin only.</em> Responsibilities:</p>
 <ul>
 <li>Sunshine service management</li>
@@ -196,7 +202,7 @@ POST /host/sunshine/close-stream
 </code></pre>
 <p>Four additional endpoints — <code>/host/sunshine/stream-started</code>, <code>/host/sunshine/stream-ended</code>, <code>/host/sunshine/transport-connected</code>, <code>/host/sunshine/transport-disconnected</code> — exist for internal use only. They are not reachable with a user JWT; they require the internal event token described in <a href="/work/pcgo/docs/internal-event-authentication">Internal Event Authentication</a>.</p>
 <hr>
-<h2 id="admin-log-apis" tabindex="-1">Admin Log APIs</h2>
+<h3 id="admin-log-apis" tabindex="-1">Admin Log APIs</h3>
 <p>Responsibilities:</p>
 <ul>
 <li>Host log viewing (admin: full log; user: own-session log only)</li>
@@ -211,7 +217,7 @@ GET /admin/my-log-sessions  (user)
 GET /admin/my-logs/download (user)
 </code></pre>
 <hr>
-<h2 id="configuration-apis" tabindex="-1">Configuration APIs</h2>
+<h3 id="configuration-apis" tabindex="-1">Configuration APIs</h3>
 <p><em>Admin only.</em> Responsibilities:</p>
 <ul>
 <li>Reading the current runtime configuration</li>
@@ -225,7 +231,7 @@ PUT  /config/{section}   (admin)
 </code></pre>
 <p>See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/architecture/settings-panel-architecture.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Administrative Settings Panel Architecture</a>.</p>
 <hr>
-<h2 id="save-apis" tabindex="-1">Save APIs</h2>
+<h3 id="save-apis" tabindex="-1">Save APIs</h3>
 <p>Responsibilities:</p>
 <ul>
 <li>Listing a user’s saves for a game</li>
@@ -238,20 +244,20 @@ DELETE /saves/{game_id}/{save_type}/{save_name}
 POST   /saves/{game_id}/force-unlock
 </code></pre>
 <hr>
-<h2 id="system-apis" tabindex="-1">System APIs</h2>
+<h3 id="system-apis" tabindex="-1">System APIs</h3>
 <p><em>Admin only.</em> Native Windows file/folder picker dialogs used by the Game Manager UI when configuring executable and save paths.</p>
 <p>Examples:</p>
 <pre class="hljs"><code>GET /system/select-file
 GET /system/select-folder
 </code></pre>
 <hr>
-<h2 id="health-api" tabindex="-1">Health API</h2>
+<h3 id="health-api" tabindex="-1">Health API</h3>
 <p><em>Admin only.</em> A single endpoint returning the Save Manager’s internal health check (used for diagnostics rather than the general host-readiness data exposed under <code>/host</code>).</p>
 <p>Examples:</p>
 <pre class="hljs"><code>GET /health/
 </code></pre>
 <hr>
-<h1>Design Goals</h1>
+<h2 id="design-goals" tabindex="-1">Design Goals</h2>
 <ul>
 <li>Clear separation of responsibilities</li>
 <li>Predictable endpoint behavior</li>
@@ -259,16 +265,27 @@ GET /system/select-folder
 <li>Extensibility</li>
 </ul>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/problems-solved"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Major problems solved</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/websocket-events"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">WebSocket events</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/problems-solved"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">Major problems solved</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/websocket-events"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">WebSocket events</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#overview">Overview</a></li><li><a href="#major-api-categories">Major API Categories</a></li><li><a href="#design-goals">Design Goals</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

@@ -46,7 +46,7 @@
 
   
 
-  <link rel="stylesheet" href="/styles.css?v=mvta1e14.9a">
+  <link rel="stylesheet" href="/styles.css?v=mvtcfe8d.d26">
 </head>
 
 <body>
@@ -64,24 +64,30 @@
       <nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list"><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Overview &amp; architecture</span><ul><li><a href="/work/pcgo/docs/project-overview">Project overview</a></li><li><a href="/work/pcgo/docs/system-architecture">System architecture</a></li><li><a href="/work/pcgo/docs/backend-architecture" aria-current="page">Backend architecture</a></li><li><a href="/work/pcgo/docs/recovery-architecture">Recovery architecture</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Engineering investigations</span><ul><li><a href="/work/pcgo/docs/tailscale-state-recovery">Tailscale state-aware recovery</a></li><li><a href="/work/pcgo/docs/internal-event-authentication">Internal event authentication</a></li><li><a href="/work/pcgo/docs/live-sync-architecture-migration">Live sync that stopped running</a></li><li><a href="/work/pcgo/docs/dashboard-cache-investigation">Stale dashboard, correct backend</a></li><li><a href="/work/pcgo/docs/release-hardening-and-reliability">Release hardening and reliability</a></li><li><a href="/work/pcgo/docs/session-persistence-and-reconnection">Session persistence and reconnection</a></li><li><a href="/work/pcgo/docs/problems-solved">Major problems solved</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">API &amp; reference</span><ul><li><a href="/work/pcgo/docs/api-overview">API overview</a></li><li><a href="/work/pcgo/docs/websocket-events">WebSocket events</a></li></ul></li><li class="doc-sidebar__group"><span class="doc-sidebar__group-title">Limits &amp; roadmap</span><ul><li><a href="/work/pcgo/docs/v0-limitations">Known limitations</a></li><li><a href="/work/pcgo/docs/roadmap">Roadmap</a></li></ul></li></ul></nav>
     </aside>
 
-    <!-- Main content -->
-    <main id="main-content" class="doc-layout__main" tabindex="-1">
-      <article class="doc-article">
-        <header class="doc-header">
-          <p class="doc-header__reading-time">2 min read</p>
-          <h1 class="doc-header__title">Backend architecture</h1>
-          <p class="doc-header__summary">How the FastAPI backend is organised and what it orchestrates.</p>
-        </header>
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">2 min read</p>
+            <h1 class="doc-header__title">Backend architecture</h1>
+            <p class="doc-header__summary">How the FastAPI backend is organised and what it orchestrates.</p>
+          </header>
 
-        <!-- TOC — inserted only on desktop, hidden on mobile -->
-        <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li></ul></nav>
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              <ul><li><a href="#overview">Overview</a></li><li><a href="#layer-structure">Layer Structure</a></li><li><a href="#authentication-layer">Authentication Layer</a></li><li><a href="#routes-layer">Routes Layer</a></li><li><a href="#controller-layer">Controller Layer</a></li><li><a href="#service-layer">Service Layer</a></li><li><a href="#websocket-layer">WebSocket Layer</a></li><li><a href="#persistence">Persistence</a></li><li><a href="#key-responsibilities">Key Responsibilities</a></li></ul>
+            </nav>
+          </details>
 
-        <div class="doc-body">
-          <h2 id="overview" tabindex="-1">Overview</h2>
+          <div class="doc-body">
+            <h2 id="overview" tabindex="-1">Overview</h2>
 <p>The backend serves as the orchestration layer for the platform.</p>
 <p>Built using FastAPI, it exposes APIs used by the dashboard and coordinates all host-side functionality.</p>
 <hr>
-<h1>Layer Structure</h1>
+<h2 id="layer-structure" tabindex="-1">Layer Structure</h2>
 <pre class="hljs"><code>Authentication (JWT dependency on every route)
   ↓
 Routes
@@ -94,7 +100,7 @@ Windows Services
 </code></pre>
 <p>A parallel, narrower authentication path (<code>api/internal_event_auth.py</code>) sits directly in front of the four Sunshine hook/transport endpoints only, using a shared secret instead of a user JWT. See <a href="/work/pcgo/docs/internal-event-authentication">Internal Event Authentication</a>.</p>
 <hr>
-<h1>Authentication Layer</h1>
+<h2 id="authentication-layer" tabindex="-1">Authentication Layer</h2>
 <p>Every route (aside from <code>/auth/login</code>, <code>/auth/bootstrap-*</code>) depends on <code>api/auth.py: get_current_user</code>, which validates the bearer JWT and returns <code>{username, role}</code>. Routes that are admin-only additionally check <code>current_user[&quot;role&quot;] != &quot;admin&quot;</code> and raise <code>403</code> otherwise.</p>
 <p>Responsibilities:</p>
 <ul>
@@ -104,7 +110,7 @@ Windows Services
 <li>User account storage (<code>host_agent/user_manager.py</code>)</li>
 </ul>
 <hr>
-<h1>Routes Layer</h1>
+<h2 id="routes-layer" tabindex="-1">Routes Layer</h2>
 <p>Responsibilities:</p>
 <ul>
 <li>Request handling</li>
@@ -123,7 +129,7 @@ Windows Services
 <li>Admin log APIs (<code>/admin</code>)</li>
 </ul>
 <hr>
-<h1>Controller Layer</h1>
+<h2 id="controller-layer" tabindex="-1">Controller Layer</h2>
 <p>Controllers coordinate business operations.</p>
 <p>Responsibilities:</p>
 <ul>
@@ -132,7 +138,7 @@ Windows Services
 <li>Service coordination</li>
 </ul>
 <hr>
-<h1>Service Layer</h1>
+<h2 id="service-layer" tabindex="-1">Service Layer</h2>
 <p>Services contain business logic.</p>
 <p>Examples:</p>
 <ul>
@@ -146,14 +152,14 @@ Windows Services
 <li>Internal Event Auth (shared-secret verification for the Sunshine hook/transport monitor)</li>
 </ul>
 <hr>
-<h1>WebSocket Layer</h1>
+<h2 id="websocket-layer" tabindex="-1">WebSocket Layer</h2>
 <p>Responsibilities:</p>
 <ul>
 <li>Live session status broadcasts (a single <code>status_update</code> message type, broadcast to every connected client)</li>
 </ul>
 <p>Host monitoring, recovery events/statistics, and Sunshine/Tailscale status are served over REST and refreshed by the dashboard through polling rather than pushed over WebSocket. See <a href="/work/pcgo/docs/websocket-events">WebSocket Events</a>.</p>
 <hr>
-<h1>Persistence</h1>
+<h2 id="persistence" tabindex="-1">Persistence</h2>
 <p>Historical and analytical data is stored in a SQLite database (<code>host-agent/data/pcgo.db</code>), accessed exclusively through a repository layer (<code>host_agent/repositories/</code>):</p>
 <ul>
 <li>Session history and session events</li>
@@ -170,7 +176,7 @@ Windows Services
 </ul>
 <p>Log files remain plain rotating log files and are not stored in SQLite.</p>
 <hr>
-<h1>Key Responsibilities</h1>
+<h2 id="key-responsibilities" tabindex="-1">Key Responsibilities</h2>
 <p>The backend is responsible for:</p>
 <ul>
 <li>Session lifecycle management</li>
@@ -181,16 +187,27 @@ Windows Services
 <li>Dashboard data delivery</li>
 </ul>
 
-        </div>
+          </div>
 
-        <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/system-architecture"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">System architecture</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/recovery-architecture"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Recovery architecture</span></a></nav>
-      </article>
-    </main>
+          <nav class="doc-prevnext-row" aria-label="Doc navigation"><a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/system-architecture"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">System architecture</span></a><a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/recovery-architecture"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">Recovery architecture</span></a></nav>
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents">
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            <ul><li><a href="#overview">Overview</a></li><li><a href="#layer-structure">Layer Structure</a></li><li><a href="#authentication-layer">Authentication Layer</a></li><li><a href="#routes-layer">Routes Layer</a></li><li><a href="#controller-layer">Controller Layer</a></li><li><a href="#service-layer">Service Layer</a></li><li><a href="#websocket-layer">WebSocket Layer</a></li><li><a href="#persistence">Persistence</a></li><li><a href="#key-responsibilities">Key Responsibilities</a></li></ul>
+          </nav>
+        </div>
+      </aside>
+    </div>
   </div>
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvtbkn7c.a8" defer></script>
+  <script src="/animation.bundle.js?v=mvtcfwte.a1" defer></script>
 </body>
 
 </html>

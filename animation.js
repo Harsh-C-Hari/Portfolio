@@ -732,3 +732,58 @@ if (isHome) {
     ScrollTrigger.refresh();
   });
 }
+
+/* ------------------------------------------------------------
+   Doc reader: TOC rail active link observer
+   ------------------------------------------------------------ */
+(function setupDocTocObserver() {
+  const tocRail = document.querySelector('.doc-toc-rail');
+  if (!tocRail) return;
+
+  const links = Array.from(tocRail.querySelectorAll('a[href^="#"]'));
+  if (!links.length) return;
+
+  const headingMap = new Map();
+  links.forEach((a) => {
+    const rawId = a.getAttribute('href').slice(1);
+    const target = document.getElementById(rawId) || document.getElementById(decodeURIComponent(rawId));
+    if (target) headingMap.set(target, a);
+  });
+
+  const targets = Array.from(headingMap.keys());
+  if (!targets.length) return;
+
+  function setActive(activeLink) {
+    links.forEach((l) => {
+      if (l === activeLink) {
+        l.classList.add('is-active');
+        l.setAttribute('aria-current', 'true');
+      } else {
+        l.classList.remove('is-active');
+        l.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  // Initial active link
+  setActive(links[0]);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries.filter((e) => e.isIntersecting);
+      if (visible.length > 0) {
+        visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const topTarget = visible[0].target;
+        const link = headingMap.get(topTarget);
+        if (link) setActive(link);
+      }
+    },
+    {
+      rootMargin: '-80px 0px -60% 0px',
+      threshold: [0, 1.0],
+    }
+  );
+
+  targets.forEach((t) => observer.observe(t));
+})();
+
