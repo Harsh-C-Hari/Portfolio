@@ -339,7 +339,10 @@ export function buildDocs(originOverride) {
     }
 
     const markdown = fs.readFileSync(contentPath, 'utf8');
-    const { html: body, toc } = render(markdown, doc.source);
+    let { html: body, toc } = render(markdown, doc.source);
+    // The layout already renders doc_title as <h1>. Strip any leading <h1>
+    // that came from the Markdown # heading so there is exactly one H1 per page.
+    body = body.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
 
     writeDocPage(doc, allDocs, body, toc, config, { cssVer, jsVer, origin });
     built.push(doc.slug);

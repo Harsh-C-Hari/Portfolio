@@ -77,8 +77,7 @@
         <nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2><ul><li><a href="#overview">Overview</a></li><li><a href="#auth-apis">Auth APIs</a></li><li><a href="#session-apis">Session APIs</a></li><li><a href="#game-apis">Game APIs</a></li><li><a href="#host-apis">Host APIs</a></li><li><a href="#recovery-apis">Recovery APIs</a></li><li><a href="#infrastructure-apis">Infrastructure APIs</a></li><li><a href="#admin-log-apis">Admin Log APIs</a></li><li><a href="#configuration-apis">Configuration APIs</a></li><li><a href="#save-apis">Save APIs</a></li><li><a href="#system-apis">System APIs</a></li><li><a href="#health-api">Health API</a></li></ul></nav>
 
         <div class="doc-body">
-          <h1>API Overview</h1>
-<h2 id="overview" tabindex="-1">Overview</h2>
+          <h2 id="overview" tabindex="-1">Overview</h2>
 <p>The FastAPI backend exposes APIs used by the dashboard, monitoring systems, recovery systems, session management systems, and infrastructure integrations.</p>
 <p>The API acts as the primary communication layer between the frontend and backend.</p>
 <p>Every route except <code>/auth/login</code> and the first-run bootstrap endpoints requires a valid JWT bearer token (<code>Authorization: Bearer &lt;token&gt;</code>). Admin-only routes additionally reject any authenticated account whose role is not <code>admin</code> (<code>403</code>). See <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/features/authentication.md" rel="noopener noreferrer" target="_blank" class="doc-link--external">Authentication &amp; Role-Based Access</a>.</p>
@@ -269,7 +268,7 @@ GET /system/select-folder
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="/animation.bundle.js?v=mvsx0lxl.15g" defer></script>
+  <script src="/animation.bundle.js?v=mvsx4f9q.us" defer></script>
 </body>
 
 </html>
