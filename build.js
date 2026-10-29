@@ -136,52 +136,74 @@ function esc(s) {
 }
 
 function generateWorkRows(projects) {
-  return projects.map((p) => {
+  return projects.map((p, idx) => {
     const hasPage     = !!p.page;
     const primaryHref = hasPage ? p.page.href : (p.links[0]?.href || '#');
     const isExternal  = !hasPage;
-    const goLabel     = hasPage ? 'Case study <i aria-hidden="true">\u2192</i>' : `${esc(p.links[0]?.label || 'GitHub')} <i aria-hidden="true">\u2197</i>`;
+    const goLabel     = hasPage ? 'Case study <span aria-hidden="true">&rarr;</span>' : `${esc(p.links[0]?.label || 'GitHub')} <span aria-hidden="true">&#x2197;</span>`;
     const extAttrs    = isExternal ? ' rel="noopener" target="_blank"' : '';
+    const isActive    = idx === 0 ? ' is-active' : '';
 
-    // Live link (first link for projects with pages that also have an external live link)
+    // Live link (for projects with pages that also have an external live link)
     const liveLink = p.links?.find(l => l.external && l.label !== 'GitHub');
     const liveLinkHtml = liveLink
-      ? `\n  <a class="wrow__live" href="${esc(liveLink.href)}" target="_blank" rel="noopener">Live \u2197</a>`
+      ? `\n        <a class="wrow__action-link wrow__live" href="${esc(liveLink.href)}" target="_blank" rel="noopener">Live <span aria-hidden="true">&#x2197;</span></a>`
       : '';
 
-    // First 4 stack items for the row meta
-    const stackLabel = (p.stack || []).slice(0, 4).join(' \u00b7 ');
+    // Mobile thumbnail (uses existing thumb or preview)
+    const t = p.thumb || p.preview;
+    const thumbSrc = t ? esc(t.src) : '';
 
-    // Touch thumbnail (uses existing thumb)
-    const t = p.thumb;
-    const touchThumb = t
-      ? `\n  <img class="wrow__touch-thumb" src="${esc(t.src)}" alt="" width="88" height="55" loading="lazy" decoding="async" aria-hidden="true">`
-      : '';
-
-    return `<li class="wrow" data-slug="${esc(p.slug)}">
-  <a class="wrow__main" href="${esc(primaryHref)}"${extAttrs}>
+    return `<li class="wrow${isActive}" data-slug="${esc(p.slug)}">
+  <div class="wrow__grid">
     <span class="wrow__idx">${esc(p.index)}</span>
-    <span class="wrow__text">
-      <span class="wrow__title">${esc(p.title)}</span>
-      <span class="wrow__tag">${esc(p.tagline || '')}</span>
-    </span>
-    <span class="wrow__meta">
-      <span class="wrow__kind">${esc(p.kind)}</span>
-      <span class="wrow__stack">${esc(stackLabel)}</span>
-    </span>
-    <span class="wrow__go">${goLabel}</span>
-  </a>${liveLinkHtml}${touchThumb}
+    <div class="wrow__content">
+      <h3 class="wrow__title-wrap">
+        <a class="wrow__title-link" href="${esc(primaryHref)}"${extAttrs}>
+          <span class="wrow__title mark">${esc(p.title)}</span>
+        </a>
+      </h3>
+      <p class="wrow__tagline">${esc(p.tagline || '')}</p>
+      <div class="wrow__kind-mobile">${esc(p.kind)}</div>
+    </div>
+    <div class="wrow__thumb-wrap" aria-hidden="true">
+      <img class="wrow__thumb" src="${thumbSrc}" alt="" width="88" height="55" loading="lazy" decoding="async">
+    </div>
+    <div class="wrow__actions">
+      <a class="wrow__action-link" href="${esc(primaryHref)}"${extAttrs}>${goLabel}</a>${liveLinkHtml}
+    </div>
+  </div>
 </li>`;
   }).join('\n\n');
 }
 
-/* One stacked <img> per project for the floating cursor preview. */
-function generatePreviewImgs(projects) {
-  return projects.map((p) => {
+/* Stacked <img> per project for the sticky preview panel. */
+function generatePanelPreviews(projects) {
+  return projects.map((p, idx) => {
     const pv = p.preview;
     if (!pv) return '';
-    return `<img class="wpreview__img" data-slug="${esc(p.slug)}" src="${esc(pv.src)}" alt="" width="${pv.width}" height="${pv.height}" decoding="async">`;
-  }).join('\n      ');
+    const isActive = idx === 0 ? ' is-active' : '';
+    return `<img class="wpanel__img${isActive}" data-slug="${esc(p.slug)}" src="${esc(pv.src)}" alt="${esc(p.title)} preview" width="${pv.width}" height="${pv.height}" decoding="async">`;
+  }).join('\n          ');
+}
+
+/* Fixed caption items for the sticky preview panel. */
+function generatePanelCaptions(projects) {
+  return projects.map((p, idx) => {
+    const isActive = idx === 0 ? ' is-active' : '';
+    const hasPage = !!p.page;
+    const primaryHref = hasPage ? p.page.href : (p.links[0]?.href || '#');
+    const isExternal = !hasPage;
+    const extAttrs = isExternal ? ' rel="noopener" target="_blank"' : '';
+    const goLabel = hasPage ? 'Case study &rarr;' : `${esc(p.links[0]?.label || 'GitHub')} &#x2197;`;
+    const fullStack = (p.stack || []).join(' &middot; ');
+
+    return `<div class="wpanel__caption-item${isActive}" data-slug="${esc(p.slug)}">
+  <div class="wpanel__kind">${esc(p.kind)}</div>
+  <div class="wpanel__stack">${esc(fullStack)}</div>
+  <a class="wpanel__action" href="${esc(primaryHref)}"${extAttrs}>${goLabel}</a>
+</div>`;
+  }).join('\n          ');
 }
 
 /* ----------------------------------------------------------------
@@ -189,10 +211,11 @@ function generatePreviewImgs(projects) {
    ---------------------------------------------------------------- */
 function buildHome(projects) {
   const vars = {
-    home:              '',   // on home, hash links are just #section
-    base:              '/',
-    work_rows:         generateWorkRows(projects),
-    work_preview_imgs: generatePreviewImgs(projects),
+    home:                 '',   // on home, hash links are just #section
+    base:                 '/',
+    work_rows:            generateWorkRows(projects),
+    work_panel_previews:  generatePanelPreviews(projects),
+    work_panel_captions:  generatePanelCaptions(projects),
   };
 
   let html = assemble(LAYOUT_HOME, vars);

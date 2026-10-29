@@ -487,94 +487,38 @@ if (track && !reduceMotion) {
 }
 
 /* ------------------------------------------------------------
-   Work list index (.wrow) & Floating Preview (.wpreview) — HOME ONLY
-   Desktop: smooth cursor-following floating preview on row hover.
-   Uses gsap.quickTo for high-performance 60fps tracking.
+   Work list index (.wrow) & Sticky Preview Panel (.wpanel) — HOME ONLY
+   Desktop: 2-column layout with fixed-height rows and sticky preview.
+   Row hover/focus activates corresponding preview and caption.
+   Pointer leave keeps last active.
    ------------------------------------------------------------ */
-(function setupWorkPreview() {
-  const wlist = $('.wlist');
+(function setupWorkPanel() {
+  const workIndex = $('.work-index');
   const rows = $$('.wrow');
-  const preview = $('.wpreview');
-  const previewImgs = $$('.wpreview__img');
+  const panelImgs = $$('.wpanel__img');
+  const captionItems = $$('.wpanel__caption-item');
 
-  if (!wlist || !rows.length || !preview) return;
-  if (!finePointer || reduceMotion) return;
+  if (!workIndex || !rows.length) return;
 
-  // Use gsap.quickTo for smooth cursor-following preview
-  const setPrevX = gsap.quickTo(preview, 'x', { duration: 0.22, ease: 'power3.out' });
-  const setPrevY = gsap.quickTo(preview, 'y', { duration: 0.22, ease: 'power3.out' });
-
-  let activeSlug = null;
-
-  function updatePreviewPosition(clientX, clientY) {
-    const pw = preview.offsetWidth || 340;
-    const ph = preview.offsetHeight || 212;
-    const pad = 24;
-
-    // Default: offset to the right & vertically centered on cursor
-    let targetX = clientX + 32;
-    let targetY = clientY - ph / 2;
-
-    // Flip to left if overflowing right edge
-    if (clientX + pw + 48 > window.innerWidth) {
-      targetX = clientX - pw - 32;
-    }
-
-    // Clamp within viewport vertically
-    targetY = Math.max(pad, Math.min(window.innerHeight - ph - pad, targetY));
-
-    setPrevX(targetX);
-    setPrevY(targetY);
+  function activate(slug) {
+    rows.forEach((r) => r.classList.toggle('is-active', r.dataset.slug === slug));
+    panelImgs.forEach((img) => img.classList.toggle('is-active', img.dataset.slug === slug));
+    captionItems.forEach((cap) => cap.classList.toggle('is-active', cap.dataset.slug === slug));
   }
 
-  function activateSlug(slug) {
-    if (activeSlug === slug) return;
-    activeSlug = slug;
-
-    previewImgs.forEach((img) => {
-      img.classList.toggle('is-active', img.dataset.slug === slug);
-    });
-    preview.classList.add('is-visible');
+  // Default active = row 1 on load
+  if (rows[0] && rows[0].dataset.slug) {
+    activate(rows[0].dataset.slug);
   }
 
-  function deactivate() {
-    activeSlug = null;
-    preview.classList.remove('is-visible');
-    previewImgs.forEach((img) => img.classList.remove('is-active'));
+  // Bind desktop interaction only for fine pointer
+  if (finePointer) {
+    rows.forEach((row) => {
+      const slug = row.dataset.slug;
+      row.addEventListener('pointerenter', () => activate(slug));
+      row.addEventListener('focusin', () => activate(slug));
+    });
   }
-
-  // Pointer movement tracking over the work list
-  wlist.addEventListener('pointermove', (e) => {
-    updatePreviewPosition(e.clientX, e.clientY);
-  });
-
-  rows.forEach((row) => {
-    const slug = row.dataset.slug;
-
-    row.addEventListener('pointerenter', (e) => {
-      updatePreviewPosition(e.clientX, e.clientY);
-      activateSlug(slug);
-    });
-
-    // Keyboard focus support: position preview next to focused row
-    row.addEventListener('focusin', () => {
-      const rect = row.getBoundingClientRect();
-      const clientX = rect.right - 120;
-      const clientY = rect.top + rect.height / 2;
-      updatePreviewPosition(clientX, clientY);
-      activateSlug(slug);
-    });
-  });
-
-  wlist.addEventListener('pointerleave', () => {
-    deactivate();
-  });
-
-  wlist.addEventListener('focusout', (e) => {
-    if (!wlist.contains(e.relatedTarget)) {
-      deactivate();
-    }
-  });
 })();
 
 /* ------------------------------------------------------------
