@@ -80,7 +80,7 @@ function scrollToTarget(hash) {
 }
 
 document.addEventListener('click', (e) => {
-  const a = e.target.closest('a[href^="#"]');
+  const a = e.target?.closest ? e.target.closest('a[href^="#"]') : null;
   if (!a || a.getAttribute('href') === '#') return;
   e.preventDefault();
   closeMenu();
@@ -217,7 +217,7 @@ document.addEventListener('click', (e) => {
     if (e.button !== 0) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
-    const a = e.target.closest('a[href]');
+    const a = e.target?.closest ? e.target.closest('a[href]') : null;
     if (!shouldIntercept(a)) return;
 
     // Skip if it's a hash-only link (already handled by the Lenis listener above)
@@ -279,11 +279,11 @@ document.addEventListener('click', (e) => {
       } catch (e) { /* */ }
     };
     document.addEventListener('pointerenter', (e) => {
-      const a = e.target.closest('a[href]');
+      const a = e.target?.closest ? e.target.closest('a[href]') : null;
       if (a) maybePrefetch(a);
     }, true);
     document.addEventListener('focusin', (e) => {
-      const a = e.target.closest('a[href]');
+      const a = e.target?.closest ? e.target.closest('a[href]') : null;
       if (a) maybePrefetch(a);
     }, true);
   }
@@ -487,70 +487,94 @@ if (track && !reduceMotion) {
 }
 
 /* ------------------------------------------------------------
-   Work list accordion  (.wrow) — HOME ONLY
-   One row open at a time. First open by default.
-   Desktop: hover with 120ms intent delay, focusin opens.
-   Touch: IntersectionObserver at viewport middle.
+   Work list index (.wrow) & Floating Preview (.wpreview) — HOME ONLY
+   Desktop: smooth cursor-following floating preview on row hover.
+   Uses gsap.quickTo for high-performance 60fps tracking.
    ------------------------------------------------------------ */
-(function setupWorkList() {
+(function setupWorkPreview() {
+  const wlist = $('.wlist');
   const rows = $$('.wrow');
-  if (!rows.length) return;
+  const preview = $('.wpreview');
+  const previewImgs = $$('.wpreview__img');
 
-  const isFine  = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  const isTouch = !isFine;
+  if (!wlist || !rows.length || !preview) return;
+  if (!finePointer || reduceMotion) return;
 
-  function openRow(row) {
-    rows.forEach((r) => {
-      const isTarget = r === row;
-      r.dataset.open = String(isTarget);
-      const panel    = r.querySelector('.wrow__panel');
-      if (!panel) return;
-      if (isTarget) {
-        panel.removeAttribute('inert');
-      } else {
-        panel.setAttribute('inert', '');
-      }
+  // Use gsap.quickTo for smooth cursor-following preview
+  const setPrevX = gsap.quickTo(preview, 'x', { duration: 0.22, ease: 'power3.out' });
+  const setPrevY = gsap.quickTo(preview, 'y', { duration: 0.22, ease: 'power3.out' });
+
+  let activeSlug = null;
+
+  function updatePreviewPosition(clientX, clientY) {
+    const pw = preview.offsetWidth || 340;
+    const ph = preview.offsetHeight || 212;
+    const pad = 24;
+
+    // Default: offset to the right & vertically centered on cursor
+    let targetX = clientX + 32;
+    let targetY = clientY - ph / 2;
+
+    // Flip to left if overflowing right edge
+    if (clientX + pw + 48 > window.innerWidth) {
+      targetX = clientX - pw - 32;
+    }
+
+    // Clamp within viewport vertically
+    targetY = Math.max(pad, Math.min(window.innerHeight - ph - pad, targetY));
+
+    setPrevX(targetX);
+    setPrevY(targetY);
+  }
+
+  function activateSlug(slug) {
+    if (activeSlug === slug) return;
+    activeSlug = slug;
+
+    previewImgs.forEach((img) => {
+      img.classList.toggle('is-active', img.dataset.slug === slug);
     });
+    preview.classList.add('is-visible');
   }
 
-  // Default: first row open
-  openRow(rows[0]);
+  function deactivate() {
+    activeSlug = null;
+    preview.classList.remove('is-visible');
+    previewImgs.forEach((img) => img.classList.remove('is-active'));
+  }
 
-  if (isFine) {
-    /* ---- Desktop: hover with 120ms intent delay ---- */
-    let intentTimer = null;
+  // Pointer movement tracking over the work list
+  wlist.addEventListener('pointermove', (e) => {
+    updatePreviewPosition(e.clientX, e.clientY);
+  });
 
-    rows.forEach((row) => {
-      row.addEventListener('pointerenter', () => {
-        clearTimeout(intentTimer);
-        intentTimer = setTimeout(() => openRow(row), 120);
-      });
+  rows.forEach((row) => {
+    const slug = row.dataset.slug;
 
-      // Focus on the title link also opens the row
-      const link = row.querySelector('.wrow__link');
-      if (link) {
-        link.addEventListener('focusin', () => {
-          clearTimeout(intentTimer);
-          openRow(row);
-        });
-      }
+    row.addEventListener('pointerenter', (e) => {
+      updatePreviewPosition(e.clientX, e.clientY);
+      activateSlug(slug);
     });
 
-    // Pointer leave from the whole list does NOT collapse — last hovered stays open.
-  }
+    // Keyboard focus support: position preview next to focused row
+    row.addEventListener('focusin', () => {
+      const rect = row.getBoundingClientRect();
+      const clientX = rect.right - 120;
+      const clientY = rect.top + rect.height / 2;
+      updatePreviewPosition(clientX, clientY);
+      activateSlug(slug);
+    });
+  });
 
-  if (isTouch) {
-    /* ---- Touch: IntersectionObserver at ~42% from top and bottom ---- */
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((en) => {
-          if (en.isIntersecting) openRow(en.target);
-        });
-      },
-      { rootMargin: '-42% 0px -42% 0px' }
-    );
-    rows.forEach((row) => io.observe(row));
-  }
+  wlist.addEventListener('pointerleave', () => {
+    deactivate();
+  });
+
+  wlist.addEventListener('focusout', (e) => {
+    if (!wlist.contains(e.relatedTarget)) {
+      deactivate();
+    }
+  });
 })();
 
 /* ------------------------------------------------------------
@@ -738,7 +762,7 @@ if (finePointer && !reduceMotion) {
       ry(e.clientY);
     });
     document.addEventListener('mouseover', (e) => {
-      const hot  = e.target.closest('a, button, .frame');
+      const hot  = e.target?.closest ? e.target.closest('a, button, .frame') : null;
       const size = hot ? 68.4 : 36;
       gsap.to(ring, {
         width:      size,
@@ -756,13 +780,11 @@ if (finePointer && !reduceMotion) {
 /* ------------------------------------------------------------
    Layout settles after webfonts + images — HOME ONLY
    ------------------------------------------------------------ */
-if (isHome && stackEl) {
+if (isHome) {
   document.fonts && document.fonts.ready.then(() => {
-    setupStack();
     ScrollTrigger.refresh();
   });
   window.addEventListener('load', () => {
-    setupStack();
     ScrollTrigger.refresh();
   });
 }

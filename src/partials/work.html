@@ -5,8 +5,13 @@
       <p class="section__note">Four projects. Two have full write-ups.</p>
     </header>
 
-    <div class="wlist" role="list">
+    <ol class="wlist">
       {{work_rows}}
+    </ol>
+
+    <!-- floating cursor preview — one element for all rows, aria-hidden -->
+    <div class="wpreview" aria-hidden="true">
+      {{work_preview_imgs}}
     </div>
   </div>
 </section>

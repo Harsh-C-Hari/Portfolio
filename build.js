@@ -136,67 +136,52 @@ function esc(s) {
 }
 
 function generateWorkRows(projects) {
-  return projects.map((p, i) => {
-    const hasPage  = !!p.page;
-    const isFirst  = i === 0;
-    // Primary link: page href if it has a case study, else first external link
+  return projects.map((p) => {
+    const hasPage     = !!p.page;
     const primaryHref = hasPage ? p.page.href : (p.links[0]?.href || '#');
-    const ctaLabel    = hasPage ? `${p.page.cta} →` : `${p.links[0]?.label || 'GitHub'} ↗`;
-    const ctaExternal = !hasPage;
+    const isExternal  = !hasPage;
+    const goLabel     = hasPage ? 'Case study <i aria-hidden="true">\u2192</i>' : `${esc(p.links[0]?.label || 'GitHub')} <i aria-hidden="true">\u2197</i>`;
+    const extAttrs    = isExternal ? ' rel="noopener" target="_blank"' : '';
 
-    // Facts dl items (up to 4, 2×2 grid on desktop)
-    const factsHtml = (p.facts || []).map(f =>
-      `<div><dt>${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`
-    ).join('\n            ');
-
-    // Stack chips
-    const stackHtml = (p.stack || []).map(s =>
-      `<li>${esc(s)}</li>`
-    ).join('');
-
-    // Secondary links (all links except the primary for rows with pages;
-    // for no-page rows, already using links[0] as CTA so show the rest)
-    const secondaryLinks = hasPage
-      ? p.links
-      : p.links.slice(1);
-    const linksHtml = secondaryLinks.length
-      ? secondaryLinks.map(l =>
-          `<a class="btn" href="${esc(l.href)}"${l.external ? ' rel="noopener" target="_blank"' : ''}>${esc(l.label)} ↗</a>`
-        ).join('\n          ')
+    // Live link (first link for projects with pages that also have an external live link)
+    const liveLink = p.links?.find(l => l.external && l.label !== 'GitHub');
+    const liveLinkHtml = liveLink
+      ? `\n  <a class="wrow__live" href="${esc(liveLink.href)}" target="_blank" rel="noopener">Live \u2197</a>`
       : '';
 
-    // Thumb
+    // First 4 stack items for the row meta
+    const stackLabel = (p.stack || []).slice(0, 4).join(' \u00b7 ');
+
+    // Touch thumbnail (uses existing thumb)
     const t = p.thumb;
-    const thumbEl = t
-      ? `<a class="wrow__thumb" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''} tabindex="-1" aria-hidden="true">
-          <img src="${esc(t.src)}" alt="${esc(t.alt)}" width="${t.width}" height="${t.height}" loading="lazy" decoding="async">
-        </a>`
+    const touchThumb = t
+      ? `\n  <img class="wrow__touch-thumb" src="${esc(t.src)}" alt="" width="88" height="55" loading="lazy" decoding="async" aria-hidden="true">`
       : '';
 
-    return `<article class="wrow" data-open="${isFirst}" data-has-page="${hasPage}">
-  <h3 class="wrow__head">
-    <a class="wrow__link" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''}>
-      <span class="wrow__idx">${esc(p.index)}</span>
+    return `<li class="wrow" data-slug="${esc(p.slug)}">
+  <a class="wrow__main" href="${esc(primaryHref)}"${extAttrs}>
+    <span class="wrow__idx">${esc(p.index)}</span>
+    <span class="wrow__text">
       <span class="wrow__title">${esc(p.title)}</span>
-    </a>
-    <span class="wrow__kind">${esc(p.kind)}</span>
-    <a class="btn wrow__cta" href="${esc(primaryHref)}"${ctaExternal ? ' rel="noopener" target="_blank"' : ''}>${esc(ctaLabel)}</a>
-  </h3>
-  <div class="wrow__panel"${isFirst ? '' : ' inert'}>
-    <div class="wrow__inner">
-      <div class="wrow__body">
-        <p class="wrow__summary">${esc(p.summary)}</p>
-        <dl class="wrow__facts">
-          ${factsHtml}
-        </dl>
-        <ul class="wrow__stack">${stackHtml}</ul>
-        ${linksHtml ? `<div class="wrow__links">${linksHtml}</div>` : ''}
-      </div>
-      ${thumbEl}
-    </div>
-  </div>
-</article>`;
+      <span class="wrow__tag">${esc(p.tagline || '')}</span>
+    </span>
+    <span class="wrow__meta">
+      <span class="wrow__kind">${esc(p.kind)}</span>
+      <span class="wrow__stack">${esc(stackLabel)}</span>
+    </span>
+    <span class="wrow__go">${goLabel}</span>
+  </a>${liveLinkHtml}${touchThumb}
+</li>`;
   }).join('\n\n');
+}
+
+/* One stacked <img> per project for the floating cursor preview. */
+function generatePreviewImgs(projects) {
+  return projects.map((p) => {
+    const pv = p.preview;
+    if (!pv) return '';
+    return `<img class="wpreview__img" data-slug="${esc(p.slug)}" src="${esc(pv.src)}" alt="" width="${pv.width}" height="${pv.height}" decoding="async">`;
+  }).join('\n      ');
 }
 
 /* ----------------------------------------------------------------
@@ -204,9 +189,10 @@ function generateWorkRows(projects) {
    ---------------------------------------------------------------- */
 function buildHome(projects) {
   const vars = {
-    home:      '',   // on home, hash links are just #section
-    base:      '/',
-    work_rows: generateWorkRows(projects),
+    home:              '',   // on home, hash links are just #section
+    base:              '/',
+    work_rows:         generateWorkRows(projects),
+    work_preview_imgs: generatePreviewImgs(projects),
   };
 
   let html = assemble(LAYOUT_HOME, vars);
