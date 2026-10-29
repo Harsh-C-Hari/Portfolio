@@ -309,16 +309,32 @@ async function build() {
   buildHome(projects);
   const pagesBuilt = buildCasePages(projects) || [];
 
+  // Resolve origin from the home layout's canonical tag
+  const ORIGIN = (() => {
+    try {
+      const m = fs.readFileSync(LAYOUT_HOME, 'utf8').match(/rel="canonical"\s+href="(https?:\/\/[^/"]+)/);
+      return m ? m[1] : 'https://harshchari.vercel.app';
+    } catch { return 'https://harshchari.vercel.app'; }
+  })();
+
   // Phase 6: PCGO docs reader
   try {
     const { buildDocs } = await import('./scripts/build-docs.mjs');
-    const originMatch  = fs.readFileSync(LAYOUT_HOME, 'utf8').match(/rel="canonical"\s+href="(https?:\/\/[^/"]+)/);
-    const origin       = originMatch ? originMatch[1] : 'https://harshchari.vercel.app';
-    const { built }    = await buildDocs(origin);
+    const { built }    = await buildDocs(ORIGIN);
     built.forEach((slug) => pagesBuilt.push(`/work/pcgo/docs/${slug}`));
   } catch (err) {
     console.warn(`[build] Docs build skipped: ${err.message}`);
   }
+
+  // Sitemap
+  const now  = new Date().toISOString().split('T')[0];
+  const urls = ['', ...pagesBuilt].map(p => {
+    const loc = p === '' ? ORIGIN + '/' : ORIGIN + p;
+    return `  <url><loc>${loc}</loc><lastmod>${now}</lastmod></url>`;
+  }).join('\n');
+  const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemapXml, 'utf8');
+  console.log(`[build] sitemap.xml written (${1 + pagesBuilt.length} URLs)`);
 
   printSummary(pagesBuilt);
 }

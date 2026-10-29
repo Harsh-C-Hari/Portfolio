@@ -3,6 +3,10 @@
   "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/work", "destination": "/#work", "permanent": false },
+    { "source": "/work/pcgo/docs", "destination": "/work/pcgo#docs", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/(.*)",

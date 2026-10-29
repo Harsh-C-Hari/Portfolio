@@ -199,6 +199,26 @@ function makeRenderer(config, currentSlugSet) {
     return defaultLinkOpen(tokens, idx, options, env, self);
   };
 
+  // Rewrite image tokens where src is a .md file (broken "![text](doc.md)" pattern)
+  // Convert these into anchor links instead of broken img tags
+  md.renderer.rules.image = (tokens, idx, options, env, self) => {
+    const token   = tokens[idx];
+    const srcIdx  = token.attrIndex('src');
+    if (srcIdx >= 0) {
+      const srcVal = token.attrs[srcIdx][1];
+      if (srcVal.endsWith('.md') || srcVal.includes('.md#')) {
+        // Treat as a link, not an image
+        const sourceFile = env.sourceFile || '';
+        const { href, external } = rewrite(srcVal, sourceFile);
+        const altText = token.children ? token.children.map(t => t.content).join('') : 'Doc link';
+        const extAttrs = external ? ' rel="noopener noreferrer" target="_blank"' : '';
+        return `<a href="${href}"${extAttrs}>${escapeHtml(altText)} →</a>`;
+      }
+    }
+    return self.renderToken(tokens, idx, options);
+  };
+
+
   function render(markdown, sourceFile) {
     const env = { sourceFile, toc: [] };
     // Collect headings for TOC by post-processing tokens

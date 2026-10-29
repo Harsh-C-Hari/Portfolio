@@ -5,7 +5,9 @@
   "description": "Harsh C Hari's portfolio site — partials assembled into a single static index.html",
   "scripts": {
     "build": "node build.js",
-    "dev": "node dev.js"
+    "dev": "node dev.js",
+    "check-links": "node scripts/check-links.mjs",
+    "test": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

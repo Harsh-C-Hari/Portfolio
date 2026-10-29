@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://harshchari.vercel.app/</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/productivity-dashboard</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/project-overview</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/system-architecture</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/backend-architecture</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/recovery-architecture</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/tailscale-state-recovery</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/internal-event-authentication</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/live-sync-architecture-migration</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/dashboard-cache-investigation</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/release-hardening-and-reliability</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/session-persistence-and-reconnection</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/problems-solved</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/api-overview</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/websocket-events</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/v0-limitations</loc><lastmod>2026-10-29</lastmod></url>
+  <url><loc>https://harshchari.vercel.app/work/pcgo/docs/roadmap</loc><lastmod>2026-10-29</lastmod></url>
+</urlset>
