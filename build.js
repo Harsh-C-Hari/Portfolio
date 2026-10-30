@@ -15,10 +15,11 @@ const fs   = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const ROOT        = __dirname;
-const LAYOUT_HOME = path.join(ROOT, 'src', 'layout.html');
-const LAYOUT_PAGE = path.join(ROOT, 'src', 'layout-page.html');
-const OUTPUT_HOME = path.join(ROOT, 'index.html');
+const ROOT          = __dirname;
+const DIST          = path.join(ROOT, 'dist');
+const LAYOUT_HOME   = path.join(ROOT, 'src', 'layout.html');
+const LAYOUT_PAGE   = path.join(ROOT, 'src', 'layout-page.html');
+const OUTPUT_HOME   = path.join(DIST, 'index.html');
 const DATA_PROJECTS = path.join(ROOT, 'data', 'projects.json');
 
 const INCLUDE_RE  = /<!-- include:(\S+?\.html) -->\r?\n/g;
@@ -34,7 +35,9 @@ const warnings = [];
    ---------------------------------------------------------------- */
 
 function versionOf(file) {
-  const p = path.join(ROOT, file);
+  const pDist = path.join(DIST, file);
+  const pRoot = path.join(ROOT, file);
+  const p = fs.existsSync(pDist) ? pDist : pRoot;
   if (!fs.existsSync(p)) return '0';
   return crypto.createHash('md5').update(fs.readFileSync(p)).digest('hex').slice(0, 8);
 }
@@ -59,13 +62,71 @@ function assemble(templatePath, vars = {}) {
   return html;
 }
 
+function stripComments(html) {
+  return html.replace(/<!--[\s\S]*?-->/g, '');
+}
+
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
 function writeFile(filePath, content) {
   ensureDir(path.dirname(filePath));
+  if (filePath.endsWith('.html')) {
+    content = stripComments(content);
+  }
   fs.writeFileSync(filePath, content, 'utf8');
+}
+
+function copyDir(src, dest) {
+  ensureDir(dest);
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+const STATIC_ROOT_FILES = [
+  'harsh-portrait.webp',
+  'image-1.webp',
+  'image-2.webp',
+  'image-prodash.webp',
+  'admin_home_page.webp',
+  'og-image-2.jpg',
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'favicon-48x48.png',
+  'favicon.ico',
+  'apple-touch-icon.png',
+  'resume.pdf',
+  'robots.txt',
+  'google371b688b56727e4a.html',
+];
+
+function copyStaticAssets() {
+  ensureDir(DIST);
+  // 1. styles.css
+  fs.copyFileSync(path.join(ROOT, 'styles.css'), path.join(DIST, 'styles.css'));
+
+  // 2. img/ directory
+  const imgDir = path.join(ROOT, 'img');
+  if (fs.existsSync(imgDir)) {
+    copyDir(imgDir, path.join(DIST, 'img'));
+  }
+
+  // 3. Static root assets
+  for (const file of STATIC_ROOT_FILES) {
+    const srcPath = path.join(ROOT, file);
+    if (fs.existsSync(srcPath)) {
+      fs.copyFileSync(srcPath, path.join(DIST, file));
+    }
+  }
 }
 
 /* ----------------------------------------------------------------
@@ -109,15 +170,16 @@ async function bundleJS() {
   }
   try {
     const esbuild = require('esbuild');
+    ensureDir(DIST);
     await esbuild.build({
       entryPoints: [animSrc],
       bundle: true,
       minify: true,
       format: 'iife',
-      outfile: path.join(ROOT, 'animation.bundle.js'),
+      outfile: path.join(DIST, 'animation.bundle.js'),
       define: { 'process.env.NODE_ENV': '"production"' },
     });
-    console.log('Bundled animation.bundle.js');
+    console.log('Bundled dist/animation.bundle.js');
   } catch (err) {
     console.error('esbuild failed:', err.message);
     process.exit(1);
@@ -279,7 +341,7 @@ function buildCasePages(projects) {
 
     let html = assemble(LAYOUT_PAGE, vars);
 
-    const outPath = path.join(ROOT, 'work', slug, 'index.html');
+    const outPath = path.join(DIST, 'work', slug, 'index.html');
     writeFile(outPath, html);
     pagesBuilt.push(`/work/${slug}`);
     console.log(`Built /work/${slug} (${Buffer.byteLength(html, 'utf8')} bytes)`);
@@ -315,8 +377,10 @@ function printSummary(pagesBuilt = []) {
    Main
    ---------------------------------------------------------------- */
 async function build() {
-  const projects   = loadProjects();
+  ensureDir(DIST);
+  copyStaticAssets();
   await bundleJS();           // JS first so HTML can hash the bundle
+  const projects   = loadProjects();
   buildHome(projects);
   const pagesBuilt = buildCasePages(projects) || [];
 
@@ -331,7 +395,7 @@ async function build() {
   // Phase 6: PCGO docs reader
   try {
     const { buildDocs } = await import('./scripts/build-docs.mjs');
-    const { built }    = await buildDocs(ORIGIN);
+    const { built }    = await buildDocs(ORIGIN, path.join(DIST, 'work', 'pcgo', 'docs'));
     built.forEach((slug) => pagesBuilt.push(`/work/pcgo/docs/${slug}`));
   } catch (err) {
     console.warn(`[build] Docs build skipped: ${err.message}`);
@@ -344,7 +408,7 @@ async function build() {
     return `  <url><loc>${loc}</loc><lastmod>${now}</lastmod></url>`;
   }).join('\n');
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
-  fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemapXml, 'utf8');
+  fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemapXml, 'utf8');
   console.log(`[build] sitemap.xml written (${1 + pagesBuilt.length} URLs)`);
 
   printSummary(pagesBuilt);

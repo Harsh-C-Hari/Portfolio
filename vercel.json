@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm install && node build.js",
-  "outputDirectory": ".",
+  "buildCommand": "npm install && node build.js && node scripts/check-leaks.mjs",
+  "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [

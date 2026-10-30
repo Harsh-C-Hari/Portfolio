@@ -1,36 +1,126 @@
-import { createRequire } from 'module';
-import path from 'path';
-import { fileURLToPath } from 'url';
+#!/usr/bin/env node
+/**
+ * scripts/qa.mjs
+ * Consolidated comprehensive Playwright QA suite:
+ *   1. Console error check across all core routes at 1440px and 375px
+ *   2. Horizontal scroll overflow check at 1440px and 375px
+ *   3. Exactly one <h1> per page check
+ *   4. Client-side page transitions back and forth
+ *   5. Reduced-motion emulation verification
+ *   6. Keyboard tab navigation pass
+ *
+ * Usage: node scripts/qa.mjs [baseUrl]
+ */
+
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const ROOT = path.resolve(__dirname, '..');
+const DIST = path.join(ROOT, 'dist');
 
 let playwright;
 try {
   playwright = await import('playwright');
 } catch {
+  const { createRequire } = await import('node:module');
   const require = createRequire(import.meta.url);
-  playwright = require('C:/Users/O M E N/AppData/Roaming/npm/node_modules/playwright');
+  const globalPath = path.join(process.env.APPDATA || '', 'npm', 'node_modules', 'playwright');
+  playwright = require(globalPath);
 }
 
 const { chromium } = playwright.default || playwright;
-const BASE_URL = 'http://localhost:3000';
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.webp': 'image/webp',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.pdf': 'application/pdf',
+  '.xml': 'application/xml',
+  '.txt': 'text/plain'
+};
+
+function createStaticServer() {
+  return http.createServer((req, res) => {
+    const rawUrl = req.url || '/';
+    const cleanPath = rawUrl.split('?')[0].split('#')[0];
+    let filePath = path.join(DIST, cleanPath.replace(/\//g, path.sep));
+
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+    } else if (!fs.existsSync(filePath)) {
+      if (fs.existsSync(filePath + '.html')) {
+        filePath = filePath + '.html';
+      } else if (fs.existsSync(path.join(filePath, 'index.html'))) {
+        filePath = path.join(filePath, 'index.html');
+      }
+    }
+
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('404 Not Found');
+      return;
+    }
+
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': contentType });
+    fs.createReadStream(filePath).pipe(res);
+  });
+}
+
+async function isServerRunning(url) {
+  return new Promise(resolve => {
+    const req = http.get(url, res => {
+      res.resume();
+      resolve(true);
+    });
+    req.on('error', () => resolve(false));
+    req.setTimeout(500, () => {
+      req.destroy();
+      resolve(false);
+    });
+  });
+}
 
 const TEST_PAGES = [
   '/',
   '/work/pcgo/',
   '/work/productivity-dashboard/',
   '/work/pcgo/docs/system-architecture/',
-  '/work/pcgo/docs/roadmap/'
+  '/work/pcgo/docs/roadmap/',
 ];
 
 async function runQA() {
+  let server = null;
+  let activeBaseUrl = process.argv[2] || 'http://localhost:3000';
+
+  if (!process.argv[2]) {
+    const isUp = await isServerRunning('http://localhost:3000');
+    if (!isUp) {
+      server = createStaticServer();
+      await new Promise(resolve => server.listen(0, resolve));
+      const port = server.address().port;
+      activeBaseUrl = `http://localhost:${port}`;
+      console.log(`[QA] Started temporary static server at ${activeBaseUrl} serving dist/`);
+    }
+  }
+
   const browser = await chromium.launch();
   let allPassed = true;
 
   try {
     console.log('======================================================');
-    console.log('TASK 7: COMPREHENSIVE PLAYWRIGHT QA SUITE');
+    console.log('COMPREHENSIVE PLAYWRIGHT QA SUITE');
     console.log('======================================================\n');
 
     // 1. Console Errors & Horizontal Scroll at 1440 and 375
@@ -46,7 +136,7 @@ async function runQA() {
           if (msg.type() === 'error') consoleErrors.push(msg.text());
         });
 
-        await page.goto(`${BASE_URL}${pagePath}`, { waitUntil: 'networkidle' });
+        await page.goto(`${activeBaseUrl}${pagePath}`, { waitUntil: 'networkidle' });
 
         const overflow = await page.evaluate(() => ({
           scrollWidth: document.documentElement.scrollWidth,
@@ -87,7 +177,7 @@ async function runQA() {
       const page = await context.newPage();
 
       // Home -> PCGO
-      await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+      await page.goto(`${activeBaseUrl}/`, { waitUntil: 'networkidle' });
       const pcgoLink = page.locator('a[href^="/work/pcgo"]').first();
       await pcgoLink.click();
       await page.waitForURL(url => url.pathname.startsWith('/work/pcgo'));
@@ -133,7 +223,7 @@ async function runQA() {
         reducedMotion: 'reduce'
       });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+      await page.goto(`${activeBaseUrl}/`, { waitUntil: 'networkidle' });
 
       const prefersReduced = await page.evaluate(() => {
         return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -146,7 +236,6 @@ async function runQA() {
         console.log('✓ prefers-reduced-motion: reduce media query matches true');
       }
 
-      // Check transition with reduced motion
       const pcgoLink = page.locator('a[href^="/work/pcgo"]').first();
       const startTime = Date.now();
       await pcgoLink.click();
@@ -162,9 +251,8 @@ async function runQA() {
     {
       const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
       const page = await context.newPage();
-      await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+      await page.goto(`${activeBaseUrl}/`, { waitUntil: 'networkidle' });
 
-      // Tab through elements
       let focusedElements = [];
       for (let i = 0; i < 15; i++) {
         await page.keyboard.press('Tab');
@@ -183,7 +271,6 @@ async function runQA() {
       }
 
       console.log(`✓ Successfully tabbed through ${focusedElements.length} focusable elements.`);
-      console.log(`  First focus: <${focusedElements[0]?.tagName}> id="${focusedElements[0]?.id}" class="${focusedElements[0]?.className}" text="${focusedElements[0]?.text}"`);
       const linksFocused = focusedElements.filter(e => e.tagName === 'A');
       console.log(`  Focus traversed ${linksFocused.length} links properly.`);
 
@@ -197,6 +284,9 @@ async function runQA() {
 
   } finally {
     await browser.close();
+    if (server) {
+      await new Promise(r => server.close(r));
+    }
   }
 
   if (!allPassed) {
@@ -209,4 +299,8 @@ async function runQA() {
   }
 }
 
-runQA();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  runQA();
+}
+
+export { runQA };

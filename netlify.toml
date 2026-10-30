@@ -1,6 +1,6 @@
 [build]
-  command   = "npm install && node build.js"
-  publish   = "."
+  command   = "npm install && node build.js && node scripts/check-leaks.mjs"
+  publish   = "dist"
 
 [[headers]]
   for = "/*"

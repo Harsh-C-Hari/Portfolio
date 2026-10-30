@@ -17,11 +17,14 @@
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 
+import path from 'node:path';
+
 let playwright;
 try {
   playwright = require('playwright');
 } catch {
-  playwright = require('C:/Users/O M E N/AppData/Roaming/npm/node_modules/playwright');
+  const globalPath = path.join(process.env.APPDATA || '', 'npm', 'node_modules', 'playwright');
+  playwright = require(globalPath);
 }
 
 const BASE_URL = process.argv[2] || 'http://localhost:3000';

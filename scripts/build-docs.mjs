@@ -24,13 +24,20 @@ const ROOT      = path.resolve(__dirname, '..');
 const CONFIG_PATH   = path.join(ROOT, 'data', 'docs.config.json');
 const SOURCE_ROOT   = path.join(ROOT, 'reference', 'personal-cloud-gaming-orchestrator-main', 'docs');
 const CONTENT_ROOT  = path.join(ROOT, 'content', 'pcgo-docs');
-const OUTPUT_ROOT   = path.join(ROOT, 'work', 'pcgo', 'docs');
+const DIST          = path.join(ROOT, 'dist');
+let   OUTPUT_ROOT   = path.join(DIST, 'work', 'pcgo', 'docs');
 const LAYOUT_DOC    = path.join(ROOT, 'src', 'layout-doc.html');
 const STYLES_VER    = () => {
-  try { return fs.statSync(path.join(ROOT, 'styles.css')).mtimeMs.toString(36); } catch { return '1'; }
+  try {
+    const p = fs.existsSync(path.join(DIST, 'styles.css')) ? path.join(DIST, 'styles.css') : path.join(ROOT, 'styles.css');
+    return fs.statSync(p).mtimeMs.toString(36);
+  } catch { return '1'; }
 };
 const JS_VER        = () => {
-  try { return fs.statSync(path.join(ROOT, 'animation.bundle.js')).mtimeMs.toString(36); } catch { return '1'; }
+  try {
+    const p = fs.existsSync(path.join(DIST, 'animation.bundle.js')) ? path.join(DIST, 'animation.bundle.js') : path.join(ROOT, 'animation.bundle.js');
+    return fs.statSync(p).mtimeMs.toString(36);
+  } catch { return '1'; }
 };
 
 /* ----------------------------------------------------------------
@@ -375,6 +382,7 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
   for (const [key, val] of Object.entries(vars)) {
     html = html.split(`{{${key}}}`).join(val);
   }
+  html = html.replace(/<!--[\s\S]*?-->/g, '');
 
   const outPath = path.join(OUTPUT_ROOT, doc.slug, 'index.html');
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
@@ -384,7 +392,10 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
 /* ----------------------------------------------------------------
    Main export
    ---------------------------------------------------------------- */
-export function buildDocs(originOverride) {
+export function buildDocs(originOverride, outputRootOverride) {
+  if (outputRootOverride) {
+    OUTPUT_ROOT = outputRootOverride;
+  }
   const config    = loadConfig();
   const allDocs   = getAllDocs(config);
   const slugSet   = new Set(allDocs.map(d => d.slug));

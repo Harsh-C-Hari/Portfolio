@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
+const DIST      = path.join(ROOT, 'dist');
 
 // Collect all generated HTML files
 function collectHTML(dir, results = []) {
@@ -31,9 +32,9 @@ function collectHTML(dir, results = []) {
 function resolveHref(href) {
   // Strip query string and hash
   const clean = href.split('?')[0].split('#')[0];
-  if (!clean || clean === '/') return path.join(ROOT, 'index.html');
+  if (!clean || clean === '/') return path.join(DIST, 'index.html');
 
-  const diskPath = path.join(ROOT, clean.replace(/\//g, path.sep));
+  const diskPath = path.join(DIST, clean.replace(/\//g, path.sep));
 
   // First try as a file
   if (fs.existsSync(diskPath)) return diskPath;
@@ -65,8 +66,8 @@ function isInternal(href) {
 }
 
 const pages   = [
-  path.join(ROOT, 'index.html'),
-  ...collectHTML(path.join(ROOT, 'work')),
+  path.join(DIST, 'index.html'),
+  ...collectHTML(path.join(DIST, 'work')),
 ];
 
 const broken  = [];

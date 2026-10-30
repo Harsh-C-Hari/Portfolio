@@ -7,11 +7,12 @@
     "build": "node build.js",
     "dev": "node dev.js",
     "check-pink": "node scripts/check-pink.mjs",
-    "check-links": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
-    "check": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
-    "test": "node scripts/check-links.mjs && node scripts/check-pink.mjs",
+    "check-links": "node scripts/check-links.mjs",
+    "check-leaks": "node scripts/check-leaks.mjs",
+    "check": "node scripts/check-links.mjs && node scripts/check-pink.mjs && node scripts/check-leaks.mjs",
+    "test": "node scripts/qa.mjs",
     "audit:pink": "node scripts/audit-pink-area.mjs",
-    "audit:qa": "node scripts/test-task7-qa.mjs",
+    "audit:qa": "node scripts/qa.mjs",
     "audit:lighthouse": "node scripts/run-lighthouse.mjs"
   },
   "dependencies": {

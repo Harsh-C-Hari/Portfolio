@@ -12,11 +12,14 @@ const bs = browserSync.create();
 // Build once up front so all output files are fresh when the server starts.
 build().catch((err) => console.error(err));
 
+const path = require('path');
+const DIST = path.join(__dirname, 'dist');
+
 bs.init({
   server: {
-    baseDir: __dirname,
+    baseDir: DIST,
   },
-  files:     ['styles.css', 'animation.bundle.js'],
+  files:     [path.join(DIST, 'styles.css'), path.join(DIST, 'animation.bundle.js')],
   open:      false,
   notify:    false,
   ui:        false,
