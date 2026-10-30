@@ -18,7 +18,6 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const STYLES_PATH = path.join(ROOT, 'styles.css');
 
-// Allow-list of selectors permitted to use a pink background
 const ALLOWED_SELECTORS = new Set([
   '::selection',
   '.skip-link',
@@ -29,6 +28,11 @@ const ALLOWED_SELECTORS = new Set([
   '.ticker__sep',
   '.pt__pink',
   'mark',
+  '.wrow__idx',
+  '.wrow__idx::before',
+  '.doc-sidebar__item',
+  '.doc-toc__link',
+  '.cs-urgency__dot',
 ]);
 
 function isAllowed(selector) {

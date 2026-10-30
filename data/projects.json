@@ -8,7 +8,7 @@
       "shortTitle": "PCGO",
       "kind": "Independent, in progress",
       "tagline": "Self-hosted cloud gaming for one Windows PC, with watchdogs that recover failures on their own.",
-      "preview": { "src": "/img/work/previews/pcgo-760.webp", "width": 760, "height": 475 },
+      "preview": { "src": "/img/work/previews/pcgo-760.webp", "width": 760, "height": 380 },
       "summary": "A self-hosted cloud gaming platform for one Windows PC: a React dashboard, a FastAPI backend and a Python host layer that supervises Sunshine streaming and Tailscale networking, with watchdogs that recover failures on their own.",
       "facts": [
         { "label": "Role", "value": "Design & full-stack build" },
@@ -35,7 +35,7 @@
       "shortTitle": "Productivity Dashboard",
       "kind": "Independent, live",
       "tagline": "Tasks that score their own urgency, with push reminders that arrive when the app is closed.",
-      "preview": { "src": "/img/work/previews/productivity-dashboard-760.webp", "width": 760, "height": 475 },
+      "preview": { "src": "/img/work/previews/productivity-dashboard-760.webp", "width": 760, "height": 380 },
       "summary": "One app for tasks, timetable, study sessions, projects and an AI workspace. Tasks get an urgency score from deadline, effort left and progress, and it installs as a PWA with Web Push alerts that arrive with the app closed.",
       "facts": [
         { "label": "Role", "value": "Design & full-stack build" },
@@ -63,7 +63,7 @@
       "shortTitle": "Future of CEC",
       "kind": "Team of four",
       "tagline": "Student portal, admin dashboard and lift access, with a local Gemma assistant.",
-      "preview": { "src": "/img/work/previews/future-of-cec-760.webp", "width": 760, "height": 475 },
+      "preview": { "src": "/img/work/previews/future-of-cec-760.webp", "width": 760, "height": 380 },
       "summary": "A Student Portal, admin dashboard and Lift Access system. Google sign-in is restricted to institutional email, students and lift operators get role-based access, and a local Gemma model served through Ollama answers student queries.",
       "facts": [
         { "label": "Team", "value": "4 people" },
@@ -84,7 +84,7 @@
       "shortTitle": "Smart Farming Dashboard",
       "kind": "Hackathon, team of three",
       "tagline": "A 24-hour hackathon build: sensor charts and Gemini crop-care advice.",
-      "preview": { "src": "/img/work/previews/smart-farming-dashboard-760.webp", "width": 760, "height": 475 },
+      "preview": { "src": "/img/work/previews/smart-farming-dashboard-760.webp", "width": 760, "height": 380 },
       "summary": "Built in 24 hours: a dashboard that charts simulated soil and weather sensor trends with Chart.js, backed by Firebase, with the Gemini API generating crop-care recommendations.",
       "facts": [
         { "label": "Build time", "value": "24 hours" },

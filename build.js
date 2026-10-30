@@ -258,7 +258,7 @@ function generatePanelCaptions(projects) {
     const isExternal = !hasPage;
     const extAttrs = isExternal ? ' rel="noopener" target="_blank"' : '';
     const goLabel = hasPage ? 'Case study &rarr;' : `${esc(p.links[0]?.label || 'GitHub')} &#x2197;`;
-    const fullStack = (p.stack || []).join(' &middot; ');
+    const fullStack = (p.stack || []).join(' · ');
 
     return `<div class="wpanel__caption-item${isActive}" data-slug="${esc(p.slug)}">
   <div class="wpanel__kind">${esc(p.kind)}</div>

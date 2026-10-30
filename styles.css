@@ -87,6 +87,21 @@ body {
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  font-synthesis: none;
+}
+
+html {
+  font-synthesis: none;
+}
+
+h1, h2, h3, h4, h5, h6,
+.title, .hero__h1, .cs-title, .cs-section__title, .doc-header__title {
+  text-wrap: balance;
+  font-synthesis: none;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 /* overflow-x:hidden on <body> makes the body its own scroll container, which silently breaks
@@ -1430,6 +1445,9 @@ main[tabindex="-1"]:focus-visible,
 
 .cs-section__title {
   font-family: var(--f-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
   font-size: clamp(24px, 4vw, 48px);
   line-height: 1.1;
   margin: 0;
@@ -1563,8 +1581,11 @@ main[tabindex="-1"]:focus-visible,
 }
 
 .cs-card__title {
-  font-family: var(--f-display);
-  font-size: clamp(16px, 1.5vw, 20px);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
+  font-size: clamp(18px, 1.6vw, 22px);
+  line-height: 1.25;
   margin: 0;
 }
 
@@ -1667,8 +1688,11 @@ main[tabindex="-1"]:focus-visible,
 }
 
 .cs-feature h3 {
-  font-family: var(--f-display);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
   font-size: 18px;
+  line-height: 1.3;
   margin: 0 0 0.5rem;
 }
 
@@ -1778,7 +1802,9 @@ main[tabindex="-1"]:focus-visible,
 }
 
 .cs-docs__group-title {
-  font-family: var(--f-display);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
   font-size: clamp(16px, 1.5vw, 20px);
   margin: 0 0 0.25rem;
 }
@@ -1856,7 +1882,9 @@ main[tabindex="-1"]:focus-visible,
 }
 
 .cs-status__head {
-  font-family: var(--f-display);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
   font-size: clamp(16px, 1.8vw, 22px);
   margin: 0 0 0.5rem;
 }
@@ -2102,11 +2130,17 @@ main[tabindex="-1"]:focus-visible,
     box-sizing: border-box;
     display: flex;
     align-items: center;
+    transition: background-color 0.18s ease;
+  }
+
+  .wrow:hover,
+  .wrow.is-active {
+    background-color: rgba(0, 0, 0, 0.03);
   }
 
   .wrow__grid {
     display: grid;
-    grid-template-columns: 2.2ch minmax(0, 1fr) auto;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
     gap: clamp(1rem, 2vw, 2.5rem);
     align-items: center;
     width: 100%;
@@ -2118,9 +2152,30 @@ main[tabindex="-1"]:focus-visible,
     font-family: var(--f-mono);
     font-size: var(--t-mono);
     color: var(--muted);
-    width: 2.2ch;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 46px;
     flex-shrink: 0;
     transition: color 0.18s ease;
+  }
+
+  .wrow__idx::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--pink);
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    flex-shrink: 0;
+  }
+
+  .wrow.is-active .wrow__idx::before {
+    opacity: 1;
+    transform: scale(1);
   }
 
   .wrow.is-active .wrow__idx,
@@ -2146,6 +2201,7 @@ main[tabindex="-1"]:focus-visible,
 
   .wrow__title {
     font-family: var(--f-display);
+    font-weight: 400;
     font-size: clamp(20px, 1.8vw, 27px);
     line-height: 1.1;
     color: var(--muted);
@@ -2155,14 +2211,17 @@ main[tabindex="-1"]:focus-visible,
     display: inline-block;
     max-width: 100%;
     vertical-align: bottom;
-    transition: color 0.3s ease, transform 0.3s ease;
+    background: linear-gradient(var(--ink), var(--ink)) 0 100% / 0% 2px no-repeat;
+    transition: color 0.25s ease, background-size 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: 2px;
   }
 
   .wrow.is-active .wrow__title,
   .wrow:hover .wrow__title,
   .wrow:focus-within .wrow__title {
     color: var(--ink);
-    transform: translateX(10px);
+    background-size: 100% 2px;
+    transform: none;
   }
 
 
@@ -2219,7 +2278,7 @@ main[tabindex="-1"]:focus-visible,
 
 /* Sticky Preview Panel frame, image stack and captions */
 .wpanel__frame {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 2 / 1;
   border: 2px solid var(--ink);
   box-shadow: 6px 6px 0 var(--ink);
   border-radius: 4px;
@@ -2234,6 +2293,7 @@ main[tabindex="-1"]:focus-visible,
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: left top;
   opacity: 0;
   transition: opacity 0.28s ease;
   pointer-events: none;
@@ -2316,6 +2376,10 @@ main[tabindex="-1"]:focus-visible,
     width: 2.2ch;
     flex-shrink: 0;
     margin-top: 0.2rem;
+  }
+
+  .wrow__idx::before {
+    display: none;
   }
 
   .wrow__content {
@@ -2499,6 +2563,7 @@ html.pt-enter .loader {
 
 .cs-area__num {
   font-family: var(--f-display);
+  font-weight: 400;
   font-size: 28px;
   line-height: 1;
   color: var(--muted);
@@ -2507,8 +2572,11 @@ html.pt-enter .loader {
 }
 
 .cs-area__name {
-  font-family: var(--f-display);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
   font-size: 18px;
+  line-height: 1.3;
   margin: 0 0 0.3rem;
 }
 
@@ -2818,6 +2886,7 @@ html.pt-enter .loader {
 
 .doc-header__title {
   font-family: var(--f-display);
+  font-weight: 400;
   font-size: clamp(28px, 5vw, 52px);
   line-height: 1.05;
   margin: 0 0 0.6rem;
@@ -2840,26 +2909,32 @@ html.pt-enter .loader {
 .doc-body > * + * { margin-top: 1.25em; }
 
 .doc-body h2 {
-  font-family: var(--f-display);
-  font-size: clamp(20px, 2.5vw, 30px);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
+  font-size: clamp(20px, 2.2vw, 28px);
   margin-top: 2.5em;
   margin-bottom: 0.4em;
-  line-height: 1.15;
+  line-height: 1.25;
   padding-bottom: 0.3em;
   border-bottom: 1px solid var(--paper-2);
 }
 
 .doc-body h3 {
-  font-family: var(--f-display);
+  font-family: var(--f-body);
+  font-weight: 700;
+  text-transform: none;
   font-size: clamp(17px, 1.8vw, 22px);
   margin-top: 2em;
   margin-bottom: 0.3em;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .doc-body h4 {
+  font-family: var(--f-body);
   font-size: var(--t-body);
   font-weight: 700;
+  text-transform: none;
   margin-top: 1.5em;
 }
 
