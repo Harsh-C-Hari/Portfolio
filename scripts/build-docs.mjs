@@ -329,6 +329,7 @@ function makeRenderer(config, currentSlugSet) {
       symbol: '<span class="doc-heading-anchor" aria-hidden="true">#</span>',
       placement: 'after',
       class: 'doc-anchor-link',
+      renderAttrs: () => ({ 'aria-label': 'Direct link to this section' }),
     }),
   });
 
