@@ -395,11 +395,25 @@ window.matchMedia('(min-width: 900px)').addEventListener('change', closeMenu);
    Scroll progress bar
    ------------------------------------------------------------ */
 if (!reduceMotion && $('.progress__bar')) {
-  gsap.to('.progress__bar', {
-    scaleX: 1,
-    ease: 'none',
-    scrollTrigger: { start: 0, end: 'max', scrub: 0.2 },
-  });
+  const docArticle = $('.doc-article');
+  if (docArticle) {
+    gsap.to('.progress__bar', {
+      scaleX: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: docArticle,
+        start: 'top top+=68',
+        end: 'bottom bottom',
+        scrub: 0.2,
+      },
+    });
+  } else {
+    gsap.to('.progress__bar', {
+      scaleX: 1,
+      ease: 'none',
+      scrollTrigger: { start: 0, end: 'max', scrub: 0.2 },
+    });
+  }
 }
 
 /* ------------------------------------------------------------

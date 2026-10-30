@@ -94,6 +94,88 @@ function readingTime(text) {
 }
 
 /* ----------------------------------------------------------------
+   Issue Information parsing & chip rendering
+   Renders Category, Component, Severity, Status as a compact chip row.
+   Severity High/Critical receives solid ink chip.
+   ---------------------------------------------------------------- */
+function parseAndStripIssueInfo(rawMarkdown, docSlug) {
+  const match = rawMarkdown.match(/(?:^|\n)#{1,2}\s+Issue Information\s*([\s\S]*?)(?=(?:\n##?\s+Overview|\n---|$))/);
+  if (!match) return { markdown: rawMarkdown, issueChipsHtml: '' };
+
+  const block = match[1];
+
+  let category = '';
+  const catMatch = block.match(/(?:\*\*Category:\*\*|Category:)\s*\n*([^\n*#]+)/i);
+  if (catMatch) category = catMatch[1].trim();
+
+  let component = '';
+  const compMatch = block.match(/(?:\*\*Affected Components?:\*\*|Affected Components?:)\s*\n*([\s\S]*?)(?=(?:\*\*Severity|\nSeverity|\n\n[A-Z]|$))/i);
+  if (compMatch) {
+    const rawComp = compMatch[1].trim();
+    if (rawComp.includes('- ') || rawComp.includes('* ')) {
+      const items = rawComp.split('\n')
+        .map(l => l.replace(/^[-*]\s*/, '').trim())
+        .filter(Boolean)
+        .map(l => l.replace(/`([^`]+)`/g, '$1').replace(/\s*\([^)]*\)/g, ''));
+      if (items.length > 2) {
+        component = `${items[0]}, ${items[1]} +${items.length - 2}`;
+      } else {
+        component = items.join(', ');
+      }
+    } else {
+      component = rawComp.split('\n')[0].trim();
+    }
+  }
+
+  let severity = '';
+  const sevMatch = block.match(/(?:\*\*Severity:\*\*|Severity:)\s*\n*([^\n*#]+)/i);
+  if (sevMatch) severity = sevMatch[1].trim();
+
+  let status = '';
+  const statMatch = block.match(/(?:\*\*Status:\*\*|Status:)\s*\n*([^\n*#]+)/i);
+  if (statMatch) {
+    status = statMatch[1].trim();
+  } else {
+    const headStat = rawMarkdown.match(/\*\*Status:\*\*\s*([^\n*#]+)/i);
+    status = headStat ? headStat[1].trim() : 'Resolved';
+  }
+
+  let severityDisplay = severity;
+  if (/^critical/i.test(severity)) severityDisplay = 'Critical';
+  else if (/^high/i.test(severity)) severityDisplay = 'High';
+  else if (/^medium/i.test(severity)) severityDisplay = 'Medium';
+  else if (/^low/i.test(severity)) severityDisplay = 'Low';
+
+  const isHighOrCritical = /critical|high/i.test(severity);
+
+  // Strip the Issue Information block
+  let cleanedMarkdown = rawMarkdown.replace(/(?:^|\n)#{1,2}\s+Issue Information\s*[\s\S]*?(?=(?:\n##?\s+Overview|\n---|$))/, '');
+  // Clean up any remaining leading hr before Overview
+  cleanedMarkdown = cleanedMarkdown.replace(/^\s*---\s*$/m, '');
+
+  const chipHtml = `<div class="doc-issue-chips">
+  <div class="doc-chip">
+    <span class="doc-chip__label">Category</span>
+    <span class="doc-chip__val">${escapeHtml(category || 'Engineering')}</span>
+  </div>
+  <div class="doc-chip">
+    <span class="doc-chip__label">Component</span>
+    <span class="doc-chip__val">${escapeHtml(component || 'Host Agent')}</span>
+  </div>
+  <div class="doc-chip ${isHighOrCritical ? 'doc-chip--solid' : ''}">
+    <span class="doc-chip__label">Severity</span>
+    <span class="doc-chip__val">${escapeHtml(severityDisplay || 'High')}</span>
+  </div>
+  <div class="doc-chip">
+    <span class="doc-chip__label">Status</span>
+    <span class="doc-chip__val">${escapeHtml(status || 'Resolved')}</span>
+  </div>
+</div>`;
+
+  return { markdown: cleanedMarkdown, issueChipsHtml: chipHtml };
+}
+
+/* ----------------------------------------------------------------
    Heading normalization
    - Strips the leading H1 and directly following <hr> (if present)
    - Normalizes misleveled headings (e.g. # Release Stabilization Phase, leading ## Overview)
@@ -240,10 +322,14 @@ function makeRenderer(config, currentSlugSet) {
     },
   });
 
-  // Anchor headings + TOC collection (levels 2-6)
+  // Anchor headings + TOC collection (levels 2-6) with on-hover # links
   md.use(mdAnchor, {
     level: [2, 3, 4, 5, 6],
-    callback: (token, info) => { /* toc built via env below */ },
+    permalink: mdAnchor.permalink.linkInsideHeader({
+      symbol: '<span class="doc-heading-anchor" aria-hidden="true">#</span>',
+      placement: 'after',
+      class: 'doc-anchor-link',
+    }),
   });
 
   // Wrap tables in scrollable div
@@ -303,7 +389,7 @@ function makeRenderer(config, currentSlugSet) {
       if ((t.type === 'heading_open') && ['h2','h3','h4','h5','h6'].includes(t.tag)) {
         const inline = tokens[i + 1];
         if (inline && inline.type === 'inline') {
-          const title = inline.children.filter(c => c.type === 'text' || c.type === 'code_inline').map(c => c.content).join('');
+          const title = inline.children.filter(c => c.type === 'text' || c.type === 'code_inline').map(c => c.content).join('').trim();
           const slug  = t.attrGet('id') || title.toLowerCase().replace(/[^\w]+/g, '-');
           env.toc.push({ level: parseInt(t.tag[1], 10), slug, title });
         }
@@ -420,8 +506,12 @@ export function buildDocs(originOverride, outputRootOverride) {
     }
 
     const rawMarkdown = fs.readFileSync(contentPath, 'utf8');
-    const markdown    = normalizeHeadings(rawMarkdown, doc.slug);
+    const { markdown: strippedMarkdown, issueChipsHtml } = parseAndStripIssueInfo(rawMarkdown, doc.slug);
+    const markdown    = normalizeHeadings(strippedMarkdown, doc.slug);
     let { html: body, toc } = render(markdown, doc.source);
+    if (issueChipsHtml) {
+      body = issueChipsHtml + '\n' + body;
+    }
 
     writeDocPage(doc, allDocs, body, toc, config, { cssVer, jsVer, origin });
     built.push(doc.slug);

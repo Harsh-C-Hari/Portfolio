@@ -33,6 +33,7 @@ const ALLOWED_SELECTORS = new Set([
   '.doc-sidebar__item',
   '.doc-toc__link',
   '.cs-urgency__dot',
+  '.cs-urgency-badge--critical::before',
 ]);
 
 function isAllowed(selector) {

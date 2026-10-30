@@ -466,49 +466,218 @@
       <p class="cs-section__intro">These are the working docs from the repo: the investigations, the architecture notes, and the limitations I have not fixed yet. Fifteen of them are published here.</p>
     </header>
 
+    <!-- Start here strip with 3 best docs as large cards -->
+    <div class="cs-docs__starthere">
+      <div class="cs-docs__starthere-head">
+        <span class="cs-docs__starthere-tag">Start here</span>
+        <p class="cs-docs__starthere-desc">The three most insightful investigations into distributed state, scoped authentication, and silent sync failure.</p>
+      </div>
+      <div class="cs-docs__starthere-grid">
+        <a href="/work/pcgo/docs/tailscale-state-recovery" class="cs-start-card">
+          <div class="cs-start-card__top">
+            <span class="cs-start-card__badge">Investigation</span>
+            <span class="cs-start-card__time">2 min read</span>
+          </div>
+          <h3 class="cs-start-card__title">Tailscale state-aware recovery</h3>
+          <p class="cs-start-card__summary">A week spent learning that "restart the service" is not a recovery strategy: Tailscale fails in distinct states that each need a different fix.</p>
+          <span class="cs-start-card__link">Read document <span class="cs-start-card__arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+        <a href="/work/pcgo/docs/internal-event-authentication" class="cs-start-card">
+          <div class="cs-start-card__top">
+            <span class="cs-start-card__badge">Investigation</span>
+            <span class="cs-start-card__time">4 min read</span>
+          </div>
+          <h3 class="cs-start-card__title">Internal event authentication</h3>
+          <p class="cs-start-card__summary">How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.</p>
+          <span class="cs-start-card__link">Read document <span class="cs-start-card__arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+        <a href="/work/pcgo/docs/live-sync-architecture-migration" class="cs-start-card">
+          <div class="cs-start-card__top">
+            <span class="cs-start-card__badge">Investigation</span>
+            <span class="cs-start-card__time">5 min read</span>
+          </div>
+          <h3 class="cs-start-card__title">Live sync that stopped running</h3>
+          <p class="cs-start-card__summary">Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service.</p>
+          <span class="cs-start-card__link">Read document <span class="cs-start-card__arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Complete docs library under 3 headings (2-column grid) -->
     <div class="cs-docs">
 
+      <!-- 1. Overview & architecture -->
       <div class="cs-docs__group">
         <h3 class="cs-docs__group-title">Overview &amp; architecture</h3>
         <p class="cs-docs__group-intro">What it is and how the layers fit together.</p>
-        <ul class="cs-docs__list">
-          <li><a href="/work/pcgo/docs/project-overview" class="cs-doc-link"><span class="cs-doc-link__title">Project overview</span><span class="cs-doc-link__summary">What the platform is, what v0.1 ships, and how the pieces fit.</span></a></li>
-          <li><a href="/work/pcgo/docs/system-architecture" class="cs-doc-link"><span class="cs-doc-link__title">System architecture</span><span class="cs-doc-link__summary">The layers from dashboard to Windows host, and the design principles behind them.</span></a></li>
-          <li><a href="/work/pcgo/docs/backend-architecture" class="cs-doc-link"><span class="cs-doc-link__title">Backend architecture</span><span class="cs-doc-link__summary">How the FastAPI backend is organised and what it orchestrates.</span></a></li>
-          <li><a href="/work/pcgo/docs/recovery-architecture" class="cs-doc-link"><span class="cs-doc-link__title">Recovery architecture</span><span class="cs-doc-link__summary">How the Sunshine and Tailscale watchdogs detect failures and recover.</span></a></li>
-        </ul>
+        <div class="cs-docs__grid">
+          <a href="/work/pcgo/docs/project-overview" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Project overview</h4>
+              <p class="cs-doc-row__summary">What the platform is, what v0.1 ships, and how the pieces fit.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">4 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/system-architecture" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">System architecture</h4>
+              <p class="cs-doc-row__summary">The layers from dashboard to Windows host, and the design principles behind them.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/backend-architecture" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Backend architecture</h4>
+              <p class="cs-doc-row__summary">How the FastAPI backend is organised and what it orchestrates.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/recovery-architecture" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Recovery architecture</h4>
+              <p class="cs-doc-row__summary">How the Sunshine and Tailscale watchdogs detect failures and recover.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">1 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        </div>
       </div>
 
+      <!-- 2. Engineering investigations -->
       <div class="cs-docs__group">
         <h3 class="cs-docs__group-title">Engineering investigations</h3>
-        <p class="cs-docs__group-intro">Bugs and design problems written up as problem, investigation, root cause, fix. The most useful reading here.</p>
-        <ul class="cs-docs__list">
-          <li><a href="/work/pcgo/docs/tailscale-state-recovery" class="cs-doc-link"><span class="cs-doc-link__title">Tailscale state-aware recovery</span><span class="cs-doc-link__summary">A week spent learning that "restart the service" is not a recovery strategy.</span></a></li>
-          <li><a href="/work/pcgo/docs/internal-event-authentication" class="cs-doc-link"><span class="cs-doc-link__title">Internal event authentication</span><span class="cs-doc-link__summary">How two non-user callers authenticate with a scoped shared secret.</span></a></li>
-          <li><a href="/work/pcgo/docs/live-sync-architecture-migration" class="cs-doc-link"><span class="cs-doc-link__title">Live sync that stopped running</span><span class="cs-doc-link__summary">Live save sync went silent. The real cause was an incomplete migration.</span></a></li>
-          <li><a href="/work/pcgo/docs/dashboard-cache-investigation" class="cs-doc-link"><span class="cs-doc-link__title">Stale dashboard, correct backend</span><span class="cs-doc-link__summary">The dashboard showed old data. The browser was caching monitoring endpoints.</span></a></li>
-          <li><a href="/work/pcgo/docs/release-hardening-and-reliability" class="cs-doc-link"><span class="cs-doc-link__title">Release hardening and reliability</span><span class="cs-doc-link__summary">Pre-release reliability work: atomic saves, session locks, integrity checks.</span></a></li>
-          <li><a href="/work/pcgo/docs/session-persistence-and-reconnection" class="cs-doc-link"><span class="cs-doc-link__title">Session persistence and reconnection</span><span class="cs-doc-link__summary">Keeping sessions consistent across crashes and reconnects.</span></a></li>
-          <li><a href="/work/pcgo/docs/problems-solved" class="cs-doc-link"><span class="cs-doc-link__title">Major problems solved</span><span class="cs-doc-link__summary">A short tour of the hardest problems and how each was solved.</span></a></li>
-        </ul>
+        <p class="cs-docs__group-intro">Bugs and design problems written up as problem, investigation, root cause, fix.</p>
+        <div class="cs-docs__grid">
+          <a href="/work/pcgo/docs/tailscale-state-recovery" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Tailscale state-aware recovery</h4>
+              <p class="cs-doc-row__summary">A week spent learning that "restart the service" is not a recovery strategy.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/internal-event-authentication" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Internal event authentication</h4>
+              <p class="cs-doc-row__summary">How two non-user callers authenticate with a scoped shared secret.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">4 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/live-sync-architecture-migration" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Live sync that stopped running</h4>
+              <p class="cs-doc-row__summary">Live save sync went silent. The real cause was an incomplete migration.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">5 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/dashboard-cache-investigation" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Stale dashboard, correct backend</h4>
+              <p class="cs-doc-row__summary">The dashboard showed old data. The browser was caching monitoring endpoints.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/release-hardening-and-reliability" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Release hardening and reliability</h4>
+              <p class="cs-doc-row__summary">Pre-release reliability work: atomic saves, session locks, integrity checks.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">9 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/session-persistence-and-reconnection" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Session persistence and reconnection</h4>
+              <p class="cs-doc-row__summary">Keeping sessions consistent across crashes and reconnects.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/problems-solved" class="cs-doc-row cs-doc-row--full">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Major problems solved</h4>
+              <p class="cs-doc-row__summary">A short tour of the hardest problems and how each was solved.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        </div>
       </div>
 
+      <!-- 3. Reference & roadmap -->
       <div class="cs-docs__group">
-        <h3 class="cs-docs__group-title">API &amp; reference</h3>
-        <p class="cs-docs__group-intro">The interfaces other code talks to.</p>
-        <ul class="cs-docs__list">
-          <li><a href="/work/pcgo/docs/api-overview" class="cs-doc-link"><span class="cs-doc-link__title">API overview</span><span class="cs-doc-link__summary">The REST surface: route groups, authentication and conventions.</span></a></li>
-          <li><a href="/work/pcgo/docs/websocket-events" class="cs-doc-link"><span class="cs-doc-link__title">WebSocket events</span><span class="cs-doc-link__summary">The single authenticated /ws channel and the one message type it carries today.</span></a></li>
-        </ul>
-      </div>
-
-      <div class="cs-docs__group">
-        <h3 class="cs-docs__group-title">Limits &amp; roadmap</h3>
-        <p class="cs-docs__group-intro">What v0.1 deliberately does not do yet, and where it goes next.</p>
-        <ul class="cs-docs__list">
-          <li><a href="/work/pcgo/docs/v0-limitations" class="cs-doc-link"><span class="cs-doc-link__title">Known limitations</span><span class="cs-doc-link__summary">No refresh tokens, no login rate limiting, no audit log yet. Written down on purpose.</span></a></li>
-          <li><a href="/work/pcgo/docs/roadmap" class="cs-doc-link"><span class="cs-doc-link__title">Roadmap</span><span class="cs-doc-link__summary">Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.</span></a></li>
-        </ul>
+        <h3 class="cs-docs__group-title">Reference &amp; roadmap</h3>
+        <p class="cs-docs__group-intro">The API interfaces, known limits, and where the platform goes next.</p>
+        <div class="cs-docs__grid">
+          <a href="/work/pcgo/docs/api-overview" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">API overview</h4>
+              <p class="cs-doc-row__summary">The REST surface: route groups, authentication and conventions.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/websocket-events" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">WebSocket events</h4>
+              <p class="cs-doc-row__summary">The single authenticated /ws channel and the one message type it carries today.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/v0-limitations" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Known limitations</h4>
+              <p class="cs-doc-row__summary">No refresh tokens, no login rate limiting, no audit log yet. Written down on purpose.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">1 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/roadmap" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Roadmap</h4>
+              <p class="cs-doc-row__summary">Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">4 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        </div>
       </div>
 
     </div>
