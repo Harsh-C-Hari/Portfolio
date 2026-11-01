@@ -1061,9 +1061,11 @@ if (isHome) {
     return (pos & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
   });
 
-  function setActiveByHref(activeHref) {
+  function setActiveHrefs(hrefs) {
+    const activeSet = new Set(Array.isArray(hrefs) ? hrefs : [hrefs]);
     allLinks.forEach((l) => {
-      if (l.getAttribute('href') === activeHref) {
+      const h = l.getAttribute('href');
+      if (activeSet.has(h)) {
         l.classList.add('is-active');
         l.setAttribute('aria-current', 'true');
       } else {
@@ -1074,42 +1076,68 @@ if (isHome) {
   }
 
   // Set initial active link
-  setActiveByHref(headingItems[0].href);
+  setActiveHrefs(headingItems[0].href);
 
-  // When a TOC link is clicked, lock active state briefly so intermediate headings don't overwrite during smooth scroll
-  let clickLockedHref = null;
-  let clickLockTimer = null;
+  // When a TOC link is clicked, keep it active until the user manually initiates scroll (wheel / touch / keyboard / outside click).
+  // Avoid arbitrary timeouts that snap back while smooth scroll or reading is underway.
+  let userClickedHref = null;
 
   allLinks.forEach((a) => {
     a.addEventListener('click', () => {
       const href = a.getAttribute('href');
-      clickLockedHref = href;
-      setActiveByHref(href);
-      if (clickLockTimer) clearTimeout(clickLockTimer);
-      clickLockTimer = setTimeout(() => {
-        clickLockedHref = null;
-        updateActiveHeading();
-      }, 1200);
+      userClickedHref = href;
+      setActiveHrefs(href);
     });
   });
 
+  const clearUserClick = () => {
+    userClickedHref = null;
+  };
+
+  window.addEventListener('wheel', clearUserClick, { passive: true });
+  window.addEventListener('touchmove', clearUserClick, { passive: true });
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.target?.closest || !e.target.closest('.doc-toc-rail, .doc-toc-details')) {
+      userClickedHref = null;
+    }
+  }, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Space', 'Home', 'End'].includes(e.code)) {
+      userClickedHref = null;
+    }
+  }, { passive: true });
+
   function updateActiveHeading() {
-    if (clickLockedHref) return;
+    if (userClickedHref) return;
 
     const scrollY = window.scrollY || window.pageYOffset || 0;
     const innerHeight = window.innerHeight;
     const scrollHeight = document.documentElement.scrollHeight;
     const maxScroll = scrollHeight - innerHeight;
+    const headerH = navH();
 
-    // Bottom of page check: if scrolled near or at the bottom (within 80px),
-    // activate the LAST heading in TOC. This handles short tail sections (like "Impact")
-    // that cannot scroll all the way to the top of the viewport.
-    if (maxScroll > 0 && scrollY >= maxScroll - 80) {
-      setActiveByHref(headingItems[headingItems.length - 1].href);
-      return;
+    // Bottom of page check: if scrolled near or at the bottom (within 40px),
+    // check visible concluding headings. If multiple are in view (e.g. "Lessons Learned" and "Impact"
+    // on concise documents), highlight both. If only one is visible, highlight that one.
+    if (maxScroll > 0 && scrollY >= maxScroll - 40) {
+      const visibleAtBottom = headingItems.filter((item) => {
+        const top = item.target.getBoundingClientRect().top;
+        return top >= headerH && top <= innerHeight * 0.75;
+      });
+
+      if (visibleAtBottom.length >= 2) {
+        setActiveHrefs(visibleAtBottom.map((v) => v.href));
+        return;
+      } else if (visibleAtBottom.length === 1) {
+        setActiveHrefs(visibleAtBottom[0].href);
+        return;
+      } else {
+        setActiveHrefs(headingItems[headingItems.length - 1].href);
+        return;
+      }
     }
 
-    const threshold = navH() + 50;
+    const threshold = headerH + 50;
 
     // Find the last heading whose top position is <= threshold
     let active = headingItems[0];
@@ -1122,8 +1150,23 @@ if (isHome) {
       }
     }
 
+    // Tail reading focus check: for short concluding sections that cannot scroll all the way to threshold,
+    // if the second-to-last heading is in reading view (top <= 45% viewport) and last heading is lower (> 65%),
+    // keep focus on the second-to-last heading.
+    const lastItem = headingItems[headingItems.length - 1];
+    const secondLastItem = headingItems.length >= 2 ? headingItems[headingItems.length - 2] : null;
+
+    if (secondLastItem) {
+      const secondLastTop = secondLastItem.target.getBoundingClientRect().top;
+      const lastTop = lastItem.target.getBoundingClientRect().top;
+
+      if (secondLastTop <= innerHeight * 0.45 && lastTop > innerHeight * 0.65) {
+        active = secondLastItem;
+      }
+    }
+
     if (active) {
-      setActiveByHref(active.href);
+      setActiveHrefs(active.href);
     }
   }
 
