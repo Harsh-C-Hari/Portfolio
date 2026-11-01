@@ -2971,6 +2971,14 @@ html.pt-enter .loader {
    Doc reader  (.doc-layout, .doc-article, .doc-sidebar, etc.)
    ============================================================ */
 
+/* Persistent topbar on doc reader pages: solid background and crisp bottom divider */
+[data-page="doc"] .nav {
+  background: rgba(242, 241, 236, 0.95);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--ink);
+}
+
 .doc-layout {
   display: grid;
   grid-template-columns: 1fr;

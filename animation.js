@@ -1061,6 +1061,24 @@ if (isHome) {
     return (pos & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
   });
 
+  const tocRail = document.querySelector('.doc-toc-rail');
+
+  function scrollActiveTocIntoView() {
+    if (!tocRail || tocRail.scrollHeight <= tocRail.clientHeight) return;
+    const activeLinks = tocRail.querySelectorAll('a.is-active');
+    if (!activeLinks.length) return;
+    const activeLink = activeLinks[activeLinks.length - 1];
+
+    const railRect = tocRail.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+
+    if (linkRect.bottom > railRect.bottom) {
+      tocRail.scrollTop += (linkRect.bottom - railRect.bottom) + 24;
+    } else if (linkRect.top < railRect.top) {
+      tocRail.scrollTop -= (railRect.top - linkRect.top) + 24;
+    }
+  }
+
   function setActiveHrefs(hrefs) {
     const activeSet = new Set(Array.isArray(hrefs) ? hrefs : [hrefs]);
     allLinks.forEach((l) => {
@@ -1073,6 +1091,7 @@ if (isHome) {
         l.removeAttribute('aria-current');
       }
     });
+    scrollActiveTocIntoView();
   }
 
   // Set initial active link
@@ -1171,5 +1190,30 @@ if (isHome) {
   }
 
   updateActiveHeading();
+})();
+
+/* ------------------------------------------------------------
+   Doc reader: auto-scroll active sidebar link into view
+   ------------------------------------------------------------ */
+(function setupDocSidebarAutoScroll() {
+  const sidebar = document.querySelector('.doc-layout__sidebar');
+  if (!sidebar) return;
+
+  const scrollActiveLink = () => {
+    const activeLink = sidebar.querySelector('a[aria-current="page"]');
+    if (!activeLink) return;
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+
+    if (linkRect.bottom > sidebarRect.bottom) {
+      sidebar.scrollTop += (linkRect.bottom - sidebarRect.bottom) + 32;
+    } else if (linkRect.top < sidebarRect.top) {
+      sidebar.scrollTop -= (sidebarRect.top - linkRect.top) + 32;
+    }
+  };
+
+  scrollActiveLink();
+  requestAnimationFrame(scrollActiveLink);
+  window.addEventListener('load', scrollActiveLink, { once: true });
 })();
 
