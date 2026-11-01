@@ -111,8 +111,26 @@ document.addEventListener('click', (e) => {
   const ptPink = $('.pt__pink');
   const ptInk  = $('.pt__ink');
 
+  // Detect reload or history traversal
+  const navEntry = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  const navType = navEntry ? navEntry.type : (window.performance && performance.navigation ? (performance.navigation.type === 1 ? 'reload' : (performance.navigation.type === 2 ? 'back_forward' : 'navigate')) : 'navigate');
+  const isReloadOrBack = (navType === 'reload' || navType === 'back_forward');
+
+  if (isReloadOrBack) {
+    document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+    document.documentElement.style.removeProperty('--pt-label');
+    try {
+      sessionStorage.removeItem('pt');
+      sessionStorage.removeItem('pt_t');
+      sessionStorage.removeItem('pt_label');
+    } catch (e) { /* */ }
+    if (ptPink) gsap.set(ptPink, { yPercent: 100 });
+    if (ptInk)  gsap.set(ptInk,  { yPercent: 100 });
+    if (ptEl)   ptEl.style.pointerEvents = 'none';
+  }
+
   // Arrive: if the head script set pt-enter, run the cover-off animation.
-  if (document.documentElement.classList.contains('pt-enter')) {
+  if (!isReloadOrBack && document.documentElement.classList.contains('pt-enter')) {
     // Focus main immediately (tabindex=-1, no scroll)
     const mainEl = $('#main-content');
     if (mainEl) mainEl.focus({ preventScroll: true });
