@@ -1140,34 +1140,28 @@ if (isHome) {
     const threshold = headerH + 50;
 
     // Find the last heading whose top position is <= threshold
-    let active = headingItems[0];
+    let activeIndex = 0;
     for (let i = 0; i < headingItems.length; i++) {
       const top = headingItems[i].target.getBoundingClientRect().top;
       if (top <= threshold) {
-        active = headingItems[i];
+        activeIndex = i;
       } else {
         break;
       }
     }
 
     // Tail reading focus check: for short concluding sections that cannot scroll all the way to threshold,
-    // if the second-to-last heading is in reading view (top <= 45% viewport) and last heading is lower (> 65%),
-    // keep focus on the second-to-last heading.
-    const lastItem = headingItems[headingItems.length - 1];
-    const secondLastItem = headingItems.length >= 2 ? headingItems[headingItems.length - 2] : null;
-
-    if (secondLastItem) {
-      const secondLastTop = secondLastItem.target.getBoundingClientRect().top;
-      const lastTop = lastItem.target.getBoundingClientRect().top;
-
-      if (secondLastTop <= innerHeight * 0.45 && lastTop > innerHeight * 0.65) {
-        active = secondLastItem;
+    // if the second-to-last heading is in reading view (top <= 45% viewport) and we haven't reached lastItem,
+    // focus stays on the second-to-last heading (never falling back to an earlier heading like third-last).
+    const secondLastIdx = headingItems.length - 2;
+    if (secondLastIdx >= 0 && activeIndex < secondLastIdx) {
+      const secondLastTop = headingItems[secondLastIdx].target.getBoundingClientRect().top;
+      if (secondLastTop <= innerHeight * 0.45) {
+        activeIndex = secondLastIdx;
       }
     }
 
-    if (active) {
-      setActiveHrefs(active.href);
-    }
+    setActiveHrefs(headingItems[activeIndex].href);
   }
 
   window.addEventListener('scroll', updateActiveHeading, { passive: true });
