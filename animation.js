@@ -295,6 +295,11 @@ document.addEventListener('click', (e) => {
       // Skip files with extensions (except .html)
       const ext = dest.pathname.match(/\.([^./]+)$/);
       if (ext && ext[1].toLowerCase() !== 'html') return false;
+
+      // Intra-docs navigation: do not run heavy full-screen transition when switching between doc pages
+      const isCurrentDocs = /^\/work\/[^/]+\/docs/.test(window.location.pathname);
+      const isDestDocs    = /^\/work\/[^/]+\/docs/.test(dest.pathname);
+      if (isCurrentDocs && isDestDocs) return false;
     } catch (e) {
       return false;
     }
@@ -414,12 +419,19 @@ document.addEventListener('click', (e) => {
   if (finePointer && !navigator.connection?.saveData) {
     const prefetched = new Set();
     const maybePrefetch = (a) => {
-      if (!shouldIntercept(a)) return;
-      const href = a.getAttribute('href');
+      const href = a?.getAttribute('href');
       if (!href || prefetched.has(href)) return;
-      prefetched.add(href);
+      if (a.target && a.target !== '_self') return;
+      if (a.hasAttribute('download')) return;
+      if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
       try {
         const dest = new URL(href, window.location.href);
+        if (dest.origin !== window.location.origin) return;
+        if (dest.pathname === window.location.pathname) return;
+        const ext = dest.pathname.match(/\.([^./]+)$/);
+        if (ext && ext[1].toLowerCase() !== 'html') return;
+
+        prefetched.add(href);
         const link = document.createElement('link');
         link.rel  = 'prefetch';
         link.href = dest.href;
