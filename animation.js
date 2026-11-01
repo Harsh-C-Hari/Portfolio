@@ -230,8 +230,26 @@ document.addEventListener('click', (e) => {
     }
   }
 
-  // bfcache restore: reset layers and clear flags
+  // Leave: intercept clicks and animate cover-in before navigating.
+  let navigating = false;
+  let leaveFailsafeTimer = null;
+  let leaveTimeoutTimer  = null;
+
+  const resetLeaveState = () => {
+    navigating = false;
+    if (leaveFailsafeTimer) {
+      clearTimeout(leaveFailsafeTimer);
+      leaveFailsafeTimer = null;
+    }
+    if (leaveTimeoutTimer) {
+      clearTimeout(leaveTimeoutTimer);
+      leaveTimeoutTimer = null;
+    }
+  };
+
+  // bfcache / history traversal restore: reset layers, flags, and cancel pending timers
   window.addEventListener('pageshow', (e) => {
+    resetLeaveState();
     if (!e.persisted) return;
     document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
     document.documentElement.style.removeProperty('--pt-label');
@@ -245,10 +263,13 @@ document.addEventListener('click', (e) => {
     if (ptEl)   ptEl.style.pointerEvents = 'none';
   });
 
-  // Leave: intercept clicks and animate cover-in before navigating.
-  let navigating = false;
-  let leaveFailsafeTimer = null;
-  let leaveTimeoutTimer  = null;
+  window.addEventListener('pagehide', () => {
+    resetLeaveState();
+  });
+
+  window.addEventListener('popstate', () => {
+    resetLeaveState();
+  });
 
   function shouldIntercept(a) {
     if (!a)                             return false;

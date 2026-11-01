@@ -240,7 +240,7 @@
           <div><dt>What I did</dt><dd>Rebuilt the watchdog as detect, diagnose, classify, then act: run <code>tailscale up</code> when stopped, start the Tailscale process when unavailable, start <code>tailscale-ipn.exe</code> when there is no state. Login failures are deliberately left alone.</dd></div>
           <div><dt>Why</dt><dd>A fix that is right for one failure state is wrong for another. Recovery has to start from diagnosis.</dd></div>
         </dl>
-        <a class="cs-card__link" href="/work/pcgo/docs/tailscale-state-recovery">Full write-up →</a>
+        <a class="cs-card__link" href="/work/pcgo/docs/tailscale-state-recovery" data-pt-label="Tailscale State Recovery">Full write-up →</a>
       </article>
 
       <article class="cs-card">
@@ -251,7 +251,7 @@
           <div><dt>What I did</dt><dd>Moved the live-sync lifecycle into the service path that actually runs sessions.</dd></div>
           <div><dt>Why</dt><dd>When a bug survives your first three theories, check the architecture, not the algorithm.</dd></div>
         </dl>
-        <a class="cs-card__link" href="/work/pcgo/docs/live-sync-architecture-migration">Full write-up →</a>
+        <a class="cs-card__link" href="/work/pcgo/docs/live-sync-architecture-migration" data-pt-label="Live Sync Migration">Full write-up →</a>
       </article>
 
       <article class="cs-card">
@@ -262,7 +262,7 @@
           <div><dt>What I did</dt><dd>Disabled caching on both sides: response headers from the backend and no-cache requests from the frontend.</dd></div>
           <div><dt>Why</dt><dd>Measure at the boundary first. Testing the API alone cut the search space in half.</dd></div>
         </dl>
-        <a class="cs-card__link" href="/work/pcgo/docs/dashboard-cache-investigation">Full write-up →</a>
+        <a class="cs-card__link" href="/work/pcgo/docs/dashboard-cache-investigation" data-pt-label="Dashboard Cache Investigation">Full write-up →</a>
       </article>
 
       <article class="cs-card">
@@ -273,7 +273,7 @@
           <div><dt>What I did</dt><dd>A single-purpose shared secret, generated with <code>secrets.token_urlsafe(32)</code>, sent as <code>X-Internal-Event-Token</code>, checked with <code>hmac.compare_digest</code>, attached to exactly four routes, and never accepted anywhere else.</dd></div>
           <div><dt>Why</dt><dd>Leaving those routes open would let any logged-in user spoof stream state. A narrow credential keeps the blast radius small.</dd></div>
         </dl>
-        <a class="cs-card__link" href="/work/pcgo/docs/internal-event-authentication">Full write-up →</a>
+        <a class="cs-card__link" href="/work/pcgo/docs/internal-event-authentication" data-pt-label="Internal Event Auth">Full write-up →</a>
       </article>
 
       <article class="cs-card">
@@ -284,7 +284,7 @@
           <div><dt>What I did</dt><dd>Hash-based change detection so identical saves are not backed up again, and startup recovery that restores consistency from a small JSON snapshot after a crash.</dd></div>
           <div><dt>Why</dt><dd>Reliability work is mostly deciding what must survive a failure, and writing that down before it fails.</dd></div>
         </dl>
-        <a class="cs-card__link" href="/work/pcgo/docs/release-hardening-and-reliability">Full write-up →</a>
+        <a class="cs-card__link" href="/work/pcgo/docs/release-hardening-and-reliability" data-pt-label="Release Hardening">Full write-up →</a>
       </article>
 
     </div>

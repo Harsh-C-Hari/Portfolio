@@ -465,7 +465,12 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
     doc_prevnext:     prevNext,
   };
 
-  let html = layoutSrc;
+  const INCLUDE_RE = /<!-- include:(\S+?\.html) -->\r?\n?/g;
+  let html = layoutSrc.replace(INCLUDE_RE, (_, relPath) => {
+    const abs = path.join(ROOT, relPath);
+    if (!fs.existsSync(abs)) throw new Error(`Partial not found: ${abs}`);
+    return fs.readFileSync(abs, 'utf8');
+  });
   for (const [key, val] of Object.entries(vars)) {
     html = html.split(`{{${key}}}`).join(val);
   }
