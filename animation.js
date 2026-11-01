@@ -92,19 +92,32 @@ document.addEventListener('click', (e) => {
    Two layers (pink leads, ink follows) rise on leave and lift
    on arrive. Spec section 6.
    ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   Page transition
+   Deterministic two-act architecture:
+     Act 1: Cover (pink 0.45s, ink +0.12s for 0.5s) -> label fades in (0.2s) -> navigate
+     Hold:  Guaranteed >= PT_MIN_HOLD_MS with destination label + sweeping pink line
+     Act 2: Reveal once ready (DOM, fonts, hero image, hold) -> label fades out (0.15s)
+            -> ink lifts (0.6s) -> pink trails at t=0.16 -> pt:reveal at t=0.25
+   ------------------------------------------------------------ */
 (function setupPageTransition() {
+  const PT_MIN_HOLD_MS    = 300;
+  const PT_READY_CAP_MS   = 4000;
+  const PT_FONT_CAP_MS    = 700;
+  const PT_IMG_CAP_MS     = 600;
+  const PT_NAV_TIMEOUT_MS = 8000;
+
   const ptEl   = $('.pt');
   const ptPink = $('.pt__pink');
   const ptInk  = $('.pt__ink');
 
   // Arrive: if the head script set pt-enter, run the cover-off animation.
-  // Runs immediately so we don't wait for DOMContentLoaded (cover is visible now).
   if (document.documentElement.classList.contains('pt-enter')) {
     // Focus main immediately (tabindex=-1, no scroll)
     const mainEl = $('#main-content');
     if (mainEl) mainEl.focus({ preventScroll: true });
 
-    // Handle hash-based scroll after cover lifts
+    // Handle hash-based scroll BEFORE cover lifts
     const doHashScroll = () => {
       const hash = window.location.hash;
       if (!hash || hash === '#') return;
@@ -115,64 +128,118 @@ document.addEventListener('click', (e) => {
     };
 
     if (!reduceMotion && ptPink && ptInk && ptEl) {
-      // Wait for fonts (cap 700ms) then lift the cover
-      const lift = () => {
-        const tl = gsap.timeline({
-          onComplete: () => {
-            document.documentElement.classList.remove('pt-enter');
-            try { sessionStorage.removeItem('pt'); } catch (e) { /* */ }
-            if (ptEl) ptEl.style.pointerEvents = 'none';
-            doHashScroll();
-          },
-        });
-        // Ink lifts first, pink trails by 0.1s
-        tl.to(ptInk,  { yPercent: -100, duration: 0.6, ease: 'power3.inOut' }, 0);
-        tl.to(ptPink, { yPercent: -100, duration: 0.6, ease: 'power3.inOut' }, 0.1);
+      let pt_t = 0;
+      try {
+        pt_t = parseInt(sessionStorage.getItem('pt_t') || '0', 10);
+      } catch (e) { /* */ }
+
+      // Ready gates: DOM ready, fonts ready (cap 700ms), first img decoded (cap 600ms), min hold elapsed
+      const domPromise = (document.readyState !== 'loading')
+        ? Promise.resolve()
+        : new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+
+      const fontPromise = document.fonts
+        ? Promise.race([
+            document.fonts.ready,
+            new Promise((r) => setTimeout(r, PT_FONT_CAP_MS)),
+          ])
+        : Promise.resolve();
+
+      const imgPromise = domPromise.then(() => {
+        const img = document.querySelector('main img[fetchpriority="high"], main img:not([loading="lazy"])');
+        if (!img) return Promise.resolve();
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return Promise.race([
+          img.decode ? img.decode().catch(() => {}) : Promise.resolve(),
+          new Promise((r) => setTimeout(r, PT_IMG_CAP_MS)),
+        ]);
+      });
+
+      const getHoldRemaining = () => {
+        if (!pt_t) return 0;
+        const elapsed = Date.now() - pt_t;
+        return Math.max(0, PT_MIN_HOLD_MS - elapsed);
       };
 
-      // Failsafe: force cover off at 1.5s
-      const failsafe = setTimeout(() => {
-        document.documentElement.classList.remove('pt-enter');
-        try { sessionStorage.removeItem('pt'); } catch (e) { /* */ }
-        if (ptPink) gsap.set(ptPink, { yPercent: -100 });
-        if (ptInk)  gsap.set(ptInk,  { yPercent: -100 });
-        if (ptEl)   ptEl.style.pointerEvents = 'none';
+      const holdPromise = new Promise((r) => {
+        const rem = getHoldRemaining();
+        if (rem <= 0) r();
+        else setTimeout(r, rem);
+      });
+
+      let revealStarted = false;
+
+      const startReveal = (isShortened = false) => {
+        if (revealStarted) return;
+        revealStarted = true;
+        window.__pt_hold_elapsed = pt_t ? (Date.now() - pt_t) : PT_MIN_HOLD_MS;
+
+        // Apply hash scroll immediately BEFORE reveal starts (still covered)
         doHashScroll();
-      }, 1500);
 
-      document.addEventListener('DOMContentLoaded', () => {
-        const fontPromise = document.fonts
-          ? Promise.race([
-              document.fonts.ready,
-              new Promise((r) => setTimeout(r, 700)),
-            ])
-          : Promise.resolve();
-        fontPromise.then(() => { clearTimeout(failsafe); lift(); });
-      }, { once: true });
+        // Label fades out (0.15s)
+        document.documentElement.classList.add('pt-label-out');
 
-      // If DOMContentLoaded already fired
-      if (document.readyState !== 'loading') {
-        const fontPromise = document.fonts
-          ? Promise.race([
-              document.fonts.ready,
-              new Promise((r) => setTimeout(r, 700)),
-            ])
-          : Promise.resolve();
-        fontPromise.then(() => { clearTimeout(failsafe); lift(); });
-      }
+        const dur = isShortened ? 0.4 : 0.6;
+        const pinkDelay = isShortened ? 0.1 : 0.16;
+        const revealEventTime = isShortened ? 0.16 : 0.25;
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+            document.documentElement.style.removeProperty('--pt-label');
+            try {
+              sessionStorage.removeItem('pt');
+              sessionStorage.removeItem('pt_t');
+              sessionStorage.removeItem('pt_label');
+            } catch (e) { /* */ }
+            if (ptPink) gsap.set(ptPink, { yPercent: -100 });
+            if (ptInk)  gsap.set(ptInk,  { yPercent: -100 });
+            if (ptEl)   ptEl.style.pointerEvents = 'none';
+          },
+        });
+
+        // Ink lifts over dur, pink trails by pinkDelay (pink is the last edge)
+        tl.to(ptInk,  { yPercent: -100, duration: dur, ease: 'power3.inOut' }, 0);
+        tl.to(ptPink, { yPercent: -100, duration: dur, ease: 'power3.inOut' }, pinkDelay);
+        tl.call(() => {
+          document.dispatchEvent(new CustomEvent('pt:reveal'));
+        }, null, revealEventTime);
+      };
+
+      // Absolute failsafe at PT_READY_CAP_MS: do not snap, run shortened animated reveal
+      const failsafe = setTimeout(() => {
+        startReveal(true);
+      }, PT_READY_CAP_MS);
+
+      Promise.all([domPromise, fontPromise, imgPromise, holdPromise]).then(() => {
+        clearTimeout(failsafe);
+        startReveal(false);
+      });
     } else {
       // Reduced motion: no animation, just remove class and scroll
-      document.documentElement.classList.remove('pt-enter');
-      try { sessionStorage.removeItem('pt'); } catch (e) { /* */ }
+      document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+      document.documentElement.style.removeProperty('--pt-label');
+      try {
+        sessionStorage.removeItem('pt');
+        sessionStorage.removeItem('pt_t');
+        sessionStorage.removeItem('pt_label');
+      } catch (e) { /* */ }
+      if (ptEl) ptEl.style.pointerEvents = 'none';
       doHashScroll();
     }
   }
 
-  // bfcache restore: reset layers and clear flag
+  // bfcache restore: reset layers and clear flags
   window.addEventListener('pageshow', (e) => {
     if (!e.persisted) return;
-    document.documentElement.classList.remove('pt-enter');
-    try { sessionStorage.removeItem('pt'); } catch (e2) { /* */ }
+    document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+    document.documentElement.style.removeProperty('--pt-label');
+    try {
+      sessionStorage.removeItem('pt');
+      sessionStorage.removeItem('pt_t');
+      sessionStorage.removeItem('pt_label');
+    } catch (e2) { /* */ }
     if (ptPink) gsap.set(ptPink, { yPercent: 100 });
     if (ptInk)  gsap.set(ptInk,  { yPercent: 100 });
     if (ptEl)   ptEl.style.pointerEvents = 'none';
@@ -180,31 +247,33 @@ document.addEventListener('click', (e) => {
 
   // Leave: intercept clicks and animate cover-in before navigating.
   let navigating = false;
+  let leaveFailsafeTimer = null;
+  let leaveTimeoutTimer  = null;
 
   function shouldIntercept(a) {
-    if (!a)                            return false;
+    if (!a)                             return false;
     if (a.dataset.noTransition != null) return false;
     const href = a.getAttribute('href');
-    if (!href)                         return false;
+    if (!href)                          return false;
 
     // External links, mailto, tel, download
     if (a.target && a.target !== '_self') return false;
-    if (a.hasAttribute('download'))       return false;
-    if (href.startsWith('mailto:') || href.startsWith('tel:'))       return false;
+    if (a.hasAttribute('download'))        return false;
+    if (href.startsWith('mailto:') || href.startsWith('tel:')) return false;
 
     // Pure same-page anchors — Lenis owns those
-    if (href.startsWith('#'))             return false;
+    if (href.startsWith('#')) return false;
 
     // Hash-only change on same path (e.g. /work/pcgo#docs -> /work/pcgo#overview)
     try {
       const dest = new URL(href, window.location.href);
       if (dest.origin !== window.location.origin) return false;
       if (dest.pathname === window.location.pathname && dest.hash) return false;
-      if (dest.href === window.location.href)      return false;
+      if (dest.href === window.location.href) return false;
 
       // Skip files with extensions (except .html)
       const ext = dest.pathname.match(/\.([^./]+)$/);
-      if (ext && ext[1].toLowerCase() !== 'html')  return false;
+      if (ext && ext[1].toLowerCase() !== 'html') return false;
     } catch (e) {
       return false;
     }
@@ -227,39 +296,97 @@ document.addEventListener('click', (e) => {
 
     e.preventDefault();
     navigating = true;
+    let navigated = false;
 
-    const navigate = () => { location.assign(dest.href); };
+    // Resolve destination label
+    let label = a.dataset.ptLabel;
+    if (!label) {
+      const visibleText = (a.innerText || a.textContent || '').trim().replace(/\s+/g, ' ');
+      label = visibleText.slice(0, 40);
+    }
+    if (!label) label = 'Loading';
+    if (label.length > 40) label = label.slice(0, 40);
+
+    const navigate = () => {
+      if (navigated) return;
+      navigated = true;
+      try {
+        sessionStorage.setItem('pt', '1');
+        sessionStorage.setItem('pt_t', String(Date.now()));
+        sessionStorage.setItem('pt_label', label);
+      } catch (ssErr) {
+        // sessionStorage unavailable — reset cover and navigate
+        gsap.set(ptPink, { yPercent: 100 });
+        gsap.set(ptInk,  { yPercent: 100 });
+        document.documentElement.classList.remove('pt-label-in');
+        document.documentElement.style.removeProperty('--pt-label');
+        if (ptEl) ptEl.style.pointerEvents = 'none';
+        navigating = false;
+        location.assign(dest.href);
+        return;
+      }
+      location.assign(dest.href);
+    };
 
     if (reduceMotion || !ptPink || !ptInk || !ptEl) {
-      // No animation for reduced motion or missing elements
-      try { sessionStorage.setItem('pt', '1'); } catch (ssErr) { /* */ }
-      navigate();
+      // Reduced motion: no animation, no flags in sessionStorage
+      navigating = false;
+      location.assign(dest.href);
       return;
     }
 
     ptEl.style.pointerEvents = 'auto';
 
+    // Set the label CSS property so pseudo-element has the destination name
+    document.documentElement.style.setProperty('--pt-label', JSON.stringify(label));
+
     // Cover-in: pink leads (0.45s), ink starts +0.12s (0.5s)
     const tl = gsap.timeline();
     tl.fromTo(ptPink, { yPercent: 100 }, { yPercent: 0, duration: 0.45, ease: 'power3.inOut' }, 0);
     tl.fromTo(ptInk,  { yPercent: 100 }, { yPercent: 0, duration: 0.5,  ease: 'power3.inOut' }, 0.12);
-    tl.call(() => {
-      try { sessionStorage.setItem('pt', '1'); } catch (ssErr) {
-        // sessionStorage unavailable — navigate without the cover
-        gsap.set(ptPink, { yPercent: 100 });
-        gsap.set(ptInk,  { yPercent: 100 });
-        ptEl.style.pointerEvents = 'none';
-        navigating = false;
-        navigate();
-        return;
-      }
-      navigate();
-    });
 
-    // Failsafe: if timeline hasn't fired navigate after 1.2s
-    setTimeout(() => {
-      if (navigating) navigate();
-    }, 1200);
+    // Once ink fully covers (at t=0.62), fade label in (0.2s)
+    tl.call(() => {
+      document.documentElement.classList.add('pt-label-in');
+    }, null, 0.62);
+
+    // Act 1 ends on label + black; navigate at t=0.82
+    tl.call(() => {
+      navigate();
+    }, null, 0.82);
+
+    // Failsafe: only call navigate if timeline hasn't navigated yet
+    leaveFailsafeTimer = setTimeout(() => {
+      if (!navigated) navigate();
+    }, 1400);
+
+    // Timeout: if navigation has not committed after PT_NAV_TIMEOUT_MS (offline / slow)
+    leaveTimeoutTimer = setTimeout(() => {
+      if (navigating) {
+        document.documentElement.classList.remove('pt-label-in');
+        gsap.to([ptPink, ptInk], {
+          yPercent: 100,
+          duration: 0.4,
+          ease: 'power3.inOut',
+          onComplete: () => {
+            if (ptEl) ptEl.style.pointerEvents = 'none';
+            document.documentElement.style.removeProperty('--pt-label');
+            try {
+              sessionStorage.removeItem('pt');
+              sessionStorage.removeItem('pt_t');
+              sessionStorage.removeItem('pt_label');
+            } catch (e) { /* */ }
+            navigating = false;
+            navigated = false;
+          },
+        });
+      }
+    }, PT_NAV_TIMEOUT_MS);
+  });
+
+  window.addEventListener('pagehide', () => {
+    clearTimeout(leaveFailsafeTimer);
+    clearTimeout(leaveTimeoutTimer);
   });
 
   // Prefetch on pointer/focus enter (desktop only, skip saveData)
@@ -437,17 +564,34 @@ function runIntro() {
   }
 
   const seen       = sessionStorage.getItem('intro-seen-home') === '1';
-  const skipLoader = reduceMotion || seen;
+  const isPtEnter  = document.documentElement.classList.contains('pt-enter');
+  const skipLoader = reduceMotion || seen || isPtEnter;
 
   if (reduceMotion) {
     endIntro();
     return;
   }
 
+  // Set initial hidden states synchronously
   gsap.set(words, { yPercent: 115 });
   const hlClosedRight = hl ? Math.ceil(hl.getBoundingClientRect().width) + 40 : 0;
   if (hl) gsap.set(hl, { clipPath: `inset(-12px ${hlClosedRight}px -16px -12px)` });
   gsap.set(heroBits, { opacity: 0, y: 16 });
+
+  const playHeroIntro = () => {
+    const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    tl.to(words, { yPercent: 0, duration: 1, stagger: 0.07 }, 0);
+    if (hl) tl.to(hl, { clipPath: 'inset(-12px -16px -16px -12px)', duration: 0.7, ease: 'power3.inOut' }, '-=0.45');
+    tl.to(heroBits, { opacity: 1, y: 0, duration: 0.8, stagger: 0.12 }, '-=0.6');
+    try { sessionStorage.setItem('intro-seen-home', '1'); } catch (e) { /* */ }
+  };
+
+  if (isPtEnter) {
+    endIntro();
+    // Wait for pt:reveal before animating hero
+    document.addEventListener('pt:reveal', playHeroIntro, { once: true });
+    return;
+  }
 
   const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
@@ -476,6 +620,46 @@ function runIntro() {
 if (isHome) {
   runIntro();
 }
+
+/* ------------------------------------------------------------
+   Case & Doc Page Entrance Animation
+   Synchronously stages initial hidden state if arriving via pt-enter,
+   and animates in when pt:reveal fires. If landing directly, plays immediately.
+   ------------------------------------------------------------ */
+(function setupPageEntrance() {
+  if (reduceMotion) return;
+
+  const isCase = document.querySelector('.cs-hero');
+  const isDoc  = document.querySelector('.doc-header');
+
+  if (!isCase && !isDoc) return;
+
+  const targets = isCase
+    ? $$('.cs-hero__meta, .cs-hero__title-block, .cs-lead, .cs-hero__actions, .cs-hero__media')
+    : $$('.doc-header__reading-time, .doc-header__title, .doc-header__summary');
+
+  if (!targets.length) return;
+
+  const playEntrance = () => {
+    gsap.to(targets, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      stagger: 0.08,
+      ease: 'power3.out',
+    });
+  };
+
+  if (document.documentElement.classList.contains('pt-enter')) {
+    gsap.set(targets, { opacity: 0, y: 20 });
+    document.addEventListener('pt:reveal', playEntrance, { once: true });
+  } else {
+    gsap.fromTo(targets,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out' }
+    );
+  }
+})();
 
 /* ------------------------------------------------------------
    Ticker: loops forever, speeds up and reverses with scroll

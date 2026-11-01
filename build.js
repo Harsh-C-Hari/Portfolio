@@ -204,6 +204,7 @@ function generateWorkRows(projects) {
     const isExternal  = !hasPage;
     const goLabel     = hasPage ? 'Case study <span aria-hidden="true">&rarr;</span>' : `${esc(p.links[0]?.label || 'GitHub')} <span aria-hidden="true">&#x2197;</span>`;
     const extAttrs    = isExternal ? ' rel="noopener" target="_blank"' : '';
+    const labelAttr   = hasPage ? ` data-pt-label="${esc(p.shortTitle || p.title)}"` : '';
     const isActive    = idx === 0 ? ' is-active' : '';
 
     // Live link (for projects with pages that also have an external live link)
@@ -221,7 +222,7 @@ function generateWorkRows(projects) {
     <span class="wrow__idx">${esc(p.index)}</span>
     <div class="wrow__content">
       <h3 class="wrow__title-wrap">
-        <a class="wrow__title-link" href="${esc(primaryHref)}"${extAttrs}>
+        <a class="wrow__title-link" href="${esc(primaryHref)}"${extAttrs}${labelAttr}>
           <span class="wrow__title">${esc(p.title)}</span>
         </a>
       </h3>
@@ -232,7 +233,7 @@ function generateWorkRows(projects) {
       <img class="wrow__thumb" src="${thumbSrc}" alt="" width="88" height="55" loading="lazy" decoding="async">
     </div>
     <div class="wrow__actions">
-      <a class="wrow__action-link" href="${esc(primaryHref)}"${extAttrs}>${goLabel}</a>${liveLinkHtml}
+      <a class="wrow__action-link" href="${esc(primaryHref)}"${extAttrs}${labelAttr}>${goLabel}</a>${liveLinkHtml}
     </div>
   </div>
 </li>`;
@@ -257,13 +258,14 @@ function generatePanelCaptions(projects) {
     const primaryHref = hasPage ? p.page.href : (p.links[0]?.href || '#');
     const isExternal = !hasPage;
     const extAttrs = isExternal ? ' rel="noopener" target="_blank"' : '';
+    const labelAttr = hasPage ? ` data-pt-label="${esc(p.shortTitle || p.title)}"` : '';
     const goLabel = hasPage ? 'Case study &rarr;' : `${esc(p.links[0]?.label || 'GitHub')} &#x2197;`;
     const fullStack = (p.stack || []).join(' · ');
 
     return `<div class="wpanel__caption-item${isActive}" data-slug="${esc(p.slug)}">
   <div class="wpanel__kind">${esc(p.kind)}</div>
   <div class="wpanel__stack">${esc(fullStack)}</div>
-  <a class="wpanel__action" href="${esc(primaryHref)}"${extAttrs}>${goLabel}</a>
+  <a class="wpanel__action" href="${esc(primaryHref)}"${extAttrs}${labelAttr}>${goLabel}</a>
 </div>`;
   }).join('\n          ');
 }

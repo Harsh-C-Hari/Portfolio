@@ -410,8 +410,8 @@ function prevNextLinks(allDocs, currentSlug) {
   const idx  = allDocs.findIndex(d => d.slug === currentSlug);
   const prev = idx > 0 ? allDocs[idx - 1] : null;
   const next = idx < allDocs.length - 1 ? allDocs[idx + 1] : null;
-  const prevHtml = prev ? `<a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/${prev.slug}"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">${escapeHtml(prev.title)}</span></a>` : '';
-  const nextHtml = next ? `<a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/${next.slug}"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">${escapeHtml(next.title)}</span></a>` : '';
+  const prevHtml = prev ? `<a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/${prev.slug}" data-pt-label="${escapeHtml(prev.title.slice(0, 40))}"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">${escapeHtml(prev.title)}</span></a>` : '';
+  const nextHtml = next ? `<a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/${next.slug}" data-pt-label="${escapeHtml(next.title.slice(0, 40))}"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">${escapeHtml(next.title)}</span></a>` : '';
   return `<nav class="doc-prevnext-row" aria-label="Doc navigation">${prevHtml}${nextHtml}</nav>`;
 }
 
@@ -432,12 +432,12 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
   const sidebarGroups = config.groups.map(g => {
     const items = g.docs.map(d => {
       const active = d.slug === doc.slug ? ' aria-current="page"' : '';
-      return `<li><a href="/work/pcgo/docs/${d.slug}"${active}>${escapeHtml(d.title)}</a></li>`;
+      return `<li><a href="/work/pcgo/docs/${d.slug}"${active} data-pt-label="${escapeHtml(d.title.slice(0, 40))}">${escapeHtml(d.title)}</a></li>`;
     }).join('');
     return `<li class="doc-sidebar__group"><span class="doc-sidebar__group-title">${escapeHtml(g.title)}</span><ul>${items}</ul></li>`;
   }).join('');
 
-  const sidebar = `<nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back">← Back to PCGO</a><ul class="doc-sidebar__list">${sidebarGroups}</ul></nav>`;
+  const sidebar = `<nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back" data-pt-label="PCGO">← Back to PCGO</a><ul class="doc-sidebar__list">${sidebarGroups}</ul></nav>`;
 
   const prevNext  = prevNextLinks(allDocs, doc.slug);
   const tocLinks  = buildTOCLinks(toc);

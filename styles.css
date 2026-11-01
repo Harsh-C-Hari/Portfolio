@@ -168,6 +168,8 @@ ul {
 main[tabindex="-1"],
 main[tabindex="-1"]:focus,
 main[tabindex="-1"]:focus-visible,
+#main-content:focus,
+#main-content:focus-visible,
 .doc-body [tabindex="-1"]:focus,
 .doc-body [tabindex="-1"]:focus-visible {
   outline: none;
@@ -2726,6 +2728,83 @@ html.pt-enter .pt__ink {
    (the cover itself serves as the entry animation) */
 html.pt-enter .loader {
   display: none;
+}
+
+/* Destination label and sweeping loading line on .pt__ink */
+@media (prefers-reduced-motion: no-preference) {
+  .pt__ink::after {
+    content: var(--pt-label, '');
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--f-mono);
+    font-size: 0.75rem; /* ~12px */
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper);
+    text-align: center;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .pt__ink::before {
+    content: '';
+    position: absolute;
+    top: calc(50% + 22px);
+    left: 50%;
+    width: 120px;
+    height: 3px;
+    background: var(--pink);
+    transform: translateX(-50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    will-change: transform;
+    animation: pt-line-sweep 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pt-line-sweep {
+    0% {
+      transform: translateX(-50%) scaleX(0.15);
+      transform-origin: left center;
+      opacity: 0.7;
+    }
+    50% {
+      transform: translateX(-50%) scaleX(1);
+      transform-origin: center center;
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-50%) scaleX(0.15);
+      transform-origin: right center;
+      opacity: 0.7;
+    }
+  }
+
+  /* Visible when arriving (html.pt-enter) or when leave timeline activates it (html.pt-label-in) */
+  html.pt-enter .pt__ink::before,
+  html.pt-enter .pt__ink::after,
+  html.pt-label-in .pt__ink::before,
+  html.pt-label-in .pt__ink::after {
+    opacity: 1;
+  }
+
+  /* When reveal timeline starts: label and line fade out over 0.15s */
+  html.pt-label-out.pt-enter .pt__ink::before,
+  html.pt-label-out.pt-enter .pt__ink::after,
+  html.pt-label-out .pt__ink::before,
+  html.pt-label-out .pt__ink::after {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
 }
 
 /* ============================================================

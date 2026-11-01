@@ -2,7 +2,7 @@
 <html lang="en" data-page="{{page_type}}" data-slug="{{page_slug}}">
 
 <head>
-  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <script>try{var isBack=window.performance&&performance.getEntriesByType&&performance.getEntriesByType('navigation')[0]&&performance.getEntriesByType('navigation')[0].type==='back_forward';if(isBack){sessionStorage.removeItem('pt');sessionStorage.removeItem('pt_t');sessionStorage.removeItem('pt_label');}else if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');var l=sessionStorage.getItem('pt_label');if(l){document.documentElement.style.setProperty('--pt-label',JSON.stringify(l));}}}catch(e){}</script>
   <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
 
   <meta charset="utf-8">

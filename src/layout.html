@@ -2,9 +2,9 @@
 <html lang="en">
 
 <head>
-  <!-- Page transition: if sessionStorage flag is set, add pt-enter before CSS loads
-       so the cover is already on-screen at first paint (no flash of new page content). -->
-  <script>try{if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');}}catch(e){}</script>
+  <!-- Page transition: if sessionStorage flag is set, add pt-enter and --pt-label before CSS loads
+       so the cover and label are already on-screen at first paint (no flash of new page content). -->
+  <script>try{var isBack=window.performance&&performance.getEntriesByType&&performance.getEntriesByType('navigation')[0]&&performance.getEntriesByType('navigation')[0].type==='back_forward';if(isBack){sessionStorage.removeItem('pt');sessionStorage.removeItem('pt_t');sessionStorage.removeItem('pt_label');}else if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');var l=sessionStorage.getItem('pt_label');if(l){document.documentElement.style.setProperty('--pt-label',JSON.stringify(l));}}}catch(e){}</script>
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
