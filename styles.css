@@ -3224,6 +3224,12 @@ html.pt-enter .loader {
 
 .doc-body > * + * { margin-top: 1.25em; }
 
+.doc-body h2,
+.doc-body h3,
+.doc-body h4 {
+  scroll-margin-top: calc(var(--nav-h) + 1.5rem);
+}
+
 .doc-body h2 {
   font-family: var(--f-body);
   font-weight: 700;

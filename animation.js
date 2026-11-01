@@ -63,19 +63,69 @@ if (!reduceMotion) {
 
 const navH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68;
 
+function getTargetElement(hash) {
+  if (!hash || hash === '#') return null;
+  const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+  if (!rawId) return null;
+
+  // 1. Direct getElementById with raw ID (handles dots, colons, percent signs, numbers)
+  let el = document.getElementById(rawId);
+  if (el) return el;
+
+  // 2. Direct getElementById with decoded component
+  try {
+    const decoded = decodeURIComponent(rawId);
+    if (decoded !== rawId) {
+      el = document.getElementById(decoded);
+      if (el) return el;
+    }
+  } catch (_) {}
+
+  // 3. Direct getElementById with encoded component
+  try {
+    const encoded = encodeURIComponent(rawId);
+    if (encoded !== rawId) {
+      el = document.getElementById(encoded);
+      if (el) return el;
+    }
+  } catch (_) {}
+
+  // 4. Fallback using CSS.escape if available
+  if (typeof CSS !== 'undefined' && CSS.escape) {
+    try {
+      el = document.querySelector('#' + CSS.escape(rawId));
+      if (el) return el;
+    } catch (_) {}
+    try {
+      el = document.querySelector('#' + CSS.escape(decodeURIComponent(rawId)));
+      if (el) return el;
+    } catch (_) {}
+  }
+
+  // 5. QuerySelector fallback
+  try {
+    el = $(hash.startsWith('#') ? hash : '#' + hash);
+    if (el) return el;
+  } catch (_) {}
+
+  return null;
+}
+
 function scrollToTarget(hash) {
   if (hash === '#top') {
     lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0 });
     return;
   }
-  const el = $(hash);
+  const el = getTargetElement(hash);
   if (!el) return;
   // About pins the page while its text fills in; land right where that begins.
   if (hash === '#about' && aboutST && lenis) {
     lenis.scrollTo(aboutST.start, { duration: 1.2 });
     return;
   }
-  if (lenis) lenis.scrollTo(el, { duration: 1.2 });
+  const isDoc = !!document.querySelector('.doc-layout');
+  const offset = isDoc ? -(navH() + 20) : -navH();
+  if (lenis) lenis.scrollTo(el, { offset, duration: 1.0 });
   else el.scrollIntoView({ block: 'start' });
 }
 
@@ -139,9 +189,11 @@ document.addEventListener('click', (e) => {
     const doHashScroll = () => {
       const hash = window.location.hash;
       if (!hash || hash === '#') return;
-      const target = $(hash);
+      const target = getTargetElement(hash);
       if (!target) return;
-      if (lenis) lenis.scrollTo(target, { immediate: true });
+      const isDoc = !!document.querySelector('.doc-layout');
+      const offset = isDoc ? -(navH() + 20) : 0;
+      if (lenis) lenis.scrollTo(target, { offset, immediate: true });
       else target.scrollIntoView({ block: 'start' });
     };
 
@@ -983,28 +1035,35 @@ if (isHome) {
 }
 
 /* ------------------------------------------------------------
-   Doc reader: TOC rail active link observer
+   Doc reader: TOC rail & details active link observer
    ------------------------------------------------------------ */
 (function setupDocTocObserver() {
-  const tocRail = document.querySelector('.doc-toc-rail');
-  if (!tocRail) return;
+  const allLinks = Array.from(document.querySelectorAll('.doc-toc-rail a[href^="#"], .doc-toc-details a[href^="#"]'));
+  if (!allLinks.length) return;
 
-  const links = Array.from(tocRail.querySelectorAll('a[href^="#"]'));
-  if (!links.length) return;
+  const headingItems = [];
+  const seenTargets = new Set();
 
-  const headingMap = new Map();
-  links.forEach((a) => {
-    const rawId = a.getAttribute('href').slice(1);
-    const target = document.getElementById(rawId) || document.getElementById(decodeURIComponent(rawId));
-    if (target) headingMap.set(target, a);
+  allLinks.forEach((a) => {
+    const href = a.getAttribute('href');
+    const target = getTargetElement(href);
+    if (target && !seenTargets.has(target)) {
+      seenTargets.add(target);
+      headingItems.push({ target, href });
+    }
   });
 
-  const targets = Array.from(headingMap.keys());
-  if (!targets.length) return;
+  if (!headingItems.length) return;
 
-  function setActive(activeLink) {
-    links.forEach((l) => {
-      if (l === activeLink) {
+  // Sort headings in visual document position
+  headingItems.sort((a, b) => {
+    const pos = a.target.compareDocumentPosition(b.target);
+    return (pos & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+  });
+
+  function setActiveByHref(activeHref) {
+    allLinks.forEach((l) => {
+      if (l.getAttribute('href') === activeHref) {
         l.classList.add('is-active');
         l.setAttribute('aria-current', 'true');
       } else {
@@ -1014,25 +1073,66 @@ if (isHome) {
     });
   }
 
-  // Initial active link
-  setActive(links[0]);
+  // Set initial active link
+  setActiveByHref(headingItems[0].href);
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries.filter((e) => e.isIntersecting);
-      if (visible.length > 0) {
-        visible.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        const topTarget = visible[0].target;
-        const link = headingMap.get(topTarget);
-        if (link) setActive(link);
-      }
-    },
-    {
-      rootMargin: '-80px 0px -60% 0px',
-      threshold: [0, 1.0],
+  // When a TOC link is clicked, lock active state briefly so intermediate headings don't overwrite during smooth scroll
+  let clickLockedHref = null;
+  let clickLockTimer = null;
+
+  allLinks.forEach((a) => {
+    a.addEventListener('click', () => {
+      const href = a.getAttribute('href');
+      clickLockedHref = href;
+      setActiveByHref(href);
+      if (clickLockTimer) clearTimeout(clickLockTimer);
+      clickLockTimer = setTimeout(() => {
+        clickLockedHref = null;
+        updateActiveHeading();
+      }, 1200);
+    });
+  });
+
+  function updateActiveHeading() {
+    if (clickLockedHref) return;
+
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const innerHeight = window.innerHeight;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const maxScroll = scrollHeight - innerHeight;
+
+    // Bottom of page check: if scrolled near or at the bottom (within 80px),
+    // activate the LAST heading in TOC. This handles short tail sections (like "Impact")
+    // that cannot scroll all the way to the top of the viewport.
+    if (maxScroll > 0 && scrollY >= maxScroll - 80) {
+      setActiveByHref(headingItems[headingItems.length - 1].href);
+      return;
     }
-  );
 
-  targets.forEach((t) => observer.observe(t));
+    const threshold = navH() + 50;
+
+    // Find the last heading whose top position is <= threshold
+    let active = headingItems[0];
+    for (let i = 0; i < headingItems.length; i++) {
+      const top = headingItems[i].target.getBoundingClientRect().top;
+      if (top <= threshold) {
+        active = headingItems[i];
+      } else {
+        break;
+      }
+    }
+
+    if (active) {
+      setActiveByHref(active.href);
+    }
+  }
+
+  window.addEventListener('scroll', updateActiveHeading, { passive: true });
+  window.addEventListener('resize', updateActiveHeading, { passive: true });
+  if (lenis) {
+    lenis.on('scroll', updateActiveHeading);
+  }
+
+  updateActiveHeading();
 })();
 
