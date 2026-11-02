@@ -140,27 +140,31 @@
         <p>A task due in ten hours with fifteen minutes of work left is fine. A task due in ten hours with eight hours of work left is not. So urgency here blends three signals: time remaining, effort still outstanding, and how those two compare.</p>
       </div>
 
-      <pre class="cs-codeblock" aria-label="Urgency algorithm (Python)"><code class="language-python">remaining_effort = estimated_effort_hours * (1 - progress / 100)
+      <div class="cs-code-wrap">
+        <pre class="cs-codeblock" aria-label="Urgency algorithm (Python)"><code class="language-python">remaining_effort = estimated_effort_hours * (1 - progress / 100)
 time_pressure = remaining_effort / max(remaining_hours, 0.5)
 
 if time_pressure &gt;= 0.7 or remaining_days &lt;= 1: return "critical"
 if time_pressure &gt;= 0.4 or remaining_days &lt;= 3: return "high"
 if time_pressure &gt;= 0.15 or remaining_days &lt;= 7: return "medium"
 return "low"</code></pre>
+      </div>
 
       <div>
         <p class="cs-section__intro" style="margin-bottom:0.75rem">How it plays out</p>
-        <table class="cs-table" aria-label="Urgency examples">
-          <thead>
-            <tr><th>Due in</th><th>Effort left</th><th>Pressure</th><th>Result</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>10 hours</td><td>8 h</td><td>0.80</td><td><span class="cs-urgency-badge cs-urgency-badge--critical">Critical</span></td></tr>
-            <tr><td>2 days</td><td>6 h</td><td>0.13</td><td><span class="cs-urgency-badge cs-urgency-badge--high">High</span></td></tr>
-            <tr><td>5 days</td><td>2 h</td><td>0.02</td><td><span class="cs-urgency-badge cs-urgency-badge--medium">Medium</span></td></tr>
-            <tr><td>12 days</td><td>3 h</td><td>0.01</td><td><span class="cs-urgency-badge cs-urgency-badge--low">Low</span></td></tr>
-          </tbody>
-        </table>
+        <div class="cs-table-wrap">
+          <table class="cs-table" aria-label="Urgency examples">
+            <thead>
+              <tr><th>Due in</th><th>Effort left</th><th>Pressure</th><th>Result</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>10 hours</td><td>8 h</td><td>0.80</td><td><span class="cs-urgency-badge cs-urgency-badge--critical">Critical</span></td></tr>
+              <tr><td>2 days</td><td>6 h</td><td>0.13</td><td><span class="cs-urgency-badge cs-urgency-badge--high">High</span></td></tr>
+              <tr><td>5 days</td><td>2 h</td><td>0.02</td><td><span class="cs-urgency-badge cs-urgency-badge--medium">Medium</span></td></tr>
+              <tr><td>12 days</td><td>3 h</td><td>0.01</td><td><span class="cs-urgency-badge cs-urgency-badge--low">Low</span></td></tr>
+            </tbody>
+          </table>
+        </div>
         <p class="cs-footnote">Overdue tasks are critical. Finished tasks have no urgency. With no deadline, 8 or more hours of work left counts as medium, otherwise low.</p>
       </div>
     </div>

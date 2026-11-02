@@ -313,12 +313,16 @@ function makeRenderer(config, currentSlugSet) {
     linkify: true,
     typographer: true,
     highlight: (code, lang) => {
+      let inner;
       if (lang && hljs.getLanguage(lang)) {
         try {
-          return `<pre class="hljs"><code>${hljs.highlight(code, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
+          inner = `<pre class="hljs"><code>${hljs.highlight(code, { language: lang, ignoreIllegals: true }).value}</code></pre>`;
         } catch (_) { /* fall through */ }
       }
-      return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`;
+      if (!inner) {
+        inner = `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`;
+      }
+      return `<div class="doc-code-wrap">${inner}</div>`;
     },
   });
 

@@ -174,7 +174,7 @@
             <path d="M 416 318 H 486 V 142 H 416" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
             <!-- Horizontal pill label -->
             <rect id="box_pill" x="420" y="217" width="132" height="26" rx="13" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/>
-            <text id="t_pill" x="486" y="234" text-anchor="middle" font-family="var(--f-mono)" font-size="11" font-weight="500" fill="var(--ink)">internal event token</text>
+            <text id="t_pill" x="486" y="234" text-anchor="middle" font-family="var(--f-mono)" font-size="12" font-weight="500" fill="var(--ink)">internal event token</text>
           </svg>
 
           <!-- Accessible ordered list describing the flow -->
@@ -303,15 +303,17 @@
     <div class="cs-prose">
       <p>Before touching the dashboard's styles I ran a quick audit on the <code>ui/overhaul</code> branch to get a baseline. The overhaul is in progress.</p>
     </div>
-    <table class="cs-table" aria-label="UI audit baseline">
-      <thead><tr><th>Metric</th><th>Measured before redesign</th></tr></thead>
-      <tbody>
-        <tr><td>Inline <code>style</code> attributes</td><td>407</td></tr>
-        <tr><td><code>!important</code> declarations</td><td>142</td></tr>
-        <tr><td>Real <code>&lt;label&gt;</code> elements</td><td>5</td></tr>
-        <tr><td>Keyframe animations</td><td>23</td></tr>
-      </tbody>
-    </table>
+    <div class="cs-table-wrap">
+      <table class="cs-table" aria-label="UI audit baseline">
+        <thead><tr><th>Metric</th><th>Measured before redesign</th></tr></thead>
+        <tbody>
+          <tr><td>Inline <code>style</code> attributes</td><td>407</td></tr>
+          <tr><td><code>!important</code> declarations</td><td>142</td></tr>
+          <tr><td>Real <code>&lt;label&gt;</code> elements</td><td>5</td></tr>
+          <tr><td>Keyframe animations</td><td>23</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 

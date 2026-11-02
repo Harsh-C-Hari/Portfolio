@@ -115,6 +115,27 @@ h1, h2, h3, h4, h5, h6,
   font-synthesis: none;
 }
 
+/* Explicit font-weight 400 for Anton display headings (Anton only has 400) */
+.cs-title,
+.cs-section__title,
+.cs-problem__title,
+.cs-arch__title,
+.cs-area__title,
+.cs-next__title,
+.hero__title,
+.about__title,
+.section__title,
+.skills__h2,
+.skill-card__title,
+.contact__title,
+.contact__mail,
+.contact__mail-domain,
+.work-panel__title,
+.doc-header__title,
+.menu a {
+  font-weight: 400;
+}
+
 p {
   text-wrap: pretty;
   line-height: 1.6;
@@ -1583,6 +1604,21 @@ main[tabindex="-1"]:focus-visible,
   display: block;
 }
 
+@media (max-width: 480px) {
+  .cs-arch__diagram {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cs-arch__diagram svg {
+    min-width: 460px;
+    width: 460px;
+  }
+  .pcgo-arch-svg [id^="c"],
+  .pcgo-arch-svg #t_pill {
+    font-size: 15px;
+  }
+}
+
 .cs-arch__caption {
   font-family: var(--f-mono);
   font-size: var(--t-mono);
@@ -1628,7 +1664,11 @@ main[tabindex="-1"]:focus-visible,
 
 .cs-mono {
   font-family: var(--f-mono);
-  font-size: 0.9em;
+  font-size: max(0.9em, 12px);
+}
+
+.cs-arch__caption .cs-mono {
+  font-size: 1em;
 }
 
 /* Decision cards */
@@ -1715,6 +1755,30 @@ main[tabindex="-1"]:focus-visible,
   }
 }
 
+/* Table Scroll Wrap */
+.cs-table-wrap {
+  position: relative;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  margin-block: 0.5rem;
+}
+
+.cs-table-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, transparent, var(--paper));
+  pointer-events: none;
+}
+
+.cs-section--alt .cs-table-wrap::after {
+  background: linear-gradient(to right, transparent, var(--paper-2));
+}
+
 /* Table */
 .cs-table {
   border-collapse: collapse;
@@ -1734,6 +1798,13 @@ main[tabindex="-1"]:focus-visible,
   .cs-table th,
   .cs-table td {
     padding: 0.5rem 0.4rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .cs-table th,
+  .cs-table td {
+    padding: 0.5rem 0.3rem;
   }
 }
 
@@ -1960,7 +2031,7 @@ main[tabindex="-1"]:focus-visible,
 
 .cs-start-card__badge {
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
@@ -2985,16 +3056,38 @@ html.pt-enter .loader {
   gap: 1.75rem;
 }
 
+/* Code block wrapper with right-edge fade */
+.cs-code-wrap {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.cs-code-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  background: linear-gradient(to right, transparent, var(--ink) 85%);
+  pointer-events: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
 /* Code block */
 .cs-codeblock {
   background: var(--ink);
   color: var(--paper);
   font-family: var(--f-mono);
-  font-size: var(--t-mono);
+  font-size: 12px;
   line-height: 1.65;
   padding: 1.25rem 1.5rem;
   border-radius: 6px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 0;
   tab-size: 2;
 }
@@ -3464,7 +3557,7 @@ html.pt-enter .loader {
   color: var(--muted);
   font-weight: 400;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.05em;
 }
 
@@ -3515,6 +3608,28 @@ html.pt-enter .loader {
   border-radius: 3px;
 }
 
+/* Document code wrapper with right-edge fade */
+.doc-code-wrap {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 100%;
+  margin-block: 1rem;
+}
+
+.doc-code-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  background: linear-gradient(to right, transparent, var(--ink) 85%);
+  pointer-events: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
 /* Highlighted code block (highlight.js) */
 .doc-body .hljs {
   background: var(--ink);
@@ -3522,13 +3637,15 @@ html.pt-enter .loader {
   border-radius: 6px;
   padding: 1.25rem 1.5rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   font-family: var(--f-mono);
-  font-size: var(--t-mono);
+  font-size: 12px;
   line-height: 1.6;
   white-space: pre;
   word-break: normal;
   overflow-wrap: normal;
   max-width: 100%;
+  margin: 0;
 }
 
 .doc-body .hljs code {
@@ -3545,8 +3662,9 @@ html.pt-enter .loader {
   border-radius: 6px;
   padding: 1rem 1.25rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   font-family: var(--f-mono);
-  font-size: var(--t-mono);
+  font-size: 12px;
   line-height: 1.55;
   white-space: pre;
   word-break: normal;
@@ -3558,9 +3676,21 @@ html.pt-enter .loader {
 
 /* Scrollable tables */
 .doc-table-wrap {
+  position: relative;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
+}
+
+.doc-table-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 24px;
+  background: linear-gradient(to right, transparent, var(--paper));
+  pointer-events: none;
 }
 
 .doc-body table {
