@@ -1482,3 +1482,14 @@ if (isHome) {
   }
 })();
 
+/* ------------------------------------------------------------
+   Accessibility: keyboard scroll for code & diagram blocks
+   ------------------------------------------------------------ */
+document.querySelectorAll('pre, .cs-arch__diagram, .hljs').forEach((el) => {
+  if (!el.hasAttribute('tabindex')) {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'region');
+    el.setAttribute('aria-label', 'Code or diagram block');
+  }
+});
+
