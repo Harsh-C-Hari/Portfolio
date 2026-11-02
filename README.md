@@ -30,20 +30,27 @@ portfolio/
 │   └── docs.config.json     <- curated list of 15 PCGO docs to publish
 ├── content/
 │   └── pcgo-docs/           <- GENERATED: copies of source docs (do not hand-edit)
+├── fonts/                   <- self-hosted variable and mono webfonts (WOFF2)
 ├── scripts/
 │   ├── build-docs.mjs       <- docs pipeline: copy, render, rewrite links
-│   └── check-links.mjs      <- internal link checker (run after build)
-├── work/                    <- GENERATED: all sub-pages (do not hand-edit)
-│   ├── pcgo/index.html
-│   ├── productivity-dashboard/index.html
-│   └── pcgo/docs/<slug>/index.html  (×15)
+│   ├── check-links.mjs      <- internal link checker
+│   ├── check-pink.mjs       <- pink accent budget enforcer
+│   ├── check-leaks.mjs      <- secrets and denylist scanner
+│   ├── verify-deploy.mjs    <- staging deployment simulator
+│   └── qa.mjs               <- Playwright device matrix, throttling & a11y suite
+├── dist/                    <- GENERATED publish directory (do not hand-edit)
+│   ├── index.html
+│   ├── sitemap.xml
+│   ├── styles.css
+│   ├── animation.bundle.js
+│   └── work/
+│       ├── pcgo/index.html
+│       ├── productivity-dashboard/index.html
+│       └── pcgo/docs/<slug>/index.html  (×15)
 ├── animation.js             <- all motion (GSAP + Lenis), bundled by esbuild
 ├── styles.css
-├── build.js                 <- assembles all pages + bundles animation.js
-├── dev.js                   <- live dev server
-├── sitemap.xml              <- GENERATED
-├── index.html               <- GENERATED, do not hand-edit
-└── animation.bundle.js      <- GENERATED
+├── build.js                 <- assembles all pages into dist/ + bundles animation.js
+└── dev.js                   <- live dev server
 ```
 
 ## Develop
@@ -53,16 +60,19 @@ npm install
 npm run dev      # http://localhost:3000, rebuilds on any save
 ```
 
-## Build
+## Build & Deploy
 
 ```
 npm run build
+npm run check           # runs check-links, check-pink, and check-leaks
+npm run verify-deploy   # simulates staging build matching Vercel deployment
+npm test                # runs full Playwright QA suite
 BUILD_STRICT=1 npm run build   # fails on any CONFIRM_WITH_HARSH placeholder
 ```
 
-Vercel runs `npm install && node build.js` on deploy. The build adds a content hash to
+Vercel and Netlify publish from the `dist/` directory via `node build.js`. The build adds a content hash to
 `styles.css?v=` and `animation.bundle.js?v=`, so the one-year immutable cache in
-`vercel.json` can never serve stale files after a change.
+`vercel.json` and `netlify.toml` can never serve stale files after a change.
 
 ## How the work pages are built
 
