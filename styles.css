@@ -86,7 +86,6 @@ a:focus:not(:focus-visible),
 button:focus:not(:focus-visible),
 [role="button"]:focus:not(:focus-visible) {
   outline: none;
-  box-shadow: none;
 }
 
 body {
@@ -524,8 +523,9 @@ main[tabindex="-1"]:focus-visible,
 }
 
 .btn:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--ink);
+  transform: scale(0.98);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition-duration: 80ms;
 }
 
 .btn--pink {
@@ -539,6 +539,10 @@ main[tabindex="-1"]:focus-visible,
   box-shadow: 4px 4px 0 var(--paper);
 }
 
+.btn--inv:active {
+  box-shadow: 2px 2px 0 var(--paper);
+}
+
 /* Hover pressed-in effect: mouse/trackpad devices only, for buttons in general */
 @media (hover: hover) and (pointer: fine) {
   .btn:hover {
@@ -549,14 +553,16 @@ main[tabindex="-1"]:focus-visible,
   .btn--inv:hover {
     box-shadow: 2px 2px 0 var(--paper);
   }
+
+  [data-copy]:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
 }
 
-/* Copy email button: keep the pressed-in hover look on every device.
-   Desktop/trackpad gets it from real :hover (safe — mouseleave always
-   fires). Touch gets it from the .is-pressed class toggled by pointer
+/* Copy email button: touch gets it from the .is-pressed class toggled by pointer
    events in animation.js, which always releases on lift/cancel and
    never sticks the way touch-simulated :hover can. */
-[data-copy]:hover,
 [data-copy].is-pressed {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--ink);
@@ -1152,15 +1158,22 @@ main[tabindex="-1"]:focus-visible,
 /* Higher specificity than the resting rule above, so the pressed/hover
    look always wins the cascade here instead of being silently
    overridden back to the resting paper shadow. */
-.contact .btn--pink:hover,
+@media (hover: hover) and (pointer: fine) {
+  .contact .btn--pink:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--paper);
+  }
+}
+
 .contact .btn--pink.is-pressed {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--paper);
 }
 
 .contact .btn--pink:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--paper);
+  transform: scale(0.98);
+  box-shadow: 2px 2px 0 var(--paper);
+  transition-duration: 80ms;
 }
 
 .contact__note {
@@ -1229,47 +1242,41 @@ main[tabindex="-1"]:focus-visible,
   }
 }
 
-/* Belt-and-braces: on any device whose primary pointer is coarse
-   (finger touch), force resting styles even if a hybrid device
-   mis-reports hover support, so nothing ever stays "stuck" hovered. */
-@media (hover: none), (pointer: coarse) {
-  .nav__resume:hover {
-    background: transparent;
-    color: inherit;
-  }
+/* ============================================================
+   ACTIVE TOUCH & POINTER RESPONSE (scale .98, shadow reduced 2px, 80ms)
+   Work rows, buttons, doc cards, "Start here" cards, gallery thumbnails,
+   and next-project band.
+   ============================================================ */
+.wrow:active,
+.btn:active,
+.cs-card:active,
+.cs-start-card:active,
+.cs-doc-row:active,
+.doc-prevnext:active,
+.cs-gallery__item:active,
+.cs-next__link:active {
+  transform: scale(0.98);
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
 
-  .menu a:hover {
-    color: var(--paper);
-  }
+.btn:active {
+  box-shadow: 2px 2px 0 var(--ink);
+}
 
-  .btn:hover {
-    transform: none;
-    box-shadow: 4px 4px 0 var(--ink);
-  }
+.btn--inv:active,
+.contact .btn--pink:active {
+  box-shadow: 2px 2px 0 var(--paper);
+}
 
-  .btn--inv:hover {
-    box-shadow: 4px 4px 0 var(--paper);
-  }
+.cs-card:active,
+.cs-start-card:active,
+.doc-prevnext:active {
+  box-shadow: 2px 2px 0 var(--ink);
+}
 
-  .skill-row:hover {
-    background: transparent;
-    color: inherit;
-    padding-inline: 0;
-  }
-
-  .contact__mail:hover {
-    background-size: 100% 0.06em;
-    background-position: 0 100%;
-  }
-
-  /* Copy email: native touch-hover is unreliable/sticky here — the
-     .is-pressed class (driven by pointer events) is the source of
-     truth for the pressed look on coarse-pointer devices instead.
-     Scoped to match/beat .contact .btn--pink:hover's specificity. */
-  .contact .btn--pink:hover {
-    transform: none;
-    box-shadow: 4px 4px 0 var(--paper);
-  }
+.cs-next__link:active .cs-next__thumb {
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: box-shadow 80ms ease;
 }
 
 
@@ -1679,8 +1686,10 @@ main[tabindex="-1"]:focus-visible,
   padding-block: 6px;
 }
 
-.cs-card__link:hover {
-  color: var(--muted);
+@media (hover: hover) and (pointer: fine) {
+  .cs-card__link:hover {
+    color: var(--muted);
+  }
 }
 
 /* Table */
@@ -1912,9 +1921,11 @@ main[tabindex="-1"]:focus-visible,
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.cs-start-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .cs-start-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
 }
 
 .cs-start-card__top {
@@ -1973,8 +1984,10 @@ main[tabindex="-1"]:focus-visible,
   transition: transform 0.2s ease;
 }
 
-.cs-start-card:hover .cs-start-card__arrow {
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .cs-start-card:hover .cs-start-card__arrow {
+    transform: translateX(4px);
+  }
 }
 
 /* 2-column docs grid under headings */
@@ -2023,10 +2036,12 @@ main[tabindex="-1"]:focus-visible,
   transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.cs-doc-row:hover {
-  background: #fff;
-  transform: translateX(2px);
-  box-shadow: 2px 2px 0 var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .cs-doc-row:hover {
+    background: #fff;
+    transform: translateX(2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
 }
 
 .cs-doc-row--full {
@@ -2075,8 +2090,10 @@ main[tabindex="-1"]:focus-visible,
   color: var(--ink);
 }
 
-.cs-doc-row:hover .cs-doc-row__arrow {
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .cs-doc-row:hover .cs-doc-row__arrow {
+    transform: translateX(4px);
+  }
 }
 
 .cs-docs__footer {
@@ -2176,9 +2193,11 @@ main[tabindex="-1"]:focus-visible,
   transition: color 0.2s ease;
 }
 
-.cs-next__all:hover {
-  color: var(--ink);
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .cs-next__all:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
 }
 
 .cs-next__link {
@@ -2244,22 +2263,34 @@ main[tabindex="-1"]:focus-visible,
   object-fit: cover;
 }
 
-/* Hover and focus states */
-.cs-next__link:hover .cs-next__title,
+/* Focus states */
 .cs-next__link:focus-visible .cs-next__title {
   transform: translateX(10px);
 }
 
-
-.cs-next__link:hover .cs-next__arrow,
 .cs-next__link:focus-visible .cs-next__arrow {
   transform: translateX(8px);
 }
 
-.cs-next__link:hover .cs-next__thumb,
 .cs-next__link:focus-visible .cs-next__thumb {
   transform: translateY(-4px);
   box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Hover states */
+@media (hover: hover) and (pointer: fine) {
+  .cs-next__link:hover .cs-next__title {
+    transform: translateX(10px);
+  }
+
+  .cs-next__link:hover .cs-next__arrow {
+    transform: translateX(8px);
+  }
+
+  .cs-next__link:hover .cs-next__thumb {
+    transform: translateY(-4px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
 }
 
 /* Hidden below 700px */
@@ -2276,12 +2307,17 @@ main[tabindex="-1"]:focus-visible,
     transition: none !important;
     transform: none !important;
   }
-  .cs-next__link:hover .cs-next__title,
   .cs-next__link:focus-visible .cs-next__title,
-  .cs-next__link:hover .cs-next__arrow,
   .cs-next__link:focus-visible .cs-next__arrow,
-  .cs-next__link:hover .cs-next__thumb,
   .cs-next__link:focus-visible .cs-next__thumb {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  .cs-next__link:hover .cs-next__title,
+  .cs-next__link:hover .cs-next__arrow,
+  .cs-next__link:hover .cs-next__thumb {
     transform: none !important;
   }
 }
@@ -2587,8 +2623,10 @@ main[tabindex="-1"]:focus-visible,
   transition: background-size 0.2s ease;
 }
 
-.wpanel__action:hover {
-  background-size: 100% 2px;
+@media (hover: hover) and (pointer: fine) {
+  .wpanel__action:hover {
+    background-size: 100% 2px;
+  }
 }
 
 /* Mobile & Touch styles: < 1024px or hover: none */
@@ -2725,8 +2763,13 @@ main[tabindex="-1"]:focus-visible,
   }
 
   .wrow.is-active .wrow__title,
-  .wrow:hover .wrow__title,
   .wrow:focus-within .wrow__title {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  .wrow:hover .wrow__title {
     transform: none !important;
   }
 }
@@ -3064,7 +3107,9 @@ html.pt-enter .loader {
   padding-block: 6px;
 }
 
-.doc-sidebar__back:hover { color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .doc-sidebar__back:hover { color: var(--ink); }
+}
 
 .doc-sidebar__list,
 .doc-sidebar__list ul {
@@ -3100,10 +3145,16 @@ html.pt-enter .loader {
   transition: border-color 0.12s;
 }
 
-.doc-sidebar__list ul li a:hover,
 .doc-sidebar__list ul li a[aria-current="page"] {
   border-left-color: var(--ink);
   font-weight: 600;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .doc-sidebar__list ul li a:hover {
+    border-left-color: var(--ink);
+    font-weight: 600;
+  }
 }
 
 /* Main + TOC content wrapper (centred in space beside sidebar) */
@@ -3179,8 +3230,10 @@ html.pt-enter .loader {
   transition: color 0.12s, border-color 0.12s;
 }
 
-.doc-toc-rail ul a:hover {
-  color: var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .doc-toc-rail ul a:hover {
+    color: var(--ink);
+  }
 }
 
 .doc-toc-rail ul a.is-active,
@@ -3244,8 +3297,10 @@ html.pt-enter .loader {
   padding: 0.4rem 0.25rem;
 }
 
-.doc-toc-details ul a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .doc-toc-details ul a:hover {
+    text-decoration: underline;
+  }
 }
 
 /* Doc header */
@@ -3334,18 +3389,23 @@ html.pt-enter .loader {
   font-size: 0.85em;
 }
 
-.doc-body h2:hover .doc-anchor-link,
-.doc-body h3:hover .doc-anchor-link,
-.doc-body h4:hover .doc-anchor-link,
-.doc-body h5:hover .doc-anchor-link,
-.doc-body h6:hover .doc-anchor-link,
 .doc-anchor-link:focus-visible {
   opacity: 1;
 }
 
-.doc-anchor-link:hover {
-  color: var(--ink);
-  text-decoration: none;
+@media (hover: hover) and (pointer: fine) {
+  .doc-body h2:hover .doc-anchor-link,
+  .doc-body h3:hover .doc-anchor-link,
+  .doc-body h4:hover .doc-anchor-link,
+  .doc-body h5:hover .doc-anchor-link,
+  .doc-body h6:hover .doc-anchor-link {
+    opacity: 1;
+  }
+
+  .doc-anchor-link:hover {
+    color: var(--ink);
+    text-decoration: none;
+  }
 }
 
 .doc-heading-anchor {
@@ -3541,9 +3601,11 @@ html.pt-enter .loader {
   outline-offset: 2px;
 }
 
-.doc-prevnext:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--ink);
+@media (hover: hover) and (pointer: fine) {
+  .doc-prevnext:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
 }
 
 .doc-prevnext--next {
@@ -3568,14 +3630,22 @@ html.pt-enter .loader {
   transition: transform 0.2s ease;
 }
 
-.doc-prevnext--prev:hover .doc-prevnext__arrow,
 .doc-prevnext--prev:focus-visible .doc-prevnext__arrow {
   transform: translateX(-3px);
 }
 
-.doc-prevnext--next:hover .doc-prevnext__arrow,
 .doc-prevnext--next:focus-visible .doc-prevnext__arrow {
   transform: translateX(3px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .doc-prevnext--prev:hover .doc-prevnext__arrow {
+    transform: translateX(-3px);
+  }
+
+  .doc-prevnext--next:hover .doc-prevnext__arrow {
+    transform: translateX(3px);
+  }
 }
 
 .doc-prevnext__title {
@@ -3589,9 +3659,10 @@ html.pt-enter .loader {
     transition: none !important;
     transform: none !important;
   }
-  .doc-prevnext:hover {
-    transform: none !important;
-  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+  .doc-prevnext:hover,
   .doc-prevnext--prev:hover .doc-prevnext__arrow,
   .doc-prevnext--next:hover .doc-prevnext__arrow {
     transform: none !important;
