@@ -325,8 +325,13 @@ document.addEventListener('click', (e) => {
     if (document.activeElement && document.activeElement !== document.body && typeof document.activeElement.blur === 'function') {
       document.activeElement.blur();
     }
-    const activeRows = $$('.wrow.is-active');
-    activeRows.forEach((r) => r.classList.remove('is-active'));
+    let lastWorkSlug = null;
+    try {
+      lastWorkSlug = sessionStorage.getItem('last-work-slug');
+    } catch (_) {}
+    if (lastWorkSlug && typeof window.__activateWorkSlug === 'function') {
+      window.__activateWorkSlug(lastWorkSlug);
+    }
     if (!e.persisted) return;
     document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
     document.documentElement.style.removeProperty('--pt-label');
@@ -400,6 +405,12 @@ document.addEventListener('click', (e) => {
     e.preventDefault();
     if (document.activeElement && typeof document.activeElement.blur === 'function') {
       document.activeElement.blur();
+    }
+    const parentRow = a.closest('.wrow');
+    if (parentRow && parentRow.dataset.slug) {
+      try {
+        sessionStorage.setItem('last-work-slug', parentRow.dataset.slug);
+      } catch (_) {}
     }
     navigating = true;
     let navigated = false;
@@ -840,32 +851,35 @@ function setupTicker() {
     captionItems.forEach((cap) => cap.classList.toggle('is-active', cap.dataset.slug === slug));
   }
 
-  function deactivateRows() {
-    rows.forEach((r) => r.classList.remove('is-active'));
+  window.__activateWorkSlug = activate;
+
+  function getTargetSlug() {
+    let stored = null;
+    try {
+      stored = sessionStorage.getItem('last-work-slug');
+    } catch (_) {}
+    if (stored && rows.some((r) => r.dataset.slug === stored)) {
+      return stored;
+    }
+    return rows[0] ? rows[0].dataset.slug : null;
   }
 
-  // Default preview = row 1 in the panel, while rows on the left start at rest
-  if (rows[0] && rows[0].dataset.slug) {
-    const defaultSlug = rows[0].dataset.slug;
-    panelImgs.forEach((img) => img.classList.toggle('is-active', img.dataset.slug === defaultSlug));
-    captionItems.forEach((cap) => cap.classList.toggle('is-active', cap.dataset.slug === defaultSlug));
+  // Activate initial row (last clicked or default first row)
+  const initialSlug = getTargetSlug();
+  if (initialSlug) {
+    activate(initialSlug);
   }
 
   rows.forEach((row) => {
     const slug = row.dataset.slug;
     row.addEventListener('pointerenter', () => activate(slug));
     row.addEventListener('focusin', () => activate(slug));
-  });
-
-  const wlist = $('.wlist');
-  if (wlist) {
-    wlist.addEventListener('pointerleave', deactivateRows);
-    wlist.addEventListener('focusout', (e) => {
-      if (!wlist.contains(e.relatedTarget)) {
-        deactivateRows();
-      }
+    row.addEventListener('click', () => {
+      try {
+        sessionStorage.setItem('last-work-slug', slug);
+      } catch (_) {}
     });
-  }
+  });
 
   const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
   scheduleIdle(() => {
