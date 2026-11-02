@@ -282,6 +282,77 @@ async function runQA() {
       await context.close();
     }
 
+    // 5. Mobile Touch Target Audit (Task 2)
+    console.log('\n--- 5. Testing Mobile Touch Targets (>= 44px, inline >= 24px) ---');
+    const TARGET_WIDTHS = [320, 360, 390, 412, 768];
+    const TARGET_PAGES = [
+      '/',
+      '/work/pcgo/',
+      '/work/productivity-dashboard/',
+      '/work/pcgo/docs/system-architecture/'
+    ];
+
+    let touchTargetViolations = 0;
+    for (const pagePath of TARGET_PAGES) {
+      for (const width of TARGET_WIDTHS) {
+        const context = await browser.newContext({
+          viewport: { width, height: 800 },
+          hasTouch: true,
+          isMobile: true
+        });
+        const page = await context.newPage();
+        await page.goto(`${activeBaseUrl}${pagePath}`, { waitUntil: 'networkidle' });
+
+        const violations = await page.evaluate(() => {
+          const items = Array.from(document.querySelectorAll('a[href], button, summary, [role="button"], input, select, textarea'));
+          const issues = [];
+
+          for (const el of items) {
+            const style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') continue;
+            const rect = el.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) continue;
+
+            if (el.closest('details:not([open])') && el.tagName.toLowerCase() !== 'summary') continue;
+            const navMenu = el.closest('.nav__menu, .mobile-menu, [id*="mobile-menu"], .menu');
+            if (navMenu && (style.display === 'none' || style.visibility === 'hidden' || navMenu.hasAttribute('hidden'))) continue;
+
+            const isInlineP = el.tagName.toLowerCase() === 'a' && el.closest('p') !== null && style.display === 'inline';
+
+            const minW = isInlineP ? 24 : 44;
+            const minH = isInlineP ? 24 : 44;
+
+            if (rect.width < minW || rect.height < minH) {
+              issues.push({
+                tag: el.tagName,
+                text: (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 35),
+                className: el.className,
+                width: Math.round(rect.width * 10) / 10,
+                height: Math.round(rect.height * 10) / 10,
+                isInlineP
+              });
+            }
+          }
+          return issues;
+        });
+
+        if (violations.length > 0) {
+          touchTargetViolations += violations.length;
+          allPassed = false;
+          console.error(`❌ ${violations.length} touch target violations on ${pagePath} at ${width}px:`);
+          for (const v of violations) {
+            console.error(`   - [${v.tag}] "${v.text}" (${v.width}x${v.height}) inlineP=${v.isInlineP} class="${v.className}"`);
+          }
+        }
+        await context.close();
+      }
+    }
+
+    if (touchTargetViolations === 0) {
+      console.log('✓ Touch targets check passed: 0 violations across all 5 widths and 4 page types');
+    }
+
+
   } finally {
     await browser.close();
     if (server) {
