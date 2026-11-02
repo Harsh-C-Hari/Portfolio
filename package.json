@@ -10,6 +10,7 @@
     "check-links": "node scripts/check-links.mjs",
     "check-leaks": "node scripts/check-leaks.mjs",
     "check": "node scripts/check-links.mjs && node scripts/check-pink.mjs && node scripts/check-leaks.mjs",
+    "verify-deploy": "node scripts/verify-deploy.mjs",
     "test": "node scripts/qa.mjs",
     "audit:pink": "node scripts/audit-pink-area.mjs",
     "audit:qa": "node scripts/qa.mjs",
