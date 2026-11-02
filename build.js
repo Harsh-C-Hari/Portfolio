@@ -226,7 +226,7 @@ function generateWorkRows(projects) {
     const t = p.thumb || p.preview;
     const thumbSrc = t ? esc(t.src) : '';
 
-    return `<li class="wrow${isActive}" data-slug="${esc(p.slug)}">
+    return `<li class="wrow" data-slug="${esc(p.slug)}">
   <div class="wrow__grid">
     <span class="wrow__idx">${esc(p.index)}</span>
     <div class="wrow__content">

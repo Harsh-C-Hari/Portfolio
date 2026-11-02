@@ -322,6 +322,11 @@ document.addEventListener('click', (e) => {
   // bfcache / history traversal restore: reset layers, flags, and cancel pending timers
   window.addEventListener('pageshow', (e) => {
     resetLeaveState();
+    if (document.activeElement && document.activeElement !== document.body && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
+    const activeRows = $$('.wrow.is-active');
+    activeRows.forEach((r) => r.classList.remove('is-active'));
     if (!e.persisted) return;
     document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
     document.documentElement.style.removeProperty('--pt-label');
@@ -393,6 +398,9 @@ document.addEventListener('click', (e) => {
     if (dest.pathname === window.location.pathname && dest.hash) return;
 
     e.preventDefault();
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
     navigating = true;
     let navigated = false;
 
@@ -832,9 +840,15 @@ function setupTicker() {
     captionItems.forEach((cap) => cap.classList.toggle('is-active', cap.dataset.slug === slug));
   }
 
-  // Default active = row 1 on load
+  function deactivateRows() {
+    rows.forEach((r) => r.classList.remove('is-active'));
+  }
+
+  // Default preview = row 1 in the panel, while rows on the left start at rest
   if (rows[0] && rows[0].dataset.slug) {
-    activate(rows[0].dataset.slug);
+    const defaultSlug = rows[0].dataset.slug;
+    panelImgs.forEach((img) => img.classList.toggle('is-active', img.dataset.slug === defaultSlug));
+    captionItems.forEach((cap) => cap.classList.toggle('is-active', cap.dataset.slug === defaultSlug));
   }
 
   rows.forEach((row) => {
@@ -842,6 +856,16 @@ function setupTicker() {
     row.addEventListener('pointerenter', () => activate(slug));
     row.addEventListener('focusin', () => activate(slug));
   });
+
+  const wlist = $('.wlist');
+  if (wlist) {
+    wlist.addEventListener('pointerleave', deactivateRows);
+    wlist.addEventListener('focusout', (e) => {
+      if (!wlist.contains(e.relatedTarget)) {
+        deactivateRows();
+      }
+    });
+  }
 
   const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
   scheduleIdle(() => {
