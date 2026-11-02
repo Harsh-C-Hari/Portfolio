@@ -410,10 +410,15 @@ function makeRenderer(config, currentSlugSet) {
 /* ----------------------------------------------------------------
    Prev / Next navigation
    ---------------------------------------------------------------- */
-function prevNextLinks(allDocs, currentSlug) {
+function getPrevNext(allDocs, currentSlug) {
   const idx  = allDocs.findIndex(d => d.slug === currentSlug);
   const prev = idx > 0 ? allDocs[idx - 1] : null;
   const next = idx < allDocs.length - 1 ? allDocs[idx + 1] : null;
+  return { prev, next };
+}
+
+function prevNextLinks(allDocs, currentSlug) {
+  const { prev, next } = getPrevNext(allDocs, currentSlug);
   const prevHtml = prev ? `<a class="doc-prevnext doc-prevnext--prev" href="/work/pcgo/docs/${prev.slug}" data-pt-label="${escapeHtml(prev.title.slice(0, 40))}"><span class="doc-prevnext__dir"><span class="doc-prevnext__arrow" aria-hidden="true">&larr;</span> Previous</span><span class="doc-prevnext__title">${escapeHtml(prev.title)}</span></a>` : '';
   const nextHtml = next ? `<a class="doc-prevnext doc-prevnext--next" href="/work/pcgo/docs/${next.slug}" data-pt-label="${escapeHtml(next.title.slice(0, 40))}"><span class="doc-prevnext__dir">Next <span class="doc-prevnext__arrow" aria-hidden="true">&rarr;</span></span><span class="doc-prevnext__title">${escapeHtml(next.title)}</span></a>` : '';
   return `<nav class="doc-prevnext-row" aria-label="Doc navigation">${prevHtml}${nextHtml}</nav>`;
@@ -432,7 +437,7 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
   const navGroup   = allDocs.filter(d => d.groupId === doc.groupId);
   const rt         = readingTime(body);
 
-  // Sidebar doc list
+  // Sidebar doc list (desktop)
   const sidebarGroups = config.groups.map(g => {
     const items = g.docs.map(d => {
       const active = d.slug === doc.slug ? ' aria-current="page"' : '';
@@ -443,30 +448,67 @@ function writeDocPage(doc, allDocs, body, toc, config, opts) {
 
   const sidebar = `<nav class="doc-sidebar" aria-label="Docs navigation"><a href="/work/pcgo#docs" class="doc-sidebar__back" data-pt-label="PCGO">← Back to PCGO</a><ul class="doc-sidebar__list">${sidebarGroups}</ul></nav>`;
 
+  // Mobile Docs sheet list (same 4 groups and 15 docs)
+  const docsSheetList = config.groups.map(g => {
+    const items = g.docs.map(d => {
+      const isCurrent = d.slug === doc.slug;
+      const activeAttr = isCurrent ? ' aria-current="page" class="is-current"' : '';
+      return `<li><a href="/work/pcgo/docs/${d.slug}"${activeAttr} data-pt-label="${escapeHtml(d.title.slice(0, 40))}">${escapeHtml(d.title)}</a></li>`;
+    }).join('');
+    return `<li class="doc-sheet__group"><span class="doc-sheet__group-title">${escapeHtml(g.title)}</span><ul>${items}</ul></li>`;
+  }).join('');
+
+  // Mobile bottom docs bar (with prev/next arrows)
+  const { prev, next } = getPrevNext(allDocs, doc.slug);
+  const prevBarBtn = prev
+    ? `<a class="doc-bar__arrow" href="/work/pcgo/docs/${prev.slug}" data-pt-label="${escapeHtml(prev.title.slice(0, 40))}" aria-label="Previous doc: ${escapeHtml(prev.title)}">&#x2039;</a>`
+    : `<button class="doc-bar__arrow is-disabled" type="button" disabled aria-disabled="true" aria-label="No previous doc">&#x2039;</button>`;
+
+  const nextBarBtn = next
+    ? `<a class="doc-bar__arrow" href="/work/pcgo/docs/${next.slug}" data-pt-label="${escapeHtml(next.title.slice(0, 40))}" aria-label="Next doc: ${escapeHtml(next.title)}">&#x203A;</a>`
+    : `<button class="doc-bar__arrow is-disabled" type="button" disabled aria-disabled="true" aria-label="No next doc">&#x203A;</button>`;
+
+  const docBar = `<nav class="doc-bar" aria-label="Mobile doc navigation">
+  <div class="doc-bar__inner">
+    <button type="button" class="doc-bar__btn doc-bar__btn--docs" aria-expanded="false" aria-controls="doc-sheet-docs">
+      <span class="doc-bar__icon" aria-hidden="true">&#x2630;</span> Docs
+    </button>
+    <button type="button" class="doc-bar__btn doc-bar__btn--toc" aria-expanded="false" aria-controls="doc-sheet-toc">
+      <span class="doc-bar__toc-label">On this page</span> <span class="doc-bar__arrow-icon" aria-hidden="true">&#x25B4;</span>
+    </button>
+    <div class="doc-bar__arrows">
+      ${prevBarBtn}
+      ${nextBarBtn}
+    </div>
+  </div>
+</nav>`;
+
   const prevNext  = prevNextLinks(allDocs, doc.slug);
   const tocLinks  = buildTOCLinks(toc);
   const tocHtml   = tocLinks ? `<nav class="doc-toc" aria-label="On this page"><h2 class="doc-toc__head">On this page</h2>${tocLinks}</nav>` : '';
 
   const vars = {
-    page_title:       pageTitle,
-    page_description: pageDesc,
-    page_canonical:   canonical,
-    page_og_image:    `${origin}/img/work/pcgo/og.jpg`,
-    page_slug:        `pcgo-doc-${doc.slug}`,
-    page_type:        'doc',
-    page_jsonld:      '',
-    css_version:      cssVer,
-    js_version:       jsVer,
-    home:             '/',
-    base:             '/',
-    doc_title:        escapeHtml(doc.title),
-    doc_summary:      escapeHtml(doc.summary),
-    doc_reading_time: rt,
-    doc_toc:          tocHtml,
-    doc_toc_links:    tocLinks,
-    doc_sidebar:      sidebar,
-    doc_body:         body,
-    doc_prevnext:     prevNext,
+    page_title:          pageTitle,
+    page_description:    pageDesc,
+    page_canonical:      canonical,
+    page_og_image:       `${origin}/img/work/pcgo/og.jpg`,
+    page_slug:           `pcgo-doc-${doc.slug}`,
+    page_type:           'doc',
+    page_jsonld:         '',
+    css_version:         cssVer,
+    js_version:          jsVer,
+    home:                '/',
+    base:                '/',
+    doc_title:           escapeHtml(doc.title),
+    doc_summary:         escapeHtml(doc.summary),
+    doc_reading_time:    rt,
+    doc_toc:             tocHtml,
+    doc_toc_links:       tocLinks,
+    doc_sidebar:         sidebar,
+    doc_body:            body,
+    doc_prevnext:        prevNext,
+    doc_bar:             docBar,
+    doc_sheet_docs_list: docsSheetList,
   };
 
   const INCLUDE_RE = /<!-- include:(\S+?\.html) -->\r?\n?/g;

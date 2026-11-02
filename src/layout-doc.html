@@ -70,14 +70,6 @@
             <p class="doc-header__summary">{{doc_summary}}</p>
           </header>
 
-          <!-- Collapsible TOC (< 1200px) -->
-          <details class="doc-toc-details">
-            <summary class="doc-toc-details__summary">On this page</summary>
-            <nav class="doc-toc-details__nav" aria-label="On this page">
-              {{doc_toc_links}}
-            </nav>
-          </details>
-
           <div class="doc-body">
             {{doc_body}}
           </div>
@@ -95,6 +87,37 @@
           </nav>
         </div>
       </aside>
+    </div>
+  </div>
+
+  {{doc_bar}}
+
+  <div class="doc-sheet-backdrop" id="doc-sheet-backdrop" hidden></div>
+
+  <div class="doc-sheet doc-sheet--docs" id="doc-sheet-docs" role="dialog" aria-modal="true" aria-label="Documentation menu" hidden>
+    <div class="doc-sheet__handle" aria-hidden="true"></div>
+    <div class="doc-sheet__header">
+      <h2 class="doc-sheet__title">Docs</h2>
+      <button type="button" class="doc-sheet__close" aria-label="Close docs menu">&#x2715;</button>
+    </div>
+    <div class="doc-sheet__body" data-lenis-prevent>
+      <a href="/work/pcgo#docs" class="doc-sheet__back" data-pt-label="PCGO">&larr; Back to PCGO</a>
+      <ul class="doc-sheet__list">
+        {{doc_sheet_docs_list}}
+      </ul>
+    </div>
+  </div>
+
+  <div class="doc-sheet doc-sheet--toc" id="doc-sheet-toc" role="dialog" aria-modal="true" aria-label="On this page" hidden>
+    <div class="doc-sheet__handle" aria-hidden="true"></div>
+    <div class="doc-sheet__header">
+      <h2 class="doc-sheet__title">On this page</h2>
+      <button type="button" class="doc-sheet__close" aria-label="Close table of contents">&#x2715;</button>
+    </div>
+    <div class="doc-sheet__body" data-lenis-prevent>
+      <nav class="doc-sheet__toc-nav" aria-label="Table of contents">
+        {{doc_toc_links}}
+      </nav>
     </div>
   </div>
 

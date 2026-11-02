@@ -1147,7 +1147,7 @@ if (isHome) {
    Doc reader: TOC rail & details active link observer
    ------------------------------------------------------------ */
 (function setupDocTocObserver() {
-  const allLinks = Array.from(document.querySelectorAll('.doc-toc-rail a[href^="#"], .doc-toc-details a[href^="#"]'));
+  const allLinks = Array.from(document.querySelectorAll('.doc-toc-rail a[href^="#"], .doc-sheet--toc a[href^="#"]'));
   if (!allLinks.length) return;
 
   const headingItems = [];
@@ -1188,6 +1188,17 @@ if (isHome) {
     }
   }
 
+  function updateTocBarLabel() {
+    const tocLabel = document.querySelector('.doc-bar__toc-label');
+    if (!tocLabel) return;
+    const activeLink = document.querySelector('.doc-toc-rail a.is-active, .doc-sheet--toc a.is-active');
+    if (activeLink) {
+      tocLabel.textContent = activeLink.textContent.trim();
+    } else {
+      tocLabel.textContent = 'On this page';
+    }
+  }
+
   function setActiveHrefs(hrefs) {
     const activeSet = new Set(Array.isArray(hrefs) ? hrefs : [hrefs]);
     allLinks.forEach((l) => {
@@ -1201,6 +1212,7 @@ if (isHome) {
       }
     });
     scrollActiveTocIntoView();
+    updateTocBarLabel();
   }
 
   // Set initial active link
@@ -1225,7 +1237,7 @@ if (isHome) {
   window.addEventListener('wheel', clearUserClick, { passive: true });
   window.addEventListener('touchmove', clearUserClick, { passive: true });
   document.addEventListener('pointerdown', (e) => {
-    if (!e.target?.closest || !e.target.closest('.doc-toc-rail, .doc-toc-details')) {
+    if (!e.target?.closest || !e.target.closest('.doc-toc-rail, .doc-sheet--toc, .doc-bar')) {
       userClickedHref = null;
     }
   }, { passive: true });
@@ -1366,16 +1378,217 @@ if (isHome) {
 })();
 
 /* ------------------------------------------------------------
-   Doc reader: auto-close mobile TOC details on link click
+   Doc reader: mobile bottom sheets (Docs index & On this page)
    ------------------------------------------------------------ */
-(function setupDocTocAutoClose() {
-  const docTocDetails = document.querySelector('.doc-toc-details');
-  if (!docTocDetails) return;
+(function setupDocSheets() {
+  const docsBtn = document.querySelector('.doc-bar__btn--docs');
+  const tocBtn = document.querySelector('.doc-bar__btn--toc');
+  const docsSheet = document.getElementById('doc-sheet-docs');
+  const tocSheet = document.getElementById('doc-sheet-toc');
+  const backdrop = document.getElementById('doc-sheet-backdrop');
+  const docLayout = document.querySelector('.doc-layout');
 
-  docTocDetails.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      docTocDetails.removeAttribute('open');
+  if (!docsSheet && !tocSheet) return;
+
+  let activeSheet = null;
+  let activeTrigger = null;
+
+  function getFocusableElements(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(
+      'button:not([disabled]), a[href]:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter((el) => el.offsetParent !== null || el.offsetWidth > 0 || el.offsetHeight > 0);
+  }
+
+  function openSheet(sheet, trigger) {
+    if (!sheet) return;
+    if (activeSheet && activeSheet !== sheet) {
+      closeSheet(activeSheet, activeTrigger, false);
+    }
+
+    activeSheet = sheet;
+    activeTrigger = trigger;
+
+    backdrop.removeAttribute('hidden');
+    sheet.removeAttribute('hidden');
+
+    // Force reflow
+    void sheet.offsetHeight;
+
+    backdrop.classList.add('is-open');
+    sheet.classList.add('is-open');
+
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'true');
+      trigger.classList.add('is-active');
+    }
+
+    document.body.style.overflow = 'hidden';
+    if (docLayout) {
+      docLayout.setAttribute('inert', '');
+    }
+
+    // Move focus into sheet
+    requestAnimationFrame(() => {
+      const focusables = getFocusableElements(sheet);
+      const closeBtn = sheet.querySelector('.doc-sheet__close');
+      if (closeBtn) {
+        closeBtn.focus();
+      } else if (focusables.length) {
+        focusables[0].focus();
+      }
     });
+  }
+
+  function closeSheet(sheet, trigger, returnFocus = true) {
+    if (!sheet) return;
+
+    sheet.classList.remove('is-open');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.classList.remove('is-active');
+    }
+
+    if (activeSheet === sheet) {
+      activeSheet = null;
+      activeTrigger = null;
+    }
+
+    // Only hide backdrop and unlock body if no other sheet is open
+    if (!activeSheet) {
+      backdrop.classList.remove('is-open');
+      document.body.style.overflow = '';
+      if (docLayout) {
+        docLayout.removeAttribute('inert');
+      }
+    }
+
+    const dur = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 280;
+    setTimeout(() => {
+      if (!sheet.classList.contains('is-open')) {
+        sheet.setAttribute('hidden', '');
+      }
+      if (!activeSheet && !backdrop.classList.contains('is-open')) {
+        backdrop.setAttribute('hidden', '');
+      }
+    }, dur + 20);
+
+    if (returnFocus && trigger && typeof trigger.focus === 'function') {
+      trigger.focus();
+    }
+  }
+
+  function closeAllSheets(returnFocus = true) {
+    if (activeSheet) {
+      closeSheet(activeSheet, activeTrigger, returnFocus);
+    }
+  }
+
+  // Toggle triggers
+  if (docsBtn && docsSheet) {
+    docsBtn.addEventListener('click', () => {
+      if (docsSheet.classList.contains('is-open')) {
+        closeSheet(docsSheet, docsBtn, true);
+      } else {
+        openSheet(docsSheet, docsBtn);
+      }
+    });
+  }
+
+  if (tocBtn && tocSheet) {
+    tocBtn.addEventListener('click', () => {
+      if (tocSheet.classList.contains('is-open')) {
+        closeSheet(tocSheet, tocBtn, true);
+      } else {
+        openSheet(tocSheet, tocBtn);
+      }
+    });
+  }
+
+  // Close buttons
+  [docsSheet, tocSheet].forEach((sheet) => {
+    if (!sheet) return;
+    const closeBtn = sheet.querySelector('.doc-sheet__close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => closeAllSheets(true));
+    }
+  });
+
+  // Tap on backdrop closes
+  if (backdrop) {
+    backdrop.addEventListener('click', () => closeAllSheets(true));
+  }
+
+  // Escape key closes
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && activeSheet) {
+      e.preventDefault();
+      closeAllSheets(true);
+    }
+  });
+
+  // Focus trap inside open sheet
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || !activeSheet) return;
+    const focusables = getFocusableElements(activeSheet);
+    if (!focusables.length) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  // Close sheet when tapping any link inside
+  if (docsSheet) {
+    docsSheet.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        closeAllSheets(false);
+      });
+    });
+  }
+
+  if (tocSheet) {
+    tocSheet.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        closeAllSheets(false);
+        if (href && href.startsWith('#')) {
+          const target = document.querySelector(href);
+          if (target) {
+            e.preventDefault();
+            const topOffset = (typeof navH === 'function' ? navH() : 68) + 16;
+            if (lenis) {
+              lenis.scrollTo(target, { offset: -topOffset });
+            } else {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }
+            try {
+              history.pushState(null, '', href);
+            } catch (_) {}
+          }
+        }
+      });
+    });
+  }
+
+  // Close sheets when page transition starts or on pageshow
+  window.addEventListener('pageshow', () => closeAllSheets(false));
+  document.addEventListener('click', (e) => {
+    const a = e.target?.closest ? e.target.closest('a[href]') : null;
+    if (a && activeSheet) {
+      closeAllSheets(false);
+    }
   });
 })();
 
