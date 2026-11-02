@@ -1,0 +1,57 @@
+{
+  "_note": "Curated public docs for the PCGO case study. 'source' is relative to reference/personal-cloud-gaming-orchestrator-main/docs/. Copy ONLY these files into content/pcgo-docs/ (same relative paths). Do not publish anything else from docs/ (especially docs/portfolio/interview-notes.md, docs/portfolio/linkedin-post.md and all of docs/phase25/). Order here = prev/next order in the reader. Summaries are final copy; do not rewrite them.",
+  "project": "pcgo",
+  "githubBlobBase": "https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/blob/main/docs/",
+  "groups": [
+    {
+      "id": "overview",
+      "title": "Overview & architecture",
+      "intro": "What it is and how the layers fit together.",
+      "docs": [
+        { "slug": "project-overview", "source": "overview/project-overview.md", "title": "Project overview", "summary": "What the platform is, what v0.1 ships, and how the pieces fit." },
+        { "slug": "system-architecture", "source": "architecture/system-architecture.md", "title": "System architecture", "summary": "The layers from dashboard to Windows host, and the design principles behind them." },
+        { "slug": "backend-architecture", "source": "architecture/backend-architecture.md", "title": "Backend architecture", "summary": "How the FastAPI backend is organised and what it orchestrates." },
+        { "slug": "recovery-architecture", "source": "architecture/recovery-architecture.md", "title": "Recovery architecture", "summary": "How the Sunshine and Tailscale watchdogs detect failures and recover." }
+      ]
+    },
+    {
+      "id": "investigations",
+      "title": "Engineering investigations",
+      "intro": "Bugs and design problems written up as problem, investigation, root cause, fix. The most useful reading here.",
+      "docs": [
+        { "slug": "tailscale-state-recovery", "source": "engineering/tailscale-state-recovery.md", "title": "Tailscale state-aware recovery", "summary": "A week spent learning that \"restart the service\" is not a recovery strategy: Tailscale fails in distinct states that each need a different fix." },
+        { "slug": "internal-event-authentication", "source": "engineering/internal-event-authentication.md", "title": "Internal event authentication", "summary": "How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison." },
+        { "slug": "live-sync-architecture-migration", "source": "engineering/live-sync-architecture-migration.md", "title": "Live sync that stopped running", "summary": "Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service." },
+        { "slug": "dashboard-cache-investigation", "source": "engineering/dashboard-cache-investigation.md", "title": "Stale dashboard, correct backend", "summary": "The dashboard showed old data while the backend was right. The browser was caching high-frequency monitoring endpoints." },
+        { "slug": "release-hardening-and-reliability", "source": "engineering/release-hardening-and-reliability.md", "title": "Release hardening and reliability", "summary": "Pre-release reliability work: atomic save capture, session locks, cleanup, config updates, integrity checks, and what the audit taught me." },
+        { "slug": "session-persistence-and-reconnection", "source": "engineering/session-persistence-and-reconnection.md", "title": "Session persistence and reconnection", "summary": "Keeping sessions consistent across crashes and reconnects." },
+        { "slug": "problems-solved", "source": "development/problems-solved.md", "title": "Major problems solved", "summary": "A short tour of the hardest problems and how each was solved." }
+      ]
+    },
+    {
+      "id": "reference",
+      "title": "API & reference",
+      "intro": "The interfaces other code talks to.",
+      "docs": [
+        { "slug": "api-overview", "source": "api/api-overview.md", "title": "API overview", "summary": "The REST surface: route groups, authentication and conventions." },
+        { "slug": "websocket-events", "source": "api/websocket-events.md", "title": "WebSocket events", "summary": "The single authenticated /ws channel and the one message type it carries today." }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Limits & roadmap",
+      "intro": "What v0.1 deliberately does not do yet, and where it goes next.",
+      "docs": [
+        { "slug": "v0-limitations", "source": "development/v0-limitations.md", "title": "Known limitations", "summary": "No refresh tokens, no login rate limiting, no audit log yet. Written down on purpose." },
+        { "slug": "roadmap", "source": "roadmap/roadmap.md", "title": "Roadmap", "summary": "Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging." }
+      ]
+    }
+  ],
+  "linkRewriting": {
+    "rule1": "A relative link to a markdown file that IS in this manifest becomes /work/pcgo/docs/<slug>, keeping any #anchor.",
+    "rule2": "A relative link to any other file under docs/ becomes the GitHub blob URL (githubBlobBase + normalised path), opens in a new tab, and gets a small external-arrow marker.",
+    "rule3": "A relative link to a file outside docs/ (for example ../../README.md or source code) becomes the GitHub blob URL at the repo root, same treatment.",
+    "rule4": "Absolute http(s) links are left alone, open in a new tab, rel='noopener noreferrer'.",
+    "rule5": "The build prints a table of every rewritten link and FAILS if a link to a manifest doc points at a heading anchor that does not exist."
+  }
+}

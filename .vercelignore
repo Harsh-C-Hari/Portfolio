@@ -1,6 +1,7 @@
 node_modules
-PORTFOLIO-REBUILD-PLAN.md
 .serena
 .od-skills
 .file-versions
 *.artifact.json
+reference/
+_handoff/

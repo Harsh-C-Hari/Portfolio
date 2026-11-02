@@ -1,10 +1,11 @@
 // Motion layer. Bundled by build.js (esbuild) into animation.bundle.js.
+// Runs on every page. Every feature early-returns when its required element
+// is absent, so sub-pages (case studies, docs) don't throw.
 //
-// Motion budget, on purpose:
+// Motion budget:
 //   1. One page-load sequence: counter loader -> hero words rise -> highlighter wipes in.
-//   2. Project cards stack as you scroll (CSS sticky + a small scale-back).
-//   3. The About statement fills in letter by letter while the page holds still (pinned);
-//      it releases the moment the last letter is lit.
+//   2. Project cards stack as you scroll (CSS sticky + scale-back). HOME ONLY.
+//   3. The About statement fills in letter by letter while the page holds still (pinned). HOME ONLY.
 //   Everything else answers an action (hover, click, scroll direction).
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -17,7 +18,14 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const finePointer  = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const isHome       = !document.documentElement.dataset.page; // layout-page.html sets data-page
+
+/* ------------------------------------------------------------
+   Set intro-seen flag on every page so the loader is skipped
+   if the visitor lands on a case page first, then goes home.
+   ------------------------------------------------------------ */
+try { sessionStorage.setItem('intro-seen', '1'); } catch (e) { /* private browsing */ }
 
 /* ------------------------------------------------------------
    Live IST clock (hero + footer)
@@ -30,21 +38,23 @@ const clockFmt = new Intl.DateTimeFormat('en-GB', {
   second: '2-digit',
 });
 const clocks = $$('[data-clock]');
-const tickClock = () => {
-  const t = clockFmt.format(new Date());
-  clocks.forEach((el) => (el.textContent = t));
-};
-tickClock();
-setInterval(tickClock, 1000);
+if (clocks.length) {
+  const tickClock = () => {
+    const t = clockFmt.format(new Date());
+    clocks.forEach((el) => (el.textContent = t));
+  };
+  tickClock();
+  setInterval(tickClock, 1000);
+}
 
 const year = $('#year');
 if (year) year.textContent = new Date().getFullYear();
 
 /* ------------------------------------------------------------
-   Smooth scroll
+   Smooth scroll (fine pointer only; native scrolling on touch)
    ------------------------------------------------------------ */
 let lenis = null;
-if (!reduceMotion) {
+if (!reduceMotion && finePointer) {
   lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -53,28 +63,77 @@ if (!reduceMotion) {
 
 const navH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68;
 
+function getTargetElement(hash) {
+  if (!hash || hash === '#') return null;
+  const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+  if (!rawId) return null;
+
+  // 1. Direct getElementById with raw ID (handles dots, colons, percent signs, numbers)
+  let el = document.getElementById(rawId);
+  if (el) return el;
+
+  // 2. Direct getElementById with decoded component
+  try {
+    const decoded = decodeURIComponent(rawId);
+    if (decoded !== rawId) {
+      el = document.getElementById(decoded);
+      if (el) return el;
+    }
+  } catch (_) {}
+
+  // 3. Direct getElementById with encoded component
+  try {
+    const encoded = encodeURIComponent(rawId);
+    if (encoded !== rawId) {
+      el = document.getElementById(encoded);
+      if (el) return el;
+    }
+  } catch (_) {}
+
+  // 4. Fallback using CSS.escape if available
+  if (typeof CSS !== 'undefined' && CSS.escape) {
+    try {
+      el = document.querySelector('#' + CSS.escape(rawId));
+      if (el) return el;
+    } catch (_) {}
+    try {
+      el = document.querySelector('#' + CSS.escape(decodeURIComponent(rawId)));
+      if (el) return el;
+    } catch (_) {}
+  }
+
+  // 5. QuerySelector fallback
+  try {
+    el = $(hash.startsWith('#') ? hash : '#' + hash);
+    if (el) return el;
+  } catch (_) {}
+
+  return null;
+}
+
 function scrollToTarget(hash) {
   if (hash === '#top') {
-    lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0 });
+    lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
-  const el = $(hash);
+  const el = getTargetElement(hash);
   if (!el) return;
   // About pins the page while its text fills in; land right where that begins.
-  if (hash === '#about' && aboutST && lenis) {
-    lenis.scrollTo(aboutST.start, { duration: 1.2 });
-    return;
+  if (hash === '#about') {
+    if (typeof initAbout === 'function') initAbout();
+    if (aboutST) {
+      if (lenis) lenis.scrollTo(aboutST.start, { duration: 1.2 });
+      else window.scrollTo({ top: aboutST.start, behavior: 'smooth' });
+      return;
+    }
   }
-  // No manual nav-height offset here: Lenis reads `scroll-padding-top` off
-  // <html> itself (see styles.css) and already subtracts it internally, so
-  // adding navH() again on top of that was double-compensating and landing
-  // sections ~68px past their real start.
-  if (lenis) lenis.scrollTo(el, { duration: 1.2 });
-  else el.scrollIntoView({ block: 'start' });
+  const offset = 0;
+  if (lenis) lenis.scrollTo(el, { offset, duration: 1.0 });
+  else el.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 document.addEventListener('click', (e) => {
-  const a = e.target.closest('a[href^="#"]');
+  const a = e.target?.closest ? e.target.closest('a[href^="#"]') : null;
   if (!a || a.getAttribute('href') === '#') return;
   e.preventDefault();
   closeMenu();
@@ -82,13 +141,397 @@ document.addEventListener('click', (e) => {
 });
 
 /* ------------------------------------------------------------
+   Page transition
+   Two layers (pink leads, ink follows) rise on leave and lift
+   on arrive. Spec section 6.
+   ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   Page transition
+   Deterministic two-act architecture:
+     Act 1: Cover (pink 0.45s, ink +0.12s for 0.5s) -> label fades in (0.2s) -> navigate
+     Hold:  Guaranteed >= PT_MIN_HOLD_MS with destination label + sweeping pink line
+     Act 2: Reveal once ready (DOM, fonts, hero image, hold) -> label fades out (0.15s)
+            -> ink lifts (0.6s) -> pink trails at t=0.16 -> pt:reveal at t=0.25
+   ------------------------------------------------------------ */
+(function setupPageTransition() {
+  const PT_MIN_HOLD_MS    = 300;
+  const PT_READY_CAP_MS   = 4000;
+  const PT_FONT_CAP_MS    = 700;
+  const PT_IMG_CAP_MS     = 600;
+  const PT_NAV_TIMEOUT_MS = 8000;
+
+  const ptEl   = $('.pt');
+  const ptPink = $('.pt__pink');
+  const ptInk  = $('.pt__ink');
+
+  // Detect reload or history traversal
+  const navEntry = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  const navType = navEntry ? navEntry.type : (window.performance && performance.navigation ? (performance.navigation.type === 1 ? 'reload' : (performance.navigation.type === 2 ? 'back_forward' : 'navigate')) : 'navigate');
+  const isReloadOrBack = (navType === 'reload' || navType === 'back_forward');
+
+  if (isReloadOrBack) {
+    document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+    document.documentElement.style.removeProperty('--pt-label');
+    try {
+      sessionStorage.removeItem('pt');
+      sessionStorage.removeItem('pt_t');
+      sessionStorage.removeItem('pt_label');
+    } catch (e) { /* */ }
+    if (ptPink) gsap.set(ptPink, { yPercent: 100 });
+    if (ptInk)  gsap.set(ptInk,  { yPercent: 100 });
+    if (ptEl)   ptEl.style.pointerEvents = 'none';
+  }
+
+  // Arrive: if the head script set pt-enter, run the cover-off animation.
+  if (!isReloadOrBack && document.documentElement.classList.contains('pt-enter')) {
+    // Focus main immediately (tabindex=-1, no scroll)
+    const mainEl = $('#main-content');
+    if (mainEl) mainEl.focus({ preventScroll: true });
+
+    // Handle hash-based scroll BEFORE cover lifts
+    const doHashScroll = () => {
+      const hash = window.location.hash;
+      if (!hash || hash === '#') return;
+      const target = getTargetElement(hash);
+      if (!target) return;
+      const offset = 0;
+      if (lenis) lenis.scrollTo(target, { offset, immediate: true });
+      else target.scrollIntoView({ block: 'start' });
+    };
+
+    if (!reduceMotion && ptPink && ptInk && ptEl) {
+      let pt_t = 0;
+      try {
+        pt_t = parseInt(sessionStorage.getItem('pt_t') || '0', 10);
+      } catch (e) { /* */ }
+
+      // Ready gates: DOM ready, fonts ready (cap 700ms), first img decoded (cap 600ms), min hold elapsed
+      const domPromise = (document.readyState !== 'loading')
+        ? Promise.resolve()
+        : new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+
+      const fontPromise = document.fonts
+        ? Promise.race([
+            document.fonts.ready,
+            new Promise((r) => setTimeout(r, PT_FONT_CAP_MS)),
+          ])
+        : Promise.resolve();
+
+      const imgPromise = domPromise.then(() => {
+        const img = document.querySelector('main img[fetchpriority="high"], main img:not([loading="lazy"])');
+        if (!img) return Promise.resolve();
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return Promise.race([
+          img.decode ? img.decode().catch(() => {}) : Promise.resolve(),
+          new Promise((r) => setTimeout(r, PT_IMG_CAP_MS)),
+        ]);
+      });
+
+      const getHoldRemaining = () => {
+        if (!pt_t) return 0;
+        const elapsed = Date.now() - pt_t;
+        return Math.max(0, PT_MIN_HOLD_MS - elapsed);
+      };
+
+      const holdPromise = new Promise((r) => {
+        const rem = getHoldRemaining();
+        if (rem <= 0) r();
+        else setTimeout(r, rem);
+      });
+
+      let revealStarted = false;
+
+      const startReveal = (isShortened = false) => {
+        if (revealStarted) return;
+        revealStarted = true;
+        window.__pt_hold_elapsed = pt_t ? (Date.now() - pt_t) : PT_MIN_HOLD_MS;
+
+        // Apply hash scroll immediately BEFORE reveal starts (still covered)
+        doHashScroll();
+
+        // Label fades out (0.15s)
+        document.documentElement.classList.add('pt-label-out');
+
+        const dur = isShortened ? 0.4 : 0.6;
+        const pinkDelay = isShortened ? 0.1 : 0.16;
+        const revealEventTime = isShortened ? 0.16 : 0.25;
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+            document.documentElement.style.removeProperty('--pt-label');
+            try {
+              sessionStorage.removeItem('pt');
+              sessionStorage.removeItem('pt_t');
+              sessionStorage.removeItem('pt_label');
+            } catch (e) { /* */ }
+            if (ptPink) gsap.set(ptPink, { yPercent: -100 });
+            if (ptInk)  gsap.set(ptInk,  { yPercent: -100 });
+            if (ptEl)   ptEl.style.pointerEvents = 'none';
+          },
+        });
+
+        // Ink lifts over dur, pink trails by pinkDelay (pink is the last edge)
+        tl.to(ptInk,  { yPercent: -100, duration: dur, ease: 'power3.inOut' }, 0);
+        tl.to(ptPink, { yPercent: -100, duration: dur, ease: 'power3.inOut' }, pinkDelay);
+        tl.call(() => {
+          document.dispatchEvent(new CustomEvent('pt:reveal'));
+        }, null, revealEventTime);
+      };
+
+      // Absolute failsafe at PT_READY_CAP_MS: do not snap, run shortened animated reveal
+      const failsafe = setTimeout(() => {
+        startReveal(true);
+      }, PT_READY_CAP_MS);
+
+      Promise.all([domPromise, fontPromise, imgPromise, holdPromise]).then(() => {
+        clearTimeout(failsafe);
+        startReveal(false);
+      });
+    } else {
+      // Reduced motion: no animation, just remove class and scroll
+      document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+      document.documentElement.style.removeProperty('--pt-label');
+      try {
+        sessionStorage.removeItem('pt');
+        sessionStorage.removeItem('pt_t');
+        sessionStorage.removeItem('pt_label');
+      } catch (e) { /* */ }
+      if (ptEl) ptEl.style.pointerEvents = 'none';
+      doHashScroll();
+    }
+  }
+
+  // Leave: intercept clicks and animate cover-in before navigating.
+  let navigating = false;
+  let leaveFailsafeTimer = null;
+  let leaveTimeoutTimer  = null;
+
+  const resetLeaveState = () => {
+    navigating = false;
+    if (leaveFailsafeTimer) {
+      clearTimeout(leaveFailsafeTimer);
+      leaveFailsafeTimer = null;
+    }
+    if (leaveTimeoutTimer) {
+      clearTimeout(leaveTimeoutTimer);
+      leaveTimeoutTimer = null;
+    }
+  };
+
+  // bfcache / history traversal restore: reset layers, flags, and cancel pending timers
+  window.addEventListener('pageshow', (e) => {
+    resetLeaveState();
+    if (!e.persisted) return;
+    document.documentElement.classList.remove('pt-enter', 'pt-label-in', 'pt-label-out');
+    document.documentElement.style.removeProperty('--pt-label');
+    try {
+      sessionStorage.removeItem('pt');
+      sessionStorage.removeItem('pt_t');
+      sessionStorage.removeItem('pt_label');
+    } catch (e2) { /* */ }
+    if (ptPink) gsap.set(ptPink, { yPercent: 100 });
+    if (ptInk)  gsap.set(ptInk,  { yPercent: 100 });
+    if (ptEl)   ptEl.style.pointerEvents = 'none';
+  });
+
+  window.addEventListener('pagehide', () => {
+    resetLeaveState();
+  });
+
+  window.addEventListener('popstate', () => {
+    resetLeaveState();
+  });
+
+  function shouldIntercept(a) {
+    if (!a)                             return false;
+    if (a.dataset.noTransition != null) return false;
+    const href = a.getAttribute('href');
+    if (!href)                          return false;
+
+    // External links, mailto, tel, download
+    if (a.target && a.target !== '_self') return false;
+    if (a.hasAttribute('download'))        return false;
+    if (href.startsWith('mailto:') || href.startsWith('tel:')) return false;
+
+    // Pure same-page anchors — Lenis owns those
+    if (href.startsWith('#')) return false;
+
+    // Hash-only change on same path (e.g. /work/pcgo#docs -> /work/pcgo#overview)
+    try {
+      const dest = new URL(href, window.location.href);
+      if (dest.origin !== window.location.origin) return false;
+      if (dest.pathname === window.location.pathname && dest.hash) return false;
+      if (dest.href === window.location.href) return false;
+
+      // Skip files with extensions (except .html)
+      const ext = dest.pathname.match(/\.([^./]+)$/);
+      if (ext && ext[1].toLowerCase() !== 'html') return false;
+
+      // Intra-docs navigation: do not run heavy full-screen transition when switching between doc pages
+      const isCurrentDocs = /^\/work\/[^/]+\/docs/.test(window.location.pathname);
+      const isDestDocs    = /^\/work\/[^/]+\/docs/.test(dest.pathname);
+      if (isCurrentDocs && isDestDocs) return false;
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  document.addEventListener('click', (e) => {
+    if (navigating) return;
+    if (e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    const a = e.target?.closest ? e.target.closest('a[href]') : null;
+    if (!shouldIntercept(a)) return;
+
+    // Skip if it's a hash-only link (already handled by the Lenis listener above)
+    const href = a.getAttribute('href');
+    const dest = new URL(href, window.location.href);
+    if (dest.pathname === window.location.pathname && dest.hash) return;
+
+    e.preventDefault();
+    navigating = true;
+    let navigated = false;
+
+    // Resolve destination label
+    let label = a.dataset.ptLabel;
+    if (!label) {
+      const visibleText = (a.innerText || a.textContent || '').trim().replace(/\s+/g, ' ');
+      label = visibleText.slice(0, 40);
+    }
+    if (!label) label = 'Loading';
+    if (label.length > 40) label = label.slice(0, 40);
+
+    const navigate = () => {
+      if (navigated) return;
+      navigated = true;
+      try {
+        sessionStorage.setItem('pt', '1');
+        sessionStorage.setItem('pt_t', String(Date.now()));
+        sessionStorage.setItem('pt_label', label);
+      } catch (ssErr) {
+        // sessionStorage unavailable — reset cover and navigate
+        gsap.set(ptPink, { yPercent: 100 });
+        gsap.set(ptInk,  { yPercent: 100 });
+        document.documentElement.classList.remove('pt-label-in');
+        document.documentElement.style.removeProperty('--pt-label');
+        if (ptEl) ptEl.style.pointerEvents = 'none';
+        navigating = false;
+        location.assign(dest.href);
+        return;
+      }
+      location.assign(dest.href);
+    };
+
+    if (reduceMotion || !ptPink || !ptInk || !ptEl) {
+      // Reduced motion: no animation, no flags in sessionStorage
+      navigating = false;
+      location.assign(dest.href);
+      return;
+    }
+
+    ptEl.style.pointerEvents = 'auto';
+
+    // Set the label CSS property so pseudo-element has the destination name
+    document.documentElement.style.setProperty('--pt-label', JSON.stringify(label));
+
+    // Cover-in: pink leads (0.45s), ink starts +0.12s (0.5s)
+    const tl = gsap.timeline();
+    tl.fromTo(ptPink, { yPercent: 100 }, { yPercent: 0, duration: 0.45, ease: 'power3.inOut' }, 0);
+    tl.fromTo(ptInk,  { yPercent: 100 }, { yPercent: 0, duration: 0.5,  ease: 'power3.inOut' }, 0.12);
+
+    // Once ink fully covers (at t=0.62), fade label in (0.2s)
+    tl.call(() => {
+      document.documentElement.classList.add('pt-label-in');
+    }, null, 0.62);
+
+    // Act 1 ends on label + black; navigate at t=0.82
+    tl.call(() => {
+      navigate();
+    }, null, 0.82);
+
+    // Failsafe: only call navigate if timeline hasn't navigated yet
+    leaveFailsafeTimer = setTimeout(() => {
+      if (!navigated) navigate();
+    }, 1400);
+
+    // Timeout: if navigation has not committed after PT_NAV_TIMEOUT_MS (offline / slow)
+    leaveTimeoutTimer = setTimeout(() => {
+      if (navigating) {
+        document.documentElement.classList.remove('pt-label-in');
+        gsap.to([ptPink, ptInk], {
+          yPercent: 100,
+          duration: 0.4,
+          ease: 'power3.inOut',
+          onComplete: () => {
+            if (ptEl) ptEl.style.pointerEvents = 'none';
+            document.documentElement.style.removeProperty('--pt-label');
+            try {
+              sessionStorage.removeItem('pt');
+              sessionStorage.removeItem('pt_t');
+              sessionStorage.removeItem('pt_label');
+            } catch (e) { /* */ }
+            navigating = false;
+            navigated = false;
+          },
+        });
+      }
+    }, PT_NAV_TIMEOUT_MS);
+  });
+
+  window.addEventListener('pagehide', () => {
+    clearTimeout(leaveFailsafeTimer);
+    clearTimeout(leaveTimeoutTimer);
+  });
+
+  // Prefetch on pointer/focus enter (desktop fine pointer only, skip saveData, defer to idle)
+  const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
+  if (finePointer && !navigator.connection?.saveData) {
+    scheduleIdle(() => {
+      const prefetched = new Set();
+      const maybePrefetch = (a) => {
+        const href = a?.getAttribute('href');
+        if (!href || prefetched.has(href)) return;
+        if (a.target && a.target !== '_self') return;
+        if (a.hasAttribute('download')) return;
+        if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
+        try {
+          const dest = new URL(href, window.location.href);
+          if (dest.origin !== window.location.origin) return;
+          if (dest.pathname === window.location.pathname) return;
+          const ext = dest.pathname.match(/\.([^./]+)$/);
+          if (ext && ext[1].toLowerCase() !== 'html') return;
+
+          prefetched.add(href);
+          const link = document.createElement('link');
+          link.rel  = 'prefetch';
+          link.href = dest.href;
+          document.head.appendChild(link);
+        } catch (e) { /* */ }
+      };
+      document.addEventListener('pointerenter', (e) => {
+        const a = e.target?.closest ? e.target.closest('a[href]') : null;
+        if (a) maybePrefetch(a);
+      }, true);
+      document.addEventListener('focusin', (e) => {
+        const a = e.target?.closest ? e.target.closest('a[href]') : null;
+        if (a) maybePrefetch(a);
+      }, true);
+    });
+  }
+})();
+
+/* ------------------------------------------------------------
    Nav: scrolled state, scroll-spy, sliding highlighter, mobile menu
    ------------------------------------------------------------ */
-const nav = $('[data-nav]');
+const nav      = $('[data-nav]');
 const navLinks = $$('.nav__links a');
 const indicator = $('.nav__indicator');
-const toggle = $('.nav__toggle');
-const menu = $('#menu');
+const toggle   = $('.nav__toggle');
+const menu     = $('#menu');
 
 function moveIndicator(link) {
   if (!indicator) return;
@@ -109,7 +552,8 @@ function moveIndicator(link) {
 function setActive(id) {
   let active = null;
   navLinks.forEach((a) => {
-    const on = a.getAttribute('href') === `#${id}`;
+    const href = a.getAttribute('href');
+    const on   = href === `#${id}` || href === `/#${id}`;
     if (on) {
       a.setAttribute('aria-current', 'true');
       active = a;
@@ -120,36 +564,63 @@ function setActive(id) {
   moveIndicator(active);
 }
 
-const spySections = ['work', 'about', 'skills', 'contact'].map((id) => document.getElementById(id));
+// Continuous scroll-spy: partition-based to guarantee no flicker or gap between sections
+const spySections = ['work', 'about', 'skills', 'contact']
+  .map((id) => document.getElementById(id))
+  .filter(Boolean);
 let currentSpy = null;
-const spy = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((en) => {
-      if (en.isIntersecting) {
-        currentSpy = en.target.id;
-        setActive(currentSpy);
-      } else if (currentSpy === en.target.id) {
-        currentSpy = null;
-        setActive(null);
-      }
-    });
-  },
-  { rootMargin: '-45% 0px -50% 0px' }
-);
-spySections.forEach((s) => s && spy.observe(s));
+
+function updateScrollSpy() {
+  if (!spySections.length) return;
+  const isBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 30;
+  if (isBottom) {
+    const last = spySections[spySections.length - 1];
+    if (currentSpy !== last.id) {
+      currentSpy = last.id;
+      setActive(currentSpy);
+    }
+    return;
+  }
+
+  const triggerY = Math.round(window.innerHeight * 0.35);
+  let activeSection = null;
+
+  for (let i = 0; i < spySections.length; i++) {
+    const sec = spySections[i];
+    const top = sec.getBoundingClientRect().top;
+    if (top <= triggerY) {
+      activeSection = sec.id;
+    } else {
+      break;
+    }
+  }
+
+  if (currentSpy !== activeSection) {
+    currentSpy = activeSection;
+    setActive(currentSpy);
+  }
+}
+
+if (spySections.length) {
+  if (lenis) lenis.on('scroll', updateScrollSpy);
+  window.addEventListener('scroll', updateScrollSpy, { passive: true });
+  updateScrollSpy();
+}
 
 window.addEventListener('resize', () => {
   const on = $('.nav__links a[aria-current="true"]');
   if (on) moveIndicator(on);
+  updateScrollSpy();
 });
 
-// A plain scroll listener, not a ScrollTrigger: a trigger that ends at 'max' turns itself
-// off at the very bottom of the page, which made the bar transparent over the black contact section.
-const syncNav = () => nav.classList.toggle('is-scrolled', window.scrollY > 8);
-window.addEventListener('scroll', syncNav, { passive: true });
-syncNav();
+if (nav) {
+  const syncNav = () => nav.classList.toggle('is-scrolled', window.scrollY > 8);
+  window.addEventListener('scroll', syncNav, { passive: true });
+  syncNav();
+}
 
 function openMenu() {
+  if (!nav || !menu || !toggle) return;
   nav.classList.add('is-open');
   menu.hidden = false;
   toggle.setAttribute('aria-expanded', 'true');
@@ -161,37 +632,52 @@ function openMenu() {
   }
 }
 function closeMenu() {
-  if (!nav.classList.contains('is-open')) return;
+  if (!nav || !nav.classList.contains('is-open')) return;
   nav.classList.remove('is-open');
-  menu.hidden = true;
-  toggle.setAttribute('aria-expanded', 'false');
-  toggle.setAttribute('aria-label', 'Open menu');
+  if (menu) menu.hidden = true;
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  }
   lenis && lenis.start();
   document.documentElement.style.overflow = '';
 }
-toggle.addEventListener('click', () => (nav.classList.contains('is-open') ? closeMenu() : openMenu()));
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeMenu();
-});
+if (toggle) toggle.addEventListener('click', () => (nav.classList.contains('is-open') ? closeMenu() : openMenu()));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
 window.matchMedia('(min-width: 900px)').addEventListener('change', closeMenu);
 
 /* ------------------------------------------------------------
    Scroll progress bar
    ------------------------------------------------------------ */
-if (!reduceMotion) {
-  gsap.to('.progress__bar', {
-    scaleX: 1,
-    ease: 'none',
-    scrollTrigger: { start: 0, end: 'max', scrub: 0.2 },
-  });
+if (!reduceMotion && $('.progress__bar')) {
+  const docArticle = $('.doc-article');
+  if (docArticle) {
+    gsap.to('.progress__bar', {
+      scaleX: 1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: docArticle,
+        start: 'top top+=68',
+        end: 'bottom bottom',
+        scrub: 0.2,
+      },
+    });
+  } else {
+    gsap.to('.progress__bar', {
+      scaleX: 1,
+      ease: 'none',
+      scrollTrigger: { start: 0, end: 'max', scrub: 0.2 },
+    });
+  }
 }
 
 /* ------------------------------------------------------------
    Intro: loader counter -> panel wipe -> hero words -> highlighter
+   HOME ONLY
    ------------------------------------------------------------ */
-const loader = $('.loader');
-const words = $$('.hero__h1 .w__in');
-const hl = $('.hl');
+const loader   = $('.loader');
+const words    = $$('.hero__h1 .w__in');
+const hl       = $('.hl');
 const heroBits = $$('.hero__status, .hero__foot');
 
 function endIntro() {
@@ -199,30 +685,46 @@ function endIntro() {
 }
 
 function runIntro() {
-  const seen = sessionStorage.getItem('intro-seen') === '1';
-  const skipLoader = reduceMotion || seen;
+  // Guard: only run if hero elements actually exist
+  if (!words.length && !hl && !heroBits.length) {
+    endIntro();
+    return;
+  }
+
+  const seen       = sessionStorage.getItem('intro-seen-home') === '1';
+  const isPtEnter  = document.documentElement.classList.contains('pt-enter');
+  const skipLoader = reduceMotion || seen || isPtEnter;
 
   if (reduceMotion) {
     endIntro();
     return;
   }
 
+  // Set initial hidden states synchronously
   gsap.set(words, { yPercent: 115 });
-  // Fully closed clip: matching px units on every side (not a % mix) so the
-  // browser doesn't have to interpolate right from "100%" to a px value later,
-  // which left a permanent sliver open at the box's left edge (the visible
-  // gap is boxWidth - leftInset - rightInset; with leftInset -12px and
-  // rightInset 100%, that's always exactly 12px, letting the "s" peek through
-  // before the reveal). Sizing the closed inset off the element's own
-  // measured width guarantees a true zero/negative gap at any font size.
   const hlClosedRight = hl ? Math.ceil(hl.getBoundingClientRect().width) + 40 : 0;
-  gsap.set(hl, { clipPath: `inset(-12px ${hlClosedRight}px -16px -12px)` });
+  if (hl) gsap.set(hl, { clipPath: `inset(-12px ${hlClosedRight}px -16px -12px)` });
   gsap.set(heroBits, { opacity: 0, y: 16 });
+
+  const playHeroIntro = () => {
+    const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    tl.to(words, { yPercent: 0, duration: 1, stagger: 0.07 }, 0);
+    if (hl) tl.to(hl, { clipPath: 'inset(-12px -16px -16px -12px)', duration: 0.7, ease: 'power3.inOut' }, '-=0.45');
+    tl.to(heroBits, { opacity: 1, y: 0, duration: 0.8, stagger: 0.12 }, '-=0.6');
+    try { sessionStorage.setItem('intro-seen-home', '1'); } catch (e) { /* */ }
+  };
+
+  if (isPtEnter) {
+    endIntro();
+    // Wait for pt:reveal before animating hero
+    document.addEventListener('pt:reveal', playHeroIntro, { once: true });
+    return;
+  }
 
   const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
 
   if (!skipLoader && loader) {
-    const count = $('.loader__count');
+    const count   = $('.loader__count');
     const counter = { v: 0 };
     tl.to(counter, {
       v: 100,
@@ -236,20 +738,63 @@ function runIntro() {
   }
 
   tl.to(words, { yPercent: 0, duration: 1, stagger: 0.07 }, skipLoader ? 0 : '-=0.35');
-  tl.to(hl, { clipPath: 'inset(-12px -16px -16px -12px)', duration: 0.7, ease: 'power3.inOut' }, '-=0.45');
+  if (hl) tl.to(hl, { clipPath: 'inset(-12px -16px -16px -12px)', duration: 0.7, ease: 'power3.inOut' }, '-=0.45');
   tl.to(heroBits, { opacity: 1, y: 0, duration: 0.8, stagger: 0.12 }, '-=0.6');
 
-  sessionStorage.setItem('intro-seen', '1');
+  try { sessionStorage.setItem('intro-seen-home', '1'); } catch (e) { /* */ }
 }
-runIntro();
+
+// Only run intro on home page
+if (isHome) {
+  runIntro();
+}
+
+/* ------------------------------------------------------------
+   Case & Doc Page Entrance Animation
+   Synchronously stages initial hidden state if arriving via pt-enter,
+   and animates in when pt:reveal fires. If landing directly, plays immediately.
+   ------------------------------------------------------------ */
+(function setupPageEntrance() {
+  if (reduceMotion) return;
+
+  const isCase = document.querySelector('.cs-hero');
+  const isDoc  = document.querySelector('.doc-header');
+
+  if (!isCase && !isDoc) return;
+
+  const targets = isCase
+    ? $$('.cs-hero__meta, .cs-hero__title-block, .cs-lead, .cs-hero__actions, .cs-hero__media')
+    : $$('.doc-header__reading-time, .doc-header__title, .doc-header__summary');
+
+  if (!targets.length) return;
+
+  const playEntrance = () => {
+    gsap.to(targets, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      stagger: 0.08,
+      ease: 'power3.out',
+    });
+  };
+
+  if (document.documentElement.classList.contains('pt-enter')) {
+    gsap.set(targets, { opacity: 0, y: 20 });
+    document.addEventListener('pt:reveal', playEntrance, { once: true });
+  }
+})();
 
 /* ------------------------------------------------------------
    Ticker: loops forever, speeds up and reverses with scroll
    ------------------------------------------------------------ */
-const track = $('.ticker__track');
-if (track && !reduceMotion) {
+let tickerInitialized = false;
+function setupTicker() {
+  if (tickerInitialized || reduceMotion) return;
+  tickerInitialized = true;
+  const track = $('.ticker__track');
+  if (!track) return;
   const group = $('.ticker__group', track);
-  // Repeat the group until one copy is wider than the viewport, then duplicate for the loop.
+  if (!group) return;
   const unit = group.innerHTML;
   while (group.scrollWidth < window.innerWidth) group.insertAdjacentHTML('beforeend', unit);
   track.appendChild(group.cloneNode(true));
@@ -257,7 +802,7 @@ if (track && !reduceMotion) {
   const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 40, repeat: -1 });
   ScrollTrigger.create({
     onUpdate: (self) => {
-      const v = self.getVelocity();
+      const v   = self.getVelocity();
       const dir = self.direction;
       gsap.to(loop, { timeScale: dir * (1 + Math.min(Math.abs(v) / 250, 5)), duration: 0.2, overwrite: true });
       gsap.to(loop, { timeScale: dir, duration: 0.8, delay: 0.2, overwrite: false });
@@ -266,81 +811,105 @@ if (track && !reduceMotion) {
 }
 
 /* ------------------------------------------------------------
-   Work: cards stack, previous one recedes as the next covers it
+   Work list index (.wrow) & Sticky Preview Panel (.wpanel) — HOME ONLY
+   Desktop: 2-column layout with fixed-height rows and sticky preview.
+   Row hover/focus activates corresponding preview and caption.
+   Pointer leave keeps last active.
    ------------------------------------------------------------ */
-const stackEl = $('.work__stack');
-const stackMQ = window.matchMedia('(min-width: 900px) and (prefers-reduced-motion: no-preference)');
-let stackTweens = [];
+(function setupWorkPanel() {
+  if (!finePointer) return; // Desktop fine pointer only
 
-function teardownStack() {
-  stackTweens.forEach((t) => {
-    if (t.scrollTrigger) t.scrollTrigger.kill();
-    t.kill();
-  });
-  stackTweens = [];
-  if (stackEl) stackEl.classList.remove('is-stacking');
-  gsap.set($$('.project__card'), { clearProps: 'transform,scale' });
-}
+  const workIndex = $('.work-index');
+  const rows = $$('.wrow');
+  const panelImgs = $$('.wpanel__img');
+  const captionItems = $$('.wpanel__caption-item');
 
-// Cards only stick if EVERY card is fully visible while stuck (nav + its stagger offset + a small
-// margin). On shorter screens (e.g. 1280x720) they scroll normally instead of being cut off.
-function setupStack() {
-  teardownStack();
-  if (!stackEl || !stackMQ.matches) return;
-  const projects = $$('.project');
-  const fits = projects.every((p, i) => {
-    const card = $('.project__card', p);
-    return card.offsetHeight + navH() + 20 + i * 16 + 12 <= window.innerHeight;
-  });
-  if (!fits) return;
+  if (!workIndex || !rows.length) return;
 
-  stackEl.classList.add('is-stacking');
-  projects.forEach((p, i) => {
-    const next = projects[i + 1];
-    if (!next) return;
-    stackTweens.push(
-      gsap.to($('.project__card', p), {
-        scale: 0.94,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: next,
-          start: () => `top ${Math.round(window.innerHeight * 0.9)}`,
-          end: () => `top ${navH() + 20 + (i + 1) * 16}`,
-          scrub: true,
-        },
-      })
-    );
+  function activate(slug) {
+    rows.forEach((r) => r.classList.toggle('is-active', r.dataset.slug === slug));
+    panelImgs.forEach((img) => img.classList.toggle('is-active', img.dataset.slug === slug));
+    captionItems.forEach((cap) => cap.classList.toggle('is-active', cap.dataset.slug === slug));
+  }
+
+  // Default active = row 1 on load
+  if (rows[0] && rows[0].dataset.slug) {
+    activate(rows[0].dataset.slug);
+  }
+
+  rows.forEach((row) => {
+    const slug = row.dataset.slug;
+    row.addEventListener('pointerenter', () => activate(slug));
+    row.addEventListener('focusin', () => activate(slug));
   });
-}
-setupStack();
-let stackResizeTimer;
-window.addEventListener('resize', () => {
-  clearTimeout(stackResizeTimer);
-  stackResizeTimer = setTimeout(setupStack, 200);
-});
-stackMQ.addEventListener('change', setupStack);
+
+  const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
+  scheduleIdle(() => {
+    panelImgs.slice(1).forEach((img) => {
+      if (img.loading === 'lazy') {
+        img.loading = 'eager';
+      }
+    });
+  });
+})();
 
 /* ------------------------------------------------------------
-   About: the page holds still while the statement fills in
+   Case study tabs  (.cs-tabs / .cs-tab / .cs-tab-panel)
+   ARIA tab pattern. Keyboard: Left/Right arrow, Home, End.
    ------------------------------------------------------------ */
-// The heading + statement pin to the middle of the screen and scrolling "spends" itself on
-// highlighting the text, letter by letter. The moment the last letter is lit the pin lets go and
-// the page carries on down. If the block can't fit on screen (very short landscape phones) it
-// falls back to a plain scrubbed fill with no pin, so nothing is ever cut off or trapped.
-const aboutLead = $('.about__lead');
-const statement = $('[data-scrub]');
-let aboutST = null;
+(function setupCSTabs() {
+  const tabLists = $$('.cs-tabs[role="tablist"]');
+  if (!tabLists.length) return;
 
-if (aboutLead && statement && !reduceMotion) {
-  // aria: 'none' -> SplitText adds no aria-label (invalid on a <p>). Screen readers get the
-  // sr-only copy in the markup; this animated copy is aria-hidden.
-  const split = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
-  let aboutTL = null;
-  let aboutW = 0;
+  tabLists.forEach((tabList) => {
+    const tabs   = $$('.cs-tab', tabList);
+    const panels = tabs.map((t) => $(('#' + t.getAttribute('aria-controls').replace(/^#/, ''))));
+
+    function activate(tab) {
+      tabs.forEach((t, i) => {
+        const isTarget = t === tab;
+        t.setAttribute('aria-selected', String(isTarget));
+        t.classList.toggle('is-active', isTarget);
+        t.tabIndex = isTarget ? 0 : -1;
+        const panel = panels[i];
+        if (panel) panel.hidden = !isTarget;
+      });
+      tab.focus();
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab));
+      tab.addEventListener('keydown', (e) => {
+        const idx = tabs.indexOf(tab);
+        if (e.key === 'ArrowRight') { e.preventDefault(); activate(tabs[(idx + 1) % tabs.length]); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); activate(tabs[(idx - 1 + tabs.length) % tabs.length]); }
+        if (e.key === 'Home')       { e.preventDefault(); activate(tabs[0]); }
+        if (e.key === 'End')        { e.preventDefault(); activate(tabs[tabs.length - 1]); }
+      });
+    });
+  });
+})();
+
+/* ------------------------------------------------------------
+   About: pin + fill-in — HOME ONLY
+   Do not refactor or touch the About pin logic.
+   ------------------------------------------------------------ */
+const aboutLead = $('.about__lead');
+const statement  = $('[data-scrub]');
+let aboutST      = null;
+let aboutInitialized = false;
+
+function initAbout() {
+  if (aboutInitialized || !aboutLead || !statement || reduceMotion) return;
+  aboutInitialized = true;
+
+  const split  = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
+  let aboutTL  = null;
+  let aboutW   = 0;
 
   const teardownAbout = () => {
     if (aboutTL) {
-      if (aboutTL.scrollTrigger) aboutTL.scrollTrigger.kill(true); // true -> also removes the pin spacer
+      if (aboutTL.scrollTrigger) aboutTL.scrollTrigger.kill(true);
       aboutTL.kill();
     }
     aboutTL = null;
@@ -351,10 +920,7 @@ if (aboutLead && statement && !reduceMotion) {
   const setupAbout = () => {
     teardownAbout();
     aboutW = window.innerWidth;
-
-    // Pin only if heading + statement fit under the nav with a little air.
-    const pinned = aboutLead.offsetHeight + navH() + 32 <= window.innerHeight;
-    // Scroll "budget" for the fill: long enough to read at a calm pace, short enough not to nag.
+    const pinned   = aboutLead.offsetHeight + navH() + 32 <= window.innerHeight;
     const distance = () => Math.round(Math.max(window.innerHeight * 1.4, 800));
 
     aboutTL = gsap.timeline({
@@ -362,37 +928,32 @@ if (aboutLead && statement && !reduceMotion) {
       scrollTrigger: pinned
         ? {
             trigger: aboutLead,
-            start: () => `center ${Math.round(window.innerHeight / 2 + navH() / 2)}px`,
-            end: () => `+=${distance()}`,
-            pin: true,
-            scrub: 0.4,
+            start:   () => `center ${Math.round(window.innerHeight / 2 + navH() / 2)}px`,
+            end:     () => `+=${distance()}`,
+            pin:     true,
+            scrub:   0.4,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           }
         : {
             trigger: statement.closest('.about__statement'),
-            start: 'top 82%',
-            end: 'bottom 55%',
-            scrub: 0.4,
+            start:   'top 82%',
+            end:     'bottom 55%',
+            scrub:   0.4,
           },
     });
 
-    // Letters light up across the first ~90% of the pinned distance; the last ~10% is a short
-    // hold so the finished sentence is readable for a beat before the page is released.
     aboutTL.fromTo(
       split.chars,
       { opacity: 0.16 },
       { opacity: 1, duration: 0.06, stagger: { amount: 0.9 } }
     );
     aboutTL.to({}, { duration: pinned ? 0.1 : 0.001 });
-
     aboutST = aboutTL.scrollTrigger;
   };
 
   setupAbout();
 
-  // Rebuild only when the width changes (rotation, window resize). Height-only resizes, like a
-  // mobile browser's address bar sliding away, must not rebuild a pin mid-scroll.
   let aboutResizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(aboutResizeTimer);
@@ -404,21 +965,53 @@ if (aboutLead && statement && !reduceMotion) {
     }, 200);
   });
 
-  // The block's height depends on the webfonts, so re-decide whether it fits once they are in.
-  const resetAbout = () => {
-    setupAbout();
-    ScrollTrigger.refresh();
-  };
+  const resetAbout = () => { setupAbout(); ScrollTrigger.refresh(); };
   document.fonts && document.fonts.ready.then(resetAbout);
   window.addEventListener('load', resetAbout);
 }
 
 /* ------------------------------------------------------------
+   Below-the-fold setup deferral (Home only)
+   IntersectionObserver with 600px margin initializes About & Ticker
+   only when they approach the viewport.
+   ------------------------------------------------------------ */
+if (isHome && !reduceMotion) {
+  if (typeof IntersectionObserver !== 'undefined') {
+    const btfObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const target = entry.target;
+        if (target.classList.contains('ticker') || target.querySelector('.ticker__track')) {
+          setupTicker();
+          btfObserver.unobserve(target);
+        }
+        if (target.id === 'about' || target.classList.contains('about')) {
+          initAbout();
+          btfObserver.unobserve(target);
+        }
+      });
+    }, { rootMargin: '600px 0px' });
+
+    const tickerEl = $('.ticker');
+    if (tickerEl) btfObserver.observe(tickerEl);
+    const aboutEl = $('#about');
+    if (aboutEl) btfObserver.observe(aboutEl);
+
+    if (window.location.hash === '#about') {
+      initAbout();
+    }
+  } else {
+    setupTicker();
+    initAbout();
+  }
+}
+
+/* ------------------------------------------------------------
    Contact: copy email
    ------------------------------------------------------------ */
-const copyBtn = $('[data-copy]');
+const copyBtn    = $('[data-copy]');
 const copyStatus = $('[data-copy-status]');
-const mail = $('[data-email]');
+const mail       = $('[data-email]');
 if (copyBtn && mail) {
   const label = copyBtn.textContent;
   let timer;
@@ -431,7 +1024,7 @@ if (copyBtn && mail) {
       ta.value = value;
       ta.setAttribute('readonly', '');
       ta.style.position = 'fixed';
-      ta.style.opacity = '0';
+      ta.style.opacity  = '0';
       document.body.appendChild(ta);
       ta.select();
       document.execCommand('copy');
@@ -446,11 +1039,7 @@ if (copyBtn && mail) {
     }, 1800);
   });
 
-  // The pressed-in look is meant to stay visible on tap, but native
-  // touch ":hover" can get stuck on until the next tap elsewhere on
-  // the page. Drive it with pointer events instead, so it always
-  // releases cleanly on lift/cancel — on every input type.
-  const press = () => copyBtn.classList.add('is-pressed');
+  const press   = () => copyBtn.classList.add('is-pressed');
   const release = () => copyBtn.classList.remove('is-pressed');
   copyBtn.addEventListener('pointerdown', press);
   copyBtn.addEventListener('pointerup', release);
@@ -470,55 +1059,437 @@ if (finePointer && !reduceMotion) {
       qx((e.clientX - (r.left + r.width / 2)) * 0.25);
       qy((e.clientY - (r.top + r.height / 2)) * 0.25);
     });
-    el.addEventListener('mouseleave', () => {
-      qx(0);
-      qy(0);
-    });
+    el.addEventListener('mouseleave', () => { qx(0); qy(0); });
   });
 
   const ring = $('.cursor');
-  document.body.classList.add('has-cursor');
-  const rx = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3.out' });
-  const ry = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3.out' });
-  let shown = false;
-  window.addEventListener('mousemove', (e) => {
-    if (!shown) {
-      shown = true;
-      gsap.set(ring, { x: e.clientX, y: e.clientY });
-      gsap.to(ring, { opacity: 1, duration: 0.3 });
-    }
-    rx(e.clientX);
-    ry(e.clientY);
-  });
-  document.addEventListener('mouseover', (e) => {
-    // Enlarging via `scale` puts a transform on the same element as
-    // mix-blend-mode, which is exactly what triggers Firefox's
-    // quadrant-seam compositor bug on the blended circle. Resizing
-    // via width/height instead keeps `transform` doing translation
-    // only, which Firefox composites as a single stable layer.
-    const hot = e.target.closest('a, button, .frame');
-    const size = hot ? 68.4 : 36;
-    gsap.to(ring, {
-      width: size,
-      height: size,
-      marginTop: -size / 2,
-      marginLeft: -size / 2,
-      duration: 0.3,
-      ease: 'power3.out',
+  if (ring) {
+    document.body.classList.add('has-cursor');
+    const rx = gsap.quickTo(ring, 'x', { duration: 0.35, ease: 'power3.out' });
+    const ry = gsap.quickTo(ring, 'y', { duration: 0.35, ease: 'power3.out' });
+    let shown = false;
+    window.addEventListener('mousemove', (e) => {
+      if (!shown) {
+        shown = true;
+        gsap.set(ring, { x: e.clientX, y: e.clientY });
+        gsap.to(ring, { opacity: 1, duration: 0.3 });
+      }
+      rx(e.clientX);
+      ry(e.clientY);
     });
-  });
-  document.addEventListener('mouseleave', () => gsap.to(ring, { opacity: 0, duration: 0.2 }));
+    document.addEventListener('mouseover', (e) => {
+      const hot  = e.target?.closest ? e.target.closest('a, button, .frame') : null;
+      const size = hot ? 68.4 : 36;
+      gsap.to(ring, {
+        width:      size,
+        height:     size,
+        marginTop:  -size / 2,
+        marginLeft: -size / 2,
+        duration:   0.3,
+        ease:       'power3.out',
+      });
+    });
+    document.addEventListener('mouseleave', () => gsap.to(ring, { opacity: 0, duration: 0.2 }));
+  }
 }
 
 /* ------------------------------------------------------------
-   Layout settles after webfonts + images
+   Layout settles after webfonts + images — HOME ONLY
    ------------------------------------------------------------ */
-// Card heights depend on the webfonts, so re-decide whether the cards can stack once they are in.
-document.fonts && document.fonts.ready.then(() => {
-  setupStack();
-  ScrollTrigger.refresh();
+if (isHome) {
+  document.fonts && document.fonts.ready.then(() => {
+    ScrollTrigger.refresh();
+  });
+  window.addEventListener('load', () => {
+    ScrollTrigger.refresh();
+  });
+}
+
+/* ------------------------------------------------------------
+   Doc reader: TOC rail & details active link observer
+   ------------------------------------------------------------ */
+(function setupDocTocObserver() {
+  const allLinks = Array.from(document.querySelectorAll('.doc-toc-rail a[href^="#"], .doc-toc-details a[href^="#"]'));
+  if (!allLinks.length) return;
+
+  const headingItems = [];
+  const seenTargets = new Set();
+
+  allLinks.forEach((a) => {
+    const href = a.getAttribute('href');
+    const target = getTargetElement(href);
+    if (target && !seenTargets.has(target)) {
+      seenTargets.add(target);
+      headingItems.push({ target, href });
+    }
+  });
+
+  if (!headingItems.length) return;
+
+  // Sort headings in visual document position
+  headingItems.sort((a, b) => {
+    const pos = a.target.compareDocumentPosition(b.target);
+    return (pos & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1;
+  });
+
+  const tocRail = document.querySelector('.doc-toc-rail');
+
+  function scrollActiveTocIntoView() {
+    if (!tocRail || tocRail.scrollHeight <= tocRail.clientHeight) return;
+    const activeLinks = tocRail.querySelectorAll('a.is-active');
+    if (!activeLinks.length) return;
+    const activeLink = activeLinks[activeLinks.length - 1];
+
+    const railRect = tocRail.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+
+    if (linkRect.bottom > railRect.bottom) {
+      tocRail.scrollTop += (linkRect.bottom - railRect.bottom) + 24;
+    } else if (linkRect.top < railRect.top) {
+      tocRail.scrollTop -= (railRect.top - linkRect.top) + 24;
+    }
+  }
+
+  function setActiveHrefs(hrefs) {
+    const activeSet = new Set(Array.isArray(hrefs) ? hrefs : [hrefs]);
+    allLinks.forEach((l) => {
+      const h = l.getAttribute('href');
+      if (activeSet.has(h)) {
+        l.classList.add('is-active');
+        l.setAttribute('aria-current', 'true');
+      } else {
+        l.classList.remove('is-active');
+        l.removeAttribute('aria-current');
+      }
+    });
+    scrollActiveTocIntoView();
+  }
+
+  // Set initial active link
+  setActiveHrefs(headingItems[0].href);
+
+  // When a TOC link is clicked, keep it active until the user manually initiates scroll (wheel / touch / keyboard / outside click).
+  // Avoid arbitrary timeouts that snap back while smooth scroll or reading is underway.
+  let userClickedHref = null;
+
+  allLinks.forEach((a) => {
+    a.addEventListener('click', () => {
+      const href = a.getAttribute('href');
+      userClickedHref = href;
+      setActiveHrefs(href);
+    });
+  });
+
+  const clearUserClick = () => {
+    userClickedHref = null;
+  };
+
+  window.addEventListener('wheel', clearUserClick, { passive: true });
+  window.addEventListener('touchmove', clearUserClick, { passive: true });
+  document.addEventListener('pointerdown', (e) => {
+    if (!e.target?.closest || !e.target.closest('.doc-toc-rail, .doc-toc-details')) {
+      userClickedHref = null;
+    }
+  }, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Space', 'Home', 'End'].includes(e.code)) {
+      userClickedHref = null;
+    }
+  }, { passive: true });
+
+  function updateActiveHeading() {
+    if (userClickedHref) return;
+
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const innerHeight = window.innerHeight;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const maxScroll = scrollHeight - innerHeight;
+    const headerH = navH();
+
+    // Bottom of page check: if scrolled near or at the bottom (within 40px),
+    // check visible concluding headings. If multiple are in view (e.g. "Lessons Learned" and "Impact"
+    // on concise documents), highlight both. If only one is visible, highlight that one.
+    if (maxScroll > 0 && scrollY >= maxScroll - 40) {
+      const visibleAtBottom = headingItems.filter((item) => {
+        const top = item.target.getBoundingClientRect().top;
+        return top >= headerH && top <= innerHeight * 0.75;
+      });
+
+      if (visibleAtBottom.length >= 2) {
+        setActiveHrefs(visibleAtBottom.map((v) => v.href));
+        return;
+      } else if (visibleAtBottom.length === 1) {
+        setActiveHrefs(visibleAtBottom[0].href);
+        return;
+      } else {
+        setActiveHrefs(headingItems[headingItems.length - 1].href);
+        return;
+      }
+    }
+
+    const threshold = headerH + 50;
+
+    // Find the last heading whose top position is <= threshold
+    let activeIndex = 0;
+    for (let i = 0; i < headingItems.length; i++) {
+      const top = headingItems[i].target.getBoundingClientRect().top;
+      if (top <= threshold) {
+        activeIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    // Tail reading focus check: for short concluding sections that cannot scroll all the way to threshold,
+    // if the second-to-last heading is in reading view (top <= 45% viewport) and we haven't reached lastItem,
+    // focus stays on the second-to-last heading (never falling back to an earlier heading like third-last).
+    const secondLastIdx = headingItems.length - 2;
+    if (secondLastIdx >= 0 && activeIndex < secondLastIdx) {
+      const secondLastTop = headingItems[secondLastIdx].target.getBoundingClientRect().top;
+      if (secondLastTop <= innerHeight * 0.45) {
+        activeIndex = secondLastIdx;
+      }
+    }
+
+    setActiveHrefs(headingItems[activeIndex].href);
+  }
+
+  window.addEventListener('scroll', updateActiveHeading, { passive: true });
+  window.addEventListener('resize', updateActiveHeading, { passive: true });
+  if (lenis) {
+    lenis.on('scroll', updateActiveHeading);
+  }
+
+  updateActiveHeading();
+})();
+
+/* ------------------------------------------------------------
+   Doc reader: auto-scroll active sidebar link into view
+   ------------------------------------------------------------ */
+(function setupDocSidebarAutoScroll() {
+  const sidebar = document.querySelector('.doc-layout__sidebar');
+  if (!sidebar) return;
+
+  const scrollActiveLink = () => {
+    const activeLink = sidebar.querySelector('a[aria-current="page"]');
+    if (!activeLink) return;
+    const sidebarRect = sidebar.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+
+    if (linkRect.bottom > sidebarRect.bottom) {
+      sidebar.scrollTop += (linkRect.bottom - sidebarRect.bottom) + 32;
+    } else if (linkRect.top < sidebarRect.top) {
+      sidebar.scrollTop -= (sidebarRect.top - linkRect.top) + 32;
+    }
+  };
+
+  scrollActiveLink();
+  requestAnimationFrame(scrollActiveLink);
+  window.addEventListener('load', scrollActiveLink, { once: true });
+})();
+
+/* ------------------------------------------------------------
+   Case study: sticky action bar (phones only)
+   ------------------------------------------------------------ */
+(function setupStickyBar() {
+  const stickyBar = document.querySelector('.cs-sticky-bar');
+  const hero = document.querySelector('.cs-hero');
+  const footer = document.querySelector('footer, .footer');
+  if (!stickyBar || !hero) return;
+
+  let heroGone = false;
+  let footerNear = false;
+
+  const update = () => {
+    if (heroGone && !footerNear) {
+      stickyBar.classList.add('is-visible');
+    } else {
+      stickyBar.classList.remove('is-visible');
+    }
+  };
+
+  const heroObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      heroGone = !entry.isIntersecting;
+      update();
+    });
+  }, { threshold: 0 });
+  heroObserver.observe(hero);
+
+  if (footer) {
+    const footerObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        footerNear = entry.isIntersecting;
+        update();
+      });
+    }, { rootMargin: '0px 0px 80px 0px', threshold: 0 });
+    footerObserver.observe(footer);
+  }
+})();
+
+/* ------------------------------------------------------------
+   Doc reader: auto-close mobile TOC details on link click
+   ------------------------------------------------------------ */
+(function setupDocTocAutoClose() {
+  const docTocDetails = document.querySelector('.doc-toc-details');
+  if (!docTocDetails) return;
+
+  docTocDetails.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      docTocDetails.removeAttribute('open');
+    });
+  });
+})();
+
+/* ------------------------------------------------------------
+   Gallery: touch lightbox with pinch-to-zoom
+   ------------------------------------------------------------ */
+(function setupGalleryLightbox() {
+  const galleryItems = document.querySelectorAll('.cs-gallery__item');
+  if (!galleryItems.length) return;
+
+  const lightbox = document.getElementById('cs-lightbox');
+  if (!lightbox) return;
+
+  const imgEl = lightbox.querySelector('.cs-lightbox__img');
+  const captionEl = lightbox.querySelector('.cs-lightbox__caption');
+  const closeBtn = lightbox.querySelector('.cs-lightbox__close');
+  let lastTrigger = null;
+
+  let scale = 1;
+  let initialDist = 0;
+  let baseScale = 1;
+  let lastTapTime = 0;
+
+  const setTransform = (s) => {
+    scale = Math.min(Math.max(1, s), 4);
+    if (imgEl) imgEl.style.transform = `scale(${scale})`;
+  };
+
+  const openLightbox = (img, caption, trigger) => {
+    lastTrigger = trigger;
+    if (imgEl) {
+      imgEl.src = img.currentSrc || img.src;
+      imgEl.alt = img.alt || '';
+      setTransform(1);
+    }
+    if (captionEl) {
+      captionEl.textContent = caption || '';
+    }
+    lightbox.removeAttribute('hidden');
+    void lightbox.offsetWidth; // Force reflow
+    lightbox.classList.add('is-open');
+    document.body.classList.add('lightbox-open');
+    document.body.style.overflow = 'hidden';
+    if (closeBtn) closeBtn.focus();
+  };
+
+  const closeLightbox = () => {
+    lightbox.classList.remove('is-open');
+    document.body.classList.remove('lightbox-open');
+    document.body.style.overflow = '';
+    setTransform(1);
+    setTimeout(() => {
+      lightbox.setAttribute('hidden', '');
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        lastTrigger.focus();
+      }
+    }, 200);
+  };
+
+  galleryItems.forEach((item) => {
+    const frame = item.querySelector('.frame');
+    const img = item.querySelector('img');
+    const figcaption = item.querySelector('figcaption');
+    const captionText = figcaption ? figcaption.textContent : '';
+
+    const trigger = frame || img;
+    if (!trigger || !img) return;
+
+    trigger.setAttribute('tabindex', '0');
+    trigger.setAttribute('role', 'button');
+    trigger.setAttribute('aria-label', `View image: ${img.alt || captionText || 'preview'}`);
+
+    const handleTrigger = (e) => {
+      e.preventDefault();
+      openLightbox(img, captionText, trigger);
+    };
+
+    trigger.addEventListener('click', handleTrigger);
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(img, captionText, trigger);
+      }
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeLightbox);
+  }
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || e.target.classList.contains('cs-lightbox__stage')) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('is-open')) {
+      closeLightbox();
+    }
+  });
+
+  // Touch pinch-to-zoom & double-tap on image
+  if (imgEl) {
+    imgEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialDist = Math.hypot(dx, dy);
+        baseScale = scale;
+      } else if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - lastTapTime < 300) {
+          e.preventDefault();
+          setTransform(scale > 1.2 ? 1 : 2.5);
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+      }
+    }, { passive: false });
+
+    imgEl.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && initialDist > 0) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const factor = dist / initialDist;
+        setTransform(baseScale * factor);
+      }
+    }, { passive: false });
+
+    imgEl.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        initialDist = 0;
+        if (scale < 1.05) {
+          setTransform(1);
+        }
+      }
+    });
+  }
+})();
+
+/* ------------------------------------------------------------
+   Accessibility: keyboard scroll for code & diagram blocks
+   ------------------------------------------------------------ */
+document.querySelectorAll('pre, .cs-arch__diagram, .hljs').forEach((el) => {
+  if (!el.hasAttribute('tabindex')) {
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'region');
+    el.setAttribute('aria-label', 'Code or diagram block');
+  }
 });
-window.addEventListener('load', () => {
-  setupStack();
-  ScrollTrigger.refresh();
-});
+

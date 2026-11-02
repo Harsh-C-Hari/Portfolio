@@ -2,28 +2,30 @@
 <html lang="en">
 
 <head>
+  <!-- Page transition: if sessionStorage flag is set, add pt-enter and --pt-label before CSS loads
+       so the cover and label are already on-screen at first paint (no flash of new page content). -->
+  <script>try{var n=window.performance&&performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];var t=n?n.type:(window.performance&&performance.navigation?(performance.navigation.type===1?'reload':(performance.navigation.type===2?'back_forward':'navigate')):'navigate');if(t==='reload'||t==='back_forward'){sessionStorage.removeItem('pt');sessionStorage.removeItem('pt_t');sessionStorage.removeItem('pt_label');}else if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');var l=sessionStorage.getItem('pt_label');if(l){document.documentElement.style.setProperty('--pt-label',JSON.stringify(l));}}}catch(e){}</script>
+
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#F2F1EC">
   <title>Harsh C Hari — Full-Stack Developer &amp; CSE Student</title>
   <meta name="description"
     content="Harsh C Hari — CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
 
-  <!-- Marks the page as JS-capable before first paint so CSS can safely stage intro states -->
   <script>document.documentElement.classList.add('js');</script>
 
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="/styles.css">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Sometype+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
+  <link rel="preload" href="/fonts/anton-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <link rel="canonical" href="https://harshchari.vercel.app/">
 
@@ -45,8 +47,6 @@
     content="CSE student and full-stack developer building experimental software systems, AI assistants, and campus platforms.">
   <meta name="twitter:image" content="https://harshchari.vercel.app/og-image-2.jpg">
   <meta name="twitter:image:alt" content="Harsh C Hari — Full-Stack Developer &amp; CSE Student">
-
-  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
@@ -58,7 +58,9 @@
 
   <!-- include:src/partials/nav.html -->
 
-  <main id="main-content">
+  <!-- include:src/partials/transition.html -->
+
+  <main id="main-content" tabindex="-1">
 
     <!-- include:src/partials/hero.html -->
 
@@ -76,7 +78,7 @@
 
   <!-- include:src/partials/footer.html -->
 
-  <script src="animation.bundle.js" defer></script>
+  <script src="/animation.bundle.js" defer></script>
 </body>
 
 </html>

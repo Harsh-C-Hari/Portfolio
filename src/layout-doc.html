@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" data-page="{{page_type}}" data-slug="{{page_slug}}">
+<head>
+  <script>try{var n=window.performance&&performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];var t=n?n.type:(window.performance&&performance.navigation?(performance.navigation.type===1?'reload':(performance.navigation.type===2?'back_forward':'navigate')):'navigate');if(t==='reload'||t==='back_forward'){sessionStorage.removeItem('pt');sessionStorage.removeItem('pt_t');sessionStorage.removeItem('pt_label');}else if(sessionStorage.getItem('pt')==='1'){document.documentElement.classList.add('pt-enter');var l=sessionStorage.getItem('pt_label');if(l){document.documentElement.style.setProperty('--pt-label',JSON.stringify(l));}}}catch(e){}</script>
+  <script>try{sessionStorage.setItem('intro-seen','1');}catch(e){}</script>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#F2F1EC">
+
+  <title>{{page_title}}</title>
+  <meta name="description" content="{{page_description}}">
+
+  <script>document.documentElement.classList.add('js');</script>
+
+  <link rel="stylesheet" href="/styles.css?v={{css_version}}">
+
+  <link rel="preload" href="/fonts/anton-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <link rel="canonical" href="{{page_canonical}}">
+
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Harsh C Hari">
+  <meta property="og:title" content="{{page_title}}">
+  <meta property="og:description" content="{{page_description}}">
+  <meta property="og:url" content="{{page_canonical}}">
+  <meta property="og:image" content="{{page_og_image}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{page_title}}">
+  <meta name="twitter:description" content="{{page_description}}">
+  <meta name="twitter:image" content="{{page_og_image}}">
+
+  {{page_jsonld}}
+</head>
+
+<body>
+  <div class="progress" aria-hidden="true"><i class="progress__bar"></i></div>
+  <div class="cursor" aria-hidden="true"></div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <!-- include:src/partials/nav.html -->
+
+  <!-- include:src/partials/transition.html -->
+
+  <div class="doc-layout">
+    <!-- Sidebar (left) -->
+    <aside class="doc-layout__sidebar" id="doc-sidebar" data-lenis-prevent>
+      {{doc_sidebar}}
+    </aside>
+
+    <!-- Content + TOC rail container (centred in space beside sidebar) -->
+    <div class="doc-layout__content">
+      <main id="main-content" class="doc-layout__main" tabindex="-1">
+        <article class="doc-article">
+          <header class="doc-header">
+            <p class="doc-header__reading-time">{{doc_reading_time}}</p>
+            <h1 class="doc-header__title">{{doc_title}}</h1>
+            <p class="doc-header__summary">{{doc_summary}}</p>
+          </header>
+
+          <!-- Collapsible TOC (< 1200px) -->
+          <details class="doc-toc-details">
+            <summary class="doc-toc-details__summary">On this page</summary>
+            <nav class="doc-toc-details__nav" aria-label="On this page">
+              {{doc_toc_links}}
+            </nav>
+          </details>
+
+          <div class="doc-body">
+            {{doc_body}}
+          </div>
+
+          {{doc_prevnext}}
+        </article>
+      </main>
+
+      <!-- Sticky TOC rail on desktop (>= 1200px) -->
+      <aside class="doc-toc-rail" aria-label="Table of contents" data-lenis-prevent>
+        <div class="doc-toc-rail__inner">
+          <p class="doc-toc-rail__head">On this page</p>
+          <nav class="doc-toc-rail__nav" aria-label="Table of contents">
+            {{doc_toc_links}}
+          </nav>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- include:src/partials/footer.html -->
+
+  <script src="/animation.bundle.js?v={{js_version}}" defer></script>
+</body>
+
+</html>

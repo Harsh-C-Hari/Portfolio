@@ -1,0 +1,745 @@
+<section class="cs-hero" aria-labelledby="cs-title">
+  <div class="container">
+    <div class="cs-hero__inner">
+
+      <div class="cs-hero__meta">
+        <span class="cs-eyebrow">(CASE STUDY, 01)</span>
+        <div class="cs-tags">
+          <span class="cs-tag">Systems</span>
+          <span class="cs-tag">Reliability</span>
+          <span class="cs-tag">Full-stack</span>
+        </div>
+      </div>
+
+      <div class="cs-hero__title-block">
+        <h1 class="cs-title" id="cs-title">PCGO</h1>
+        <p class="cs-subtitle">Personal Cloud Gaming Orchestrator</p>
+      </div>
+
+      <p class="cs-lead">A self-hosted cloud gaming platform. It turns one Windows gaming PC into a server I can play from anywhere, and it keeps that server healthy without me touching it.</p>
+
+      <div class="cs-hero__actions">
+        <a class="btn btn--pink" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator" rel="noopener" target="_blank">GitHub ↗</a>
+      </div>
+
+      <figure class="cs-hero__media">
+        <div class="frame">
+          <div class="frame__bar"><i></i><i></i><i></i><span>PCGO admin dashboard</span></div>
+          <img src="/img/work/pcgo/home-800.webp" srcset="/img/work/pcgo/home-800.webp 800w, /img/work/pcgo/home-1600.webp 1600w" sizes="(max-width: 600px) 300px, (max-width: 1200px) 100vw, 1200px" alt="PCGO admin dashboard home page showing active alerts, session launcher and live activity" width="1600" height="900" loading="eager" fetchpriority="high" decoding="async">
+        </div>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     META ROW
+     ====================================================== -->
+<section class="cs-meta-row" aria-label="Project metadata">
+  <div class="container">
+    <dl class="cs-meta-dl">
+      <div><dt>Role</dt><dd>Design and full-stack build</dd></div>
+      <div><dt>Year</dt><dd>2026</dd></div>
+      <div><dt>Status</dt><dd>v0.1 live, Phase 26 next</dd></div>
+      <div><dt>Team</dt><dd>Independent</dd></div>
+      <div><dt>Stack</dt><dd>React, Vite, FastAPI, Python, SQLite, WebSockets, JWT, Sunshine, Tailscale</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ======================================================
+     STAT ROW
+     ====================================================== -->
+<section class="cs-stats" aria-label="Project stats">
+  <div class="container">
+    <ul class="cs-stats__list">
+      <li>
+        <span class="cs-stat__num">74</span>
+        <span class="cs-stat__cap">API routes</span>
+      </li>
+      <li>
+        <span class="cs-stat__num">25</span>
+        <span class="cs-stat__cap">development phases shipped</span>
+      </li>
+      <li>
+        <span class="cs-stat__num">2</span>
+        <span class="cs-stat__cap">self-healing watchdogs</span>
+      </li>
+      <li>
+        <span class="cs-stat__num">43</span>
+        <span class="cs-stat__cap">frontend tests passing</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================================================
+     01 THE PROBLEM
+     ====================================================== -->
+<section class="cs-section" id="problem" aria-labelledby="problem-title">
+  <div class="container cs-section__inner">
+    <header class="cs-section__head">
+      <span class="cs-section__num">01</span>
+      <h2 class="cs-section__title" id="problem-title">Cloud gaming is rented. I wanted to own mine.</h2>
+    </header>
+    <div class="cs-prose">
+      <p>Cloud gaming is usually expensive, closed, or both. I wanted the opposite: my PC, my saves, my network, reachable from anywhere.</p>
+      <p>Streaming itself is the solved part. Sunshine handles it well. The hard part is everything around it: starting and stopping sessions cleanly, keeping saves safe from one session to the next, knowing when the host is unhealthy, and fixing it when I am not there.</p>
+    </div>
+    <ul class="cs-challenges" aria-label="Core challenges">
+      <li>Session management</li>
+      <li>Save synchronisation</li>
+      <li>Host monitoring</li>
+      <li>Recovery when things fail</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================================================
+     02 HOW IT FITS TOGETHER
+     ====================================================== -->
+<section class="cs-section cs-section--alt" id="architecture" aria-labelledby="arch-title">
+  <div class="container cs-section__inner cs-section__inner--split">
+    <header class="cs-section__head">
+      <span class="cs-section__num">02</span>
+      <h2 class="cs-section__title" id="arch-title">Four layers, one host.</h2>
+    </header>
+
+    <div class="cs-section__content">
+      <div class="cs-arch">
+        <!-- Inline SVG diagram -->
+        <figure class="cs-arch__diagram" aria-labelledby="pcgo-arch-title">
+          <svg viewBox="0 0 560 600" class="pcgo-arch-svg" role="img" aria-labelledby="pcgo-arch-title pcgo-arch-desc" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <title id="pcgo-arch-title">PCGO System Architecture Diagram</title>
+            <desc id="pcgo-arch-desc">Layered architecture diagram: React Dashboard at top connects to FastAPI Backend, Controllers &amp; Services, Python Host Agent, Sunshine &amp; Tailscale, down to Windows Gaming Host, with an internal event token side channel.</desc>
+            <defs>
+              <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                <path d="M 0 1 L 7 4 L 0 7 Z" fill="var(--ink)"/>
+              </marker>
+            </defs>
+
+            <!-- Level 1: React dashboard -->
+            <rect id="box1" x="16" y="24" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t1" x="216" y="49" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--paper)">React dashboard</text>
+            <text id="c1" x="216" y="69" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">Admin and user views</text>
+
+            <!-- Arrow 1 -> 2 -->
+            <line x1="216" y1="84" x2="216" y2="112" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 2: FastAPI backend -->
+            <rect id="box2" x="16" y="112" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t2" x="216" y="137" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--paper)">FastAPI backend</text>
+            <text id="c2" x="216" y="157" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">JWT on every route</text>
+
+            <!-- Arrow 2 -> 3 -->
+            <line x1="216" y1="172" x2="216" y2="200" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 3: Controllers & services -->
+            <rect id="box3" x="16" y="200" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t3" x="216" y="225" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--paper)">Controllers &amp; services</text>
+            <text id="c3" x="216" y="245" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">Sessions, saves, monitoring, recovery</text>
+
+            <!-- Arrow 3 -> 4 -->
+            <line x1="216" y1="260" x2="216" y2="288" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 4: Python host agent -->
+            <rect id="box4" x="16" y="288" width="400" height="60" rx="6" fill="var(--ink)" stroke="var(--ink)"/>
+            <text id="t4" x="216" y="313" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--paper)">Python host agent</text>
+            <text id="c4" x="216" y="333" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--pink)">Does the work on the Windows PC</text>
+
+            <!-- Arrow 4 -> 5 -->
+            <line x1="112" y1="348" x2="112" y2="376" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+            <line x1="320" y1="348" x2="320" y2="376" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 5: Sunshine & Tailscale -->
+            <rect id="box5a" x="16" y="376" width="192" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text id="t5a" x="112" y="401" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--ink)">Sunshine</text>
+            <text id="c5a" x="112" y="421" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--ink)">streaming</text>
+
+            <rect id="box5b" x="224" y="376" width="192" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text id="t5b" x="320" y="401" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--ink)">Tailscale</text>
+            <text id="c5b" x="320" y="421" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--ink)">networking</text>
+
+            <!-- Arrow 5 -> 6 -->
+            <line x1="112" y1="436" x2="112" y2="464" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+            <line x1="320" y1="436" x2="320" y2="464" stroke="var(--ink)" stroke-width="2" marker-end="url(#arr)"/>
+
+            <!-- Level 6: Windows gaming host -->
+            <rect id="box6" x="16" y="464" width="400" height="60" rx="6" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="2"/>
+            <text id="t6" x="216" y="489" text-anchor="middle" font-family="var(--f-display)" font-size="18" font-weight="400" fill="var(--ink)">Windows gaming host</text>
+            <text id="c6" x="216" y="509" text-anchor="middle" font-family="var(--f-mono)" font-size="12" fill="var(--ink)">the machine</text>
+
+            <!-- Side channel: dashed path between Host Agent and Backend -->
+            <path d="M 416 318 H 486 V 142 H 416" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arr)"/>
+            <!-- Horizontal pill label -->
+            <rect id="box_pill" x="420" y="217" width="132" height="26" rx="13" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/>
+            <text id="t_pill" x="486" y="234" text-anchor="middle" font-family="var(--f-mono)" font-size="12" font-weight="500" fill="var(--ink)">internal event token</text>
+          </svg>
+
+          <!-- Accessible ordered list describing the flow -->
+          <ol class="sr-only">
+            <li><strong>React dashboard:</strong> Admin and user views</li>
+            <li><strong>FastAPI backend:</strong> JWT on every route</li>
+            <li><strong>Controllers &amp; services:</strong> Sessions, saves, monitoring, recovery</li>
+            <li><strong>Python host agent:</strong> Does the work on the Windows PC; connects to FastAPI backend via an internal event token</li>
+            <li><strong>Sunshine &amp; Tailscale:</strong> Streaming and secure mesh networking</li>
+            <li><strong>Windows gaming host:</strong> The machine</li>
+          </ol>
+
+          <figcaption class="cs-arch__caption">
+            <span class="cs-mono">internal event token</span>: Sunshine's hook script and a log-tailing monitor report stream state straight into the backend. They get a separate, narrower credential.
+          </figcaption>
+        </figure>
+
+        <!-- Text descriptions -->
+        <div class="cs-arch__text">
+          <dl class="cs-arch__dl">
+            <div>
+              <dt>Dashboard.</dt>
+              <dd>One React app. After login it shows the full admin dashboard or a scoped user dashboard limited to that account's own sessions, analytics, history and logs.</dd>
+            </div>
+            <div>
+              <dt>Backend.</dt>
+              <dd>FastAPI. Every route except login and first-run bootstrap needs a valid JWT, and roles are enforced per route.</dd>
+            </div>
+            <div>
+              <dt>Host agent.</dt>
+              <dd>The Python layer that touches the machine: runs sessions, injects and backs up saves, monitors, validates and performs recovery actions.</dd>
+            </div>
+            <div>
+              <dt>Storage.</dt>
+              <dd>History, users and recovery events live in SQLite. Host config, the game library and the active-session crash snapshot stay as JSON on purpose, so the host can still recover when the database is the thing that broke.</dd>
+            </div>
+          </dl>
+          <p class="cs-honesty">Single host today. A multi-host design exists as a document, not as code.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     03 THINGS THAT BROKE
+     ====================================================== -->
+<section class="cs-section" id="investigations" aria-labelledby="broke-title">
+  <div class="container cs-section__inner">
+    <header class="cs-section__head">
+      <span class="cs-section__num">03</span>
+      <h2 class="cs-section__title" id="broke-title">What went wrong, and what I learned.</h2>
+      <p class="cs-section__intro">These are the problems that taught me the most. Each one links to the full write-up.</p>
+    </header>
+
+    <div class="cs-cards">
+
+      <article class="cs-card">
+        <h3 class="cs-card__title">Tailscale is not a service you restart</h3>
+        <dl class="cs-card__dl">
+          <div><dt>Problem</dt><dd>Tailscale looked healthy to Windows while the connection was dead. My first watchdog just restarted the service and often fixed nothing.</dd></div>
+          <div><dt>What I found</dt><dd>After about a week of testing: Tailscale is two parts, the service and the IPN backend process, and a healthy connection needs both. Different failure states needed different fixes.</dd></div>
+          <div><dt>What I did</dt><dd>Rebuilt the watchdog as detect, diagnose, classify, then act: run <code>tailscale up</code> when stopped, start the Tailscale process when unavailable, start <code>tailscale-ipn.exe</code> when there is no state. Login failures are deliberately left alone.</dd></div>
+          <div><dt>Why</dt><dd>A fix that is right for one failure state is wrong for another. Recovery has to start from diagnosis.</dd></div>
+        </dl>
+        <a class="cs-card__link" href="/work/pcgo/docs/tailscale-state-recovery" data-pt-label="Tailscale State Recovery">Full write-up →</a>
+      </article>
+
+      <article class="cs-card">
+        <h3 class="cs-card__title">Live save sync that quietly never ran</h3>
+        <dl class="cs-card__dl">
+          <div><dt>Problem</dt><dd>After I made save-file matching configurable per game, live sync stopped. No errors, just silence. The final cleanup still captured saves correctly.</dd></div>
+          <div><dt>What I found</dt><dd>Hashing, capture and verification all worked, so my first suspect was wrong. The real cause was an incomplete migration: live sync belonged to the old command-line session runner and never made it into the new FastAPI execution path.</dd></div>
+          <div><dt>What I did</dt><dd>Moved the live-sync lifecycle into the service path that actually runs sessions.</dd></div>
+          <div><dt>Why</dt><dd>When a bug survives your first three theories, check the architecture, not the algorithm.</dd></div>
+        </dl>
+        <a class="cs-card__link" href="/work/pcgo/docs/live-sync-architecture-migration" data-pt-label="Live Sync Migration">Full write-up →</a>
+      </article>
+
+      <article class="cs-card">
+        <h3 class="cs-card__title">Stale dashboard, correct backend</h3>
+        <dl class="cs-card__dl">
+          <div><dt>Problem</dt><dd>Session analytics, host metrics and recovery events sometimes showed old data.</dd></div>
+          <div><dt>What I found</dt><dd>I suspected WebSockets and React state. Calling the API directly returned correct data every time. The browser was caching the high-frequency monitoring endpoints.</dd></div>
+          <div><dt>What I did</dt><dd>Disabled caching on both sides: response headers from the backend and no-cache requests from the frontend.</dd></div>
+          <div><dt>Why</dt><dd>Measure at the boundary first. Testing the API alone cut the search space in half.</dd></div>
+        </dl>
+        <a class="cs-card__link" href="/work/pcgo/docs/dashboard-cache-investigation" data-pt-label="Dashboard Cache Investigation">Full write-up →</a>
+      </article>
+
+      <article class="cs-card">
+        <h3 class="cs-card__title">Authenticating a caller that is not a user</h3>
+        <dl class="cs-card__dl">
+          <div><dt>Problem</dt><dd>Once everything required a login, four endpoints still had to be callable by two non-user callers: Sunshine's stream hook script and a thread that tails Sunshine's log.</dd></div>
+          <div><dt>What I found</dt><dd>The hook runs as a separate OS process, so there is no Python call stack to check. The only enforcement point left is the request itself.</dd></div>
+          <div><dt>What I did</dt><dd>A single-purpose shared secret, generated with <code>secrets.token_urlsafe(32)</code>, sent as <code>X-Internal-Event-Token</code>, checked with <code>hmac.compare_digest</code>, attached to exactly four routes, and never accepted anywhere else.</dd></div>
+          <div><dt>Why</dt><dd>Leaving those routes open would let any logged-in user spoof stream state. A narrow credential keeps the blast radius small.</dd></div>
+        </dl>
+        <a class="cs-card__link" href="/work/pcgo/docs/internal-event-authentication" data-pt-label="Internal Event Auth">Full write-up →</a>
+      </article>
+
+      <article class="cs-card">
+        <h3 class="cs-card__title">Backups that multiplied, sessions that outlived a crash</h3>
+        <dl class="cs-card__dl">
+          <div><dt>Problem</dt><dd>Early on, every sync could create another save backup, and a backend crash could leave sessions stuck in a half-finished state.</dd></div>
+          <div><dt>What I found</dt><dd>Both came from not being able to tell meaningful change from noise, and from state that lived only in memory.</dd></div>
+          <div><dt>What I did</dt><dd>Hash-based change detection so identical saves are not backed up again, and startup recovery that restores consistency from a small JSON snapshot after a crash.</dd></div>
+          <div><dt>Why</dt><dd>Reliability work is mostly deciding what must survive a failure, and writing that down before it fails.</dd></div>
+        </dl>
+        <a class="cs-card__link" href="/work/pcgo/docs/release-hardening-and-reliability" data-pt-label="Release Hardening">Full write-up →</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     04 UI AUDIT (baseline only — overhaul in progress)
+     ====================================================== -->
+<section class="cs-section cs-section--alt" id="ui-audit" aria-labelledby="audit-title">
+  <div class="container cs-section__inner">
+    <header class="cs-section__head">
+      <span class="cs-section__num">04</span>
+      <h2 class="cs-section__title" id="audit-title">I measured the UI before redesigning it.</h2>
+    </header>
+    <div class="cs-prose">
+      <p>Before touching the dashboard's styles I ran a quick audit on the <code>ui/overhaul</code> branch to get a baseline. The overhaul is in progress.</p>
+    </div>
+    <div class="cs-table-wrap">
+      <table class="cs-table" aria-label="UI audit baseline">
+        <thead><tr><th>Metric</th><th>Measured before redesign</th></tr></thead>
+        <tbody>
+          <tr><td>Inline <code>style</code> attributes</td><td>407</td></tr>
+          <tr><td><code>!important</code> declarations</td><td>142</td></tr>
+          <tr><td>Real <code>&lt;label&gt;</code> elements</td><td>5</td></tr>
+          <tr><td>Keyframe animations</td><td>23</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     05 WHAT IT DOES TODAY
+     ====================================================== -->
+<section class="cs-section" id="features" aria-labelledby="features-title">
+  <div class="container cs-section__inner">
+    <header class="cs-section__head">
+      <span class="cs-section__num">05</span>
+      <h2 class="cs-section__title" id="features-title">What v0.1 actually does.</h2>
+    </header>
+    <ul class="cs-features">
+      <li class="cs-feature">
+        <h3>Sessions</h3>
+        <p>Lifecycle management, timers, event logging, analytics, cleanup workflows</p>
+      </li>
+      <li class="cs-feature">
+        <h3>Saves</h3>
+        <p>Injection, backup, restore, archives, live sync, hash-based change detection</p>
+      </li>
+      <li class="cs-feature">
+        <h3>Monitoring</h3>
+        <p>CPU, RAM and disk, host readiness validation</p>
+      </li>
+      <li class="cs-feature">
+        <h3>Recovery</h3>
+        <p>Sunshine watchdog, Tailscale recovery, recovery statistics and events, stale-session recovery on startup</p>
+      </li>
+      <li class="cs-feature">
+        <h3>Access</h3>
+        <p>JWT login with first-run admin bootstrap, admin and user roles on every route, user management, password change</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================================================
+     06 INTERFACE (screenshots gallery)
+     ====================================================== -->
+<section class="cs-section cs-section--alt" id="interface" aria-labelledby="interface-title">
+  <div class="container cs-section__inner">
+    <header class="cs-section__head">
+      <span class="cs-section__num">06</span>
+      <h2 class="cs-section__title" id="interface-title">The dashboard.</h2>
+    </header>
+
+    <!-- Segmented tabs -->
+    <div class="cs-tabs" role="tablist" aria-label="Dashboard views">
+      <button class="cs-tab is-active" role="tab" aria-selected="true" aria-controls="tab-admin" id="tab-btn-admin">Admin</button>
+      <button class="cs-tab" role="tab" aria-selected="false" aria-controls="tab-user" id="tab-btn-user" tabindex="-1">User</button>
+    </div>
+
+    <div id="tab-admin" role="tabpanel" aria-labelledby="tab-btn-admin" class="cs-tab-panel">
+      <div class="cs-gallery">
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Admin home</span></div>
+            <img src="/img/work/pcgo/home-1600.webp" srcset="/img/work/pcgo/home-800.webp 800w, /img/work/pcgo/home-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Admin home page showing session launcher, active alerts and live activity feed." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Admin home: session launcher, active alerts, live activity.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Game manager</span></div>
+            <img src="/img/work/pcgo/game-manager-1600.webp" srcset="/img/work/pcgo/game-manager-800.webp 800w, /img/work/pcgo/game-manager-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Game manager showing library, per-game save config and launch controls." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Game manager: library, save config, launch controls.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Save library</span></div>
+            <img src="/img/work/pcgo/save-library-1600.webp" srcset="/img/work/pcgo/save-library-800.webp 800w, /img/work/pcgo/save-library-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Save library listing all captured save files with metadata and restore actions." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Save library: captured saves, metadata, restore actions.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Host monitor</span></div>
+            <img src="/img/work/pcgo/host-monitor-1600.webp" srcset="/img/work/pcgo/host-monitor-800.webp 800w, /img/work/pcgo/host-monitor-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Host monitor showing CPU, GPU, memory and Tailscale connection health." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Host monitor: CPU, GPU, memory, Tailscale health.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Recovery</span></div>
+            <img src="/img/work/pcgo/recovery-1600.webp" srcset="/img/work/pcgo/recovery-800.webp 800w, /img/work/pcgo/recovery-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Recovery log showing watchdog events, diagnosed states and recovery actions taken." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Recovery: watchdog events, diagnosed states, actions taken.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Analytics</span></div>
+            <img src="/img/work/pcgo/analytics-1600.webp" srcset="/img/work/pcgo/analytics-800.webp 800w, /img/work/pcgo/analytics-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Analytics page with session duration charts, save frequency and uptime metrics." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Analytics: session durations, save frequency, uptime.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Session history</span></div>
+            <img src="/img/work/pcgo/history-1600.webp" srcset="/img/work/pcgo/history-800.webp 800w, /img/work/pcgo/history-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Session history list with timestamps, duration, games played and save events." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>History: timestamps, duration, games, save events.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Logs</span></div>
+            <img src="/img/work/pcgo/logs-1600.webp" srcset="/img/work/pcgo/logs-800.webp 800w, /img/work/pcgo/logs-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Live log viewer showing structured backend and host-agent log lines." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Logs: structured backend and host-agent output.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>User management</span></div>
+            <img src="/img/work/pcgo/user-management-1600.webp" srcset="/img/work/pcgo/user-management-800.webp 800w, /img/work/pcgo/user-management-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="User management panel listing accounts, roles and invite controls." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>User management: accounts, roles, invite controls.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Sunshine</span></div>
+            <img src="/img/work/pcgo/sunshine-1600.webp" srcset="/img/work/pcgo/sunshine-800.webp 800w, /img/work/pcgo/sunshine-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Sunshine stream configuration panel with bitrate, codec and resolution settings." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Sunshine config: bitrate, codec, resolution.</figcaption>
+        </figure>
+        <figure class="cs-gallery__item">
+          <div class="frame">
+            <div class="frame__bar"><i></i><i></i><i></i><span>Settings</span></div>
+            <img src="/img/work/pcgo/settings-1600.webp" srcset="/img/work/pcgo/settings-800.webp 800w, /img/work/pcgo/settings-1600.webp 1600w" sizes="(max-width: 900px) 100vw, 900px" alt="Settings panel with host config, save paths and feature flags." width="1600" height="780" loading="lazy" decoding="async">
+          </div>
+          <figcaption>Settings: host config, save paths, feature flags.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <div id="tab-user" role="tabpanel" aria-labelledby="tab-btn-user" class="cs-tab-panel" hidden>
+      <div class="cs-gallery">
+        <p class="cs-gallery__note">User dashboard in progress. Phase 26 work.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     07 DOCS  (id="docs" for nav link)
+     ====================================================== -->
+<section class="cs-section" id="docs" aria-labelledby="docs-title">
+  <div class="container cs-section__inner">
+    <header class="cs-section__head">
+      <span class="cs-section__num">07</span>
+      <h2 class="cs-section__title" id="docs-title">I write things down as I go.</h2>
+      <p class="cs-section__intro">These are the working docs from the repo: the investigations, the architecture notes, and the limitations I have not fixed yet. Fifteen of them are published here.</p>
+    </header>
+
+    <!-- Start here strip with 3 best docs as large cards -->
+    <div class="cs-docs__starthere">
+      <div class="cs-docs__starthere-head">
+        <span class="cs-docs__starthere-tag">Start here</span>
+        <p class="cs-docs__starthere-desc">The three most insightful investigations into distributed state, scoped authentication, and silent sync failure.</p>
+      </div>
+      <div class="cs-docs__starthere-grid">
+        <a href="/work/pcgo/docs/tailscale-state-recovery" class="cs-start-card" data-pt-label="Tailscale State Recovery">
+          <div class="cs-start-card__top">
+            <span class="cs-start-card__badge">Investigation</span>
+            <span class="cs-start-card__time">2 min read</span>
+          </div>
+          <h3 class="cs-start-card__title">Tailscale state-aware recovery</h3>
+          <p class="cs-start-card__summary">A week spent learning that "restart the service" is not a recovery strategy: Tailscale fails in distinct states that each need a different fix.</p>
+          <span class="cs-start-card__link">Read document <span class="cs-start-card__arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+        <a href="/work/pcgo/docs/internal-event-authentication" class="cs-start-card" data-pt-label="Internal Event Auth">
+          <div class="cs-start-card__top">
+            <span class="cs-start-card__badge">Investigation</span>
+            <span class="cs-start-card__time">4 min read</span>
+          </div>
+          <h3 class="cs-start-card__title">Internal event authentication</h3>
+          <p class="cs-start-card__summary">How two non-user callers authenticate to the backend with a scoped shared secret and a constant-time comparison.</p>
+          <span class="cs-start-card__link">Read document <span class="cs-start-card__arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+        <a href="/work/pcgo/docs/live-sync-architecture-migration" class="cs-start-card" data-pt-label="Live Sync Migration">
+          <div class="cs-start-card__top">
+            <span class="cs-start-card__badge">Investigation</span>
+            <span class="cs-start-card__time">5 min read</span>
+          </div>
+          <h3 class="cs-start-card__title">Live sync that stopped running</h3>
+          <p class="cs-start-card__summary">Live save sync went silent. The suspect was new hashing code; the real cause was an incomplete migration from a CLI runner to the FastAPI service.</p>
+          <span class="cs-start-card__link">Read document <span class="cs-start-card__arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Complete docs library under 3 headings (2-column grid) -->
+    <div class="cs-docs">
+
+      <!-- 1. Overview & architecture -->
+      <div class="cs-docs__group">
+        <h3 class="cs-docs__group-title">Overview &amp; architecture</h3>
+        <p class="cs-docs__group-intro">What it is and how the layers fit together.</p>
+        <div class="cs-docs__grid">
+          <a href="/work/pcgo/docs/project-overview" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Project overview</h4>
+              <p class="cs-doc-row__summary">What the platform is, what v0.1 ships, and how the pieces fit.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">4 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/system-architecture" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">System architecture</h4>
+              <p class="cs-doc-row__summary">The layers from dashboard to Windows host, and the design principles behind them.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/backend-architecture" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Backend architecture</h4>
+              <p class="cs-doc-row__summary">How the FastAPI backend is organised and what it orchestrates.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/recovery-architecture" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Recovery architecture</h4>
+              <p class="cs-doc-row__summary">How the Sunshine and Tailscale watchdogs detect failures and recover.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">1 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. Engineering investigations -->
+      <div class="cs-docs__group">
+        <h3 class="cs-docs__group-title">Engineering investigations</h3>
+        <p class="cs-docs__group-intro">Bugs and design problems written up as problem, investigation, root cause, fix.</p>
+        <div class="cs-docs__grid">
+          <a href="/work/pcgo/docs/tailscale-state-recovery" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Tailscale state-aware recovery</h4>
+              <p class="cs-doc-row__summary">A week spent learning that "restart the service" is not a recovery strategy.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/internal-event-authentication" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Internal event authentication</h4>
+              <p class="cs-doc-row__summary">How two non-user callers authenticate with a scoped shared secret.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">4 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/live-sync-architecture-migration" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Live sync that stopped running</h4>
+              <p class="cs-doc-row__summary">Live save sync went silent. The real cause was an incomplete migration.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">5 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/dashboard-cache-investigation" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Stale dashboard, correct backend</h4>
+              <p class="cs-doc-row__summary">The dashboard showed old data. The browser was caching monitoring endpoints.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/release-hardening-and-reliability" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Release hardening and reliability</h4>
+              <p class="cs-doc-row__summary">Pre-release reliability work: atomic saves, session locks, integrity checks.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">9 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/session-persistence-and-reconnection" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Session persistence and reconnection</h4>
+              <p class="cs-doc-row__summary">Keeping sessions consistent across crashes and reconnects.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/problems-solved" class="cs-doc-row cs-doc-row--full">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Major problems solved</h4>
+              <p class="cs-doc-row__summary">A short tour of the hardest problems and how each was solved.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. Reference & roadmap -->
+      <div class="cs-docs__group">
+        <h3 class="cs-docs__group-title">Reference &amp; roadmap</h3>
+        <p class="cs-docs__group-intro">The API interfaces, known limits, and where the platform goes next.</p>
+        <div class="cs-docs__grid">
+          <a href="/work/pcgo/docs/api-overview" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">API overview</h4>
+              <p class="cs-doc-row__summary">The REST surface: route groups, authentication and conventions.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">3 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/websocket-events" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">WebSocket events</h4>
+              <p class="cs-doc-row__summary">The single authenticated /ws channel and the one message type it carries today.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">2 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/v0-limitations" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Known limitations</h4>
+              <p class="cs-doc-row__summary">No refresh tokens, no login rate limiting, no audit log yet. Written down on purpose.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">1 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+          <a href="/work/pcgo/docs/roadmap" class="cs-doc-row">
+            <div class="cs-doc-row__main">
+              <h4 class="cs-doc-row__title">Roadmap</h4>
+              <p class="cs-doc-row__summary">Phases 23 to 32: from persistence and auth to a user app, embedded Tailscale and packaging.</p>
+            </div>
+            <div class="cs-doc-row__meta">
+              <span class="cs-doc-row__time">4 min read</span>
+              <span class="cs-doc-row__arrow" aria-hidden="true">&rarr;</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="cs-docs__footer">The full set, including the roadmap phases, is in the repository. <a href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator/tree/main/docs" rel="noopener" target="_blank">GitHub ↗</a></p>
+  </div>
+</section>
+
+<!-- ======================================================
+     08 WHERE IT STANDS
+     ====================================================== -->
+<section class="cs-section cs-section--alt" id="status" aria-labelledby="status-title">
+  <div class="container cs-section__inner cs-section__inner--split">
+    <header class="cs-section__head">
+      <span class="cs-section__num">08</span>
+      <h2 class="cs-section__title" id="status-title">Honest status.</h2>
+    </header>
+
+    <div class="cs-section__content">
+      <div class="cs-status">
+        <div class="cs-status__col">
+          <h3 class="cs-status__head">Done</h3>
+          <p>v0.1 host foundation, then Phase 23 session persistence and reconnection, Phase 24 authentication and roles, Phase 25 the move from JSON files to SQLite.</p>
+        </div>
+        <div class="cs-status__col">
+          <h3 class="cs-status__head">Next</h3>
+          <p>Phase 26 a dedicated user app, 27 embedded Tailscale, 28 Moonlight automation, 29 production player experience, 30 production host dashboard, 31 security and audit logging, 32 deployment and packaging.</p>
+        </div>
+        <div class="cs-status__col cs-status__col--full">
+          <h3 class="cs-status__head">Not done yet</h3>
+          <ul class="cs-status__list">
+            <li>No refresh tokens: sessions expire and need a new login.</li>
+            <li>No login rate limiting or account lockout.</li>
+            <li>No audit log of logins or admin actions (planned, Phase 31).</li>
+            <li>The API only allows localhost origins until it is deployed somewhere else.</li>
+            <li>No automated backend tests yet.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================
+     NEXT PROJECT BAND
+     ====================================================== -->
+<section class="cs-next" aria-label="Next project">
+  <div class="container">
+    <div class="cs-next__head">
+      <span class="cs-next__label">Next project · 02</span>
+      <a class="cs-next__all" href="/#work" data-pt-label="Harsh C Hari">&larr; All work</a>
+    </div>
+    <a class="cs-next__link" href="/work/productivity-dashboard" data-pt-label="Productivity Dashboard">
+      <div class="cs-next__body">
+        <h2 class="cs-next__title">Productivity Dashboard</h2>
+        <span class="cs-next__arrow" aria-hidden="true">&rarr;</span>
+      </div>
+      <figure class="cs-next__thumb" aria-hidden="true">
+        <img src="/image-prodash.webp" alt="" width="240" height="150" loading="lazy" decoding="async">
+      </figure>
+    </a>
+  </div>
+</section>

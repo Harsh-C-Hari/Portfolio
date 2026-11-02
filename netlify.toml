@@ -1,6 +1,6 @@
 [build]
-  command   = "npm install && node build.js"
-  publish   = "."
+  command   = "npm install && node build.js && node scripts/check-leaks.mjs"
+  publish   = "dist"
 
 [[headers]]
   for = "/*"
@@ -21,6 +21,11 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
+  for = "/fonts/*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
   for = "/*.webp"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
@@ -31,7 +36,22 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
   for = "/resume.pdf"
   [headers.values]
     Cache-Control       = "public, max-age=86400"
     Content-Disposition = "inline"
+
+[[redirects]]
+  from   = "/work"
+  to     = "/#work"
+  status = 302
+
+[[redirects]]
+  from   = "/work/pcgo/docs"
+  to     = "/work/pcgo#docs"
+  status = 302
