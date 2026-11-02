@@ -63,10 +63,6 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
-:target,
-[id] {
-  scroll-margin-top: var(--nav-h);
-}
 
 /* Interactive elements: kill the tap highlight box and long-press
    selection/callout, but let text remain selectable everywhere else. */
@@ -3235,7 +3231,7 @@ html.pt-enter .loader {
 .doc-body h2,
 .doc-body h3,
 .doc-body h4 {
-  scroll-margin-top: calc(var(--nav-h) + 1.5rem);
+  scroll-margin-top: 1.5rem;
 }
 
 .doc-body h2 {

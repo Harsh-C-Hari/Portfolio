@@ -123,8 +123,7 @@ function scrollToTarget(hash) {
     lenis.scrollTo(aboutST.start, { duration: 1.2 });
     return;
   }
-  const isDoc = !!document.querySelector('.doc-layout');
-  const offset = isDoc ? -(navH() + 20) : -navH();
+  const offset = 0;
   if (lenis) lenis.scrollTo(el, { offset, duration: 1.0 });
   else el.scrollIntoView({ block: 'start' });
 }
@@ -191,8 +190,7 @@ document.addEventListener('click', (e) => {
       if (!hash || hash === '#') return;
       const target = getTargetElement(hash);
       if (!target) return;
-      const isDoc = !!document.querySelector('.doc-layout');
-      const offset = isDoc ? -(navH() + 20) : 0;
+      const offset = 0;
       if (lenis) lenis.scrollTo(target, { offset, immediate: true });
       else target.scrollIntoView({ block: 'start' });
     };
