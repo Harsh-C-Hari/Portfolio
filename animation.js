@@ -1288,3 +1288,197 @@ if (isHome) {
   window.addEventListener('load', scrollActiveLink, { once: true });
 })();
 
+/* ------------------------------------------------------------
+   Case study: sticky action bar (phones only)
+   ------------------------------------------------------------ */
+(function setupStickyBar() {
+  const stickyBar = document.querySelector('.cs-sticky-bar');
+  const hero = document.querySelector('.cs-hero');
+  const footer = document.querySelector('footer, .footer');
+  if (!stickyBar || !hero) return;
+
+  let heroGone = false;
+  let footerNear = false;
+
+  const update = () => {
+    if (heroGone && !footerNear) {
+      stickyBar.classList.add('is-visible');
+    } else {
+      stickyBar.classList.remove('is-visible');
+    }
+  };
+
+  const heroObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      heroGone = !entry.isIntersecting;
+      update();
+    });
+  }, { threshold: 0 });
+  heroObserver.observe(hero);
+
+  if (footer) {
+    const footerObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        footerNear = entry.isIntersecting;
+        update();
+      });
+    }, { rootMargin: '0px 0px 80px 0px', threshold: 0 });
+    footerObserver.observe(footer);
+  }
+})();
+
+/* ------------------------------------------------------------
+   Doc reader: auto-close mobile TOC details on link click
+   ------------------------------------------------------------ */
+(function setupDocTocAutoClose() {
+  const docTocDetails = document.querySelector('.doc-toc-details');
+  if (!docTocDetails) return;
+
+  docTocDetails.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      docTocDetails.removeAttribute('open');
+    });
+  });
+})();
+
+/* ------------------------------------------------------------
+   Gallery: touch lightbox with pinch-to-zoom
+   ------------------------------------------------------------ */
+(function setupGalleryLightbox() {
+  const galleryItems = document.querySelectorAll('.cs-gallery__item');
+  if (!galleryItems.length) return;
+
+  const lightbox = document.getElementById('cs-lightbox');
+  if (!lightbox) return;
+
+  const imgEl = lightbox.querySelector('.cs-lightbox__img');
+  const captionEl = lightbox.querySelector('.cs-lightbox__caption');
+  const closeBtn = lightbox.querySelector('.cs-lightbox__close');
+  let lastTrigger = null;
+
+  let scale = 1;
+  let initialDist = 0;
+  let baseScale = 1;
+  let lastTapTime = 0;
+
+  const setTransform = (s) => {
+    scale = Math.min(Math.max(1, s), 4);
+    if (imgEl) imgEl.style.transform = `scale(${scale})`;
+  };
+
+  const openLightbox = (img, caption, trigger) => {
+    lastTrigger = trigger;
+    if (imgEl) {
+      imgEl.src = img.currentSrc || img.src;
+      imgEl.alt = img.alt || '';
+      setTransform(1);
+    }
+    if (captionEl) {
+      captionEl.textContent = caption || '';
+    }
+    lightbox.removeAttribute('hidden');
+    void lightbox.offsetWidth; // Force reflow
+    lightbox.classList.add('is-open');
+    document.body.classList.add('lightbox-open');
+    document.body.style.overflow = 'hidden';
+    if (closeBtn) closeBtn.focus();
+  };
+
+  const closeLightbox = () => {
+    lightbox.classList.remove('is-open');
+    document.body.classList.remove('lightbox-open');
+    document.body.style.overflow = '';
+    setTransform(1);
+    setTimeout(() => {
+      lightbox.setAttribute('hidden', '');
+      if (lastTrigger && typeof lastTrigger.focus === 'function') {
+        lastTrigger.focus();
+      }
+    }, 200);
+  };
+
+  galleryItems.forEach((item) => {
+    const frame = item.querySelector('.frame');
+    const img = item.querySelector('img');
+    const figcaption = item.querySelector('figcaption');
+    const captionText = figcaption ? figcaption.textContent : '';
+
+    const trigger = frame || img;
+    if (!trigger || !img) return;
+
+    trigger.setAttribute('tabindex', '0');
+    trigger.setAttribute('role', 'button');
+    trigger.setAttribute('aria-label', `View image: ${img.alt || captionText || 'preview'}`);
+
+    const handleTrigger = (e) => {
+      e.preventDefault();
+      openLightbox(img, captionText, trigger);
+    };
+
+    trigger.addEventListener('click', handleTrigger);
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLightbox(img, captionText, trigger);
+      }
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeLightbox);
+  }
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightbox || e.target.classList.contains('cs-lightbox__stage')) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('is-open')) {
+      closeLightbox();
+    }
+  });
+
+  // Touch pinch-to-zoom & double-tap on image
+  if (imgEl) {
+    imgEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialDist = Math.hypot(dx, dy);
+        baseScale = scale;
+      } else if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - lastTapTime < 300) {
+          e.preventDefault();
+          setTransform(scale > 1.2 ? 1 : 2.5);
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+      }
+    }, { passive: false });
+
+    imgEl.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && initialDist > 0) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const factor = dist / initialDist;
+        setTransform(baseScale * factor);
+      }
+    }, { passive: false });
+
+    imgEl.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        initialDist = 0;
+        if (scale < 1.05) {
+          setTransform(1);
+        }
+      }
+    });
+  }
+})();
+

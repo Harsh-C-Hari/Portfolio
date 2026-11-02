@@ -239,7 +239,7 @@ function generateWorkRows(projects) {
       <div class="wrow__kind-mobile">${esc(p.kind)}</div>
     </div>
     <div class="wrow__thumb-wrap" aria-hidden="true">
-      <img class="wrow__thumb" src="${thumbSrc}" alt="" width="88" height="55" loading="lazy" decoding="async">
+      <img class="wrow__thumb" src="${thumbSrc}" alt="" width="104" height="65" loading="lazy" decoding="async">
     </div>
     <div class="wrow__actions">
       <a class="wrow__action-link" href="${esc(primaryHref)}"${extAttrs}${labelAttr}>${goLabel}</a>${liveLinkHtml}
@@ -340,6 +340,18 @@ function buildCasePages(projects) {
       ? '<link rel="preload" as="image" imagesrcset="/img/work/pcgo/home-800.webp 800w, /img/work/pcgo/home-1600.webp 1600w" imagesizes="(max-width: 600px) 300px, (max-width: 1200px) 100vw, 1200px" fetchpriority="high">'
       : '';
 
+    const stickyBarHtml = slug === 'productivity-dashboard'
+      ? `<nav class="cs-sticky-bar" aria-label="Quick actions">
+  <a class="btn btn--pink" href="https://productivity-dashboard-phi-navy.vercel.app/" rel="noopener" target="_blank">Open live ↗</a>
+  <a class="btn" href="https://github.com/Harsh-C-Hari/Productivity-Dashboard" rel="noopener" target="_blank">GitHub ↗</a>
+</nav>`
+      : (slug === 'pcgo'
+        ? `<nav class="cs-sticky-bar" aria-label="Quick actions">
+  <a class="btn" href="https://github.com/Harsh-C-Hari/personal-cloud-gaming-orchestrator" rel="noopener" target="_blank">GitHub ↗</a>
+  <a class="btn" href="/work/pcgo/docs/system-architecture/">Docs &rarr;</a>
+</nav>`
+        : '');
+
     const vars = {
       home:             '/',
       base:             '/',
@@ -352,6 +364,7 @@ function buildCasePages(projects) {
       page_body:        bodyHtml,
       page_jsonld:      '',
       page_preload:     pagePreload,
+      cs_sticky_bar:    stickyBarHtml,
       css_version:      versionOf('styles.css'),
       js_version:       versionOf('animation.bundle.js'),
     };
