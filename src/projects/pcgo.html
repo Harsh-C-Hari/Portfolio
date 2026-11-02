@@ -177,14 +177,42 @@
             <text id="t_pill" x="486" y="234" text-anchor="middle" font-family="var(--f-mono)" font-size="12" font-weight="500" fill="var(--ink)">internal event token</text>
           </svg>
 
-          <!-- Accessible ordered list describing the flow -->
-          <ol class="sr-only">
-            <li><strong>React dashboard:</strong> Admin and user views</li>
-            <li><strong>FastAPI backend:</strong> JWT on every route</li>
-            <li><strong>Controllers &amp; services:</strong> Sessions, saves, monitoring, recovery</li>
-            <li><strong>Python host agent:</strong> Does the work on the Windows PC; connects to FastAPI backend via an internal event token</li>
-            <li><strong>Sunshine &amp; Tailscale:</strong> Streaming and secure mesh networking</li>
-            <li><strong>Windows gaming host:</strong> The machine</li>
+          <!-- Accessible ordered list describing the flow (stacked card diagram on mobile) -->
+          <ol class="cs-arch__list">
+            <li class="cs-arch__card cs-arch__card--fill">
+              <span class="cs-arch__card-title">React dashboard</span>
+              <span class="cs-arch__card-caption">Admin and user views</span>
+            </li>
+            <li class="cs-arch__card cs-arch__card--fill">
+              <span class="cs-arch__card-title">FastAPI backend</span>
+              <span class="cs-arch__card-caption">JWT on every route</span>
+            </li>
+            <li class="cs-arch__card cs-arch__card--fill">
+              <span class="cs-arch__card-title">Controllers &amp; services</span>
+              <span class="cs-arch__card-caption">Sessions, saves, monitoring, recovery</span>
+            </li>
+            <li class="cs-arch__card cs-arch__card--fill">
+              <span class="cs-arch__card-title">Python host agent</span>
+              <span class="cs-arch__card-caption">Does the work on the Windows PC</span>
+            </li>
+            <li class="cs-arch__card cs-arch__card--note">
+              <span class="cs-arch__note-pill">internal event token</span>
+              <span class="cs-arch__note-text">Side channel: Sunshine hook script &amp; monitor report stream state directly to backend</span>
+            </li>
+            <li class="cs-arch__card-row">
+              <div class="cs-arch__card cs-arch__card--outline">
+                <span class="cs-arch__card-title">Sunshine</span>
+                <span class="cs-arch__card-caption">streaming</span>
+              </div>
+              <div class="cs-arch__card cs-arch__card--outline">
+                <span class="cs-arch__card-title">Tailscale</span>
+                <span class="cs-arch__card-caption">networking</span>
+              </div>
+            </li>
+            <li class="cs-arch__card cs-arch__card--outline">
+              <span class="cs-arch__card-title">Windows gaming host</span>
+              <span class="cs-arch__card-caption">the machine</span>
+            </li>
           </ol>
 
           <figcaption class="cs-arch__caption">
