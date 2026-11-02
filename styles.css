@@ -2735,8 +2735,20 @@ main[tabindex="-1"]:focus-visible,
   }
 }
 
-/* Hidden below 700px */
+/* Responsive next band below 700px */
 @media (max-width: 700px) {
+  .cs-next {
+    padding: 1.5rem 0 1.75rem;
+  }
+
+  .cs-next__head {
+    margin-bottom: 0.75rem;
+  }
+
+  .cs-next__link {
+    min-height: 44px;
+  }
+
   .cs-next__thumb {
     display: none;
   }
