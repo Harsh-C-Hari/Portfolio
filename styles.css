@@ -371,23 +371,38 @@ main[tabindex="-1"]:focus-visible,
   padding-top: var(--safe-top);
   padding-left: var(--safe-left);
   padding-right: var(--safe-right);
-  transition: background-color 0.3s, border-color 0.3s;
+  transition: border-color 0.3s;
   border-bottom: 2px solid transparent;
+  isolation: isolate;
 }
 
-.nav.is-scrolled,
-.nav.is-open {
-  background: rgba(242, 241, 236, 0.9);
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(242, 241, 236, 0.92);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  transition: opacity 0.3s;
+}
+
+.nav.is-scrolled {
   border-bottom-color: var(--ink);
 }
 
+.nav.is-scrolled::before {
+  opacity: 1;
+}
+
 .nav.is-open {
-  background: var(--paper);
-  /* backdrop-filter would make the fixed .menu resolve against the 68px nav, not the viewport */
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  border-bottom-color: var(--ink);
+}
+
+.nav.is-open::before {
+  opacity: 0;
 }
 
 .nav__inner {
@@ -3388,10 +3403,18 @@ html.pt-enter .loader {
 
 /* Persistent topbar on doc reader pages: solid background and crisp bottom divider */
 [data-page="doc"] .nav {
-  background: rgba(242, 241, 236, 0.95);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
   border-bottom: 2px solid var(--ink);
+}
+
+[data-page="doc"] .nav::before {
+  opacity: 1;
+  background: var(--paper);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-page="doc"] .nav.is-open::before {
+  opacity: 0;
 }
 
 .doc-layout {
