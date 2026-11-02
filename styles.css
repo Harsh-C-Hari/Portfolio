@@ -945,6 +945,10 @@ main[tabindex="-1"]:focus-visible,
 /* ============================================================
    ABOUT
    ============================================================ */
+.about {
+  padding-bottom: 0;
+}
+
 .about__statement {
   max-width: 24em;
   font-size: clamp(28px, 4.2vw, 60px);
@@ -1025,7 +1029,7 @@ main[tabindex="-1"]:focus-visible,
    SKILLS
    ============================================================ */
 .skills {
-  padding-top: 0;
+  padding-top: clamp(64px, 8vw, 112px);
 }
 
 .skills__note {

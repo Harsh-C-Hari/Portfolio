@@ -557,33 +557,53 @@ function setActive(id) {
   moveIndicator(active);
 }
 
-// Only observe spy sections that actually exist on this page (home only)
+// Continuous scroll-spy: partition-based to guarantee no flicker or gap between sections
 const spySections = ['work', 'about', 'skills', 'contact']
   .map((id) => document.getElementById(id))
   .filter(Boolean);
 let currentSpy = null;
 
+function updateScrollSpy() {
+  if (!spySections.length) return;
+  const isBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 30;
+  if (isBottom) {
+    const last = spySections[spySections.length - 1];
+    if (currentSpy !== last.id) {
+      currentSpy = last.id;
+      setActive(currentSpy);
+    }
+    return;
+  }
+
+  const triggerY = Math.round(window.innerHeight * 0.35);
+  let activeSection = null;
+
+  for (let i = 0; i < spySections.length; i++) {
+    const sec = spySections[i];
+    const top = sec.getBoundingClientRect().top;
+    if (top <= triggerY) {
+      activeSection = sec.id;
+    } else {
+      break;
+    }
+  }
+
+  if (currentSpy !== activeSection) {
+    currentSpy = activeSection;
+    setActive(currentSpy);
+  }
+}
+
 if (spySections.length) {
-  const spy = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) {
-          currentSpy = en.target.id;
-          setActive(currentSpy);
-        } else if (currentSpy === en.target.id) {
-          currentSpy = null;
-          setActive(null);
-        }
-      });
-    },
-    { rootMargin: '-45% 0px -50% 0px' }
-  );
-  spySections.forEach((s) => spy.observe(s));
+  if (lenis) lenis.on('scroll', updateScrollSpy);
+  window.addEventListener('scroll', updateScrollSpy, { passive: true });
+  updateScrollSpy();
 }
 
 window.addEventListener('resize', () => {
   const on = $('.nav__links a[aria-current="true"]');
   if (on) moveIndicator(on);
+  updateScrollSpy();
 });
 
 if (nav) {
