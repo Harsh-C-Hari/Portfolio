@@ -53,6 +53,7 @@ const ALLOWED_EXTENSIONS = new Set([
   '.txt',
   '.xml',
   '.webmanifest',
+  '.woff2',
 ]);
 
 // Explicit forbidden string patterns in text files

@@ -37,12 +37,15 @@ for (const p of PAGES) {
     const scores = {
       Page: p.name,
       Performance: Math.round((raw.categories.performance?.score || 0) * 100),
+      LCP: raw.audits['largest-contentful-paint']?.displayValue || 'N/A',
+      TBT: raw.audits['total-blocking-time']?.displayValue || 'N/A',
+      CLS: raw.audits['cumulative-layout-shift']?.displayValue || '0',
       Accessibility: Math.round((raw.categories.accessibility?.score || 0) * 100),
       'Best Practices': Math.round((raw.categories['best-practices']?.score || 0) * 100),
       SEO: Math.round((raw.categories.seo?.score || 0) * 100),
     };
     results.push(scores);
-    console.log(`Done! (P: ${scores.Performance}, A: ${scores.Accessibility}, BP: ${scores['Best Practices']}, SEO: ${scores.SEO})`);
+    console.log(`Done! (P: ${scores.Performance}, LCP: ${scores.LCP}, TBT: ${scores.TBT}, CLS: ${scores.CLS})`);
   } catch (err) {
     console.error(`Failed: ${err.message}`);
     results.push({

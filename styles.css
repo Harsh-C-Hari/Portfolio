@@ -4,6 +4,39 @@
    Bricolage Grotesque for reading, Sometype Mono for small data.
    ============================================================ */
 
+/* Self-hosted fonts (woff2, Latin subset, font-display: swap) */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/anton-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/bricolage-grotesque-var.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Sometype Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/sometype-mono-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Sometype Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/sometype-mono-500.woff2') format('woff2');
+}
+
 :root {
   color-scheme: light;
 

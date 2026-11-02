@@ -51,10 +51,10 @@ const year = $('#year');
 if (year) year.textContent = new Date().getFullYear();
 
 /* ------------------------------------------------------------
-   Smooth scroll
+   Smooth scroll (fine pointer only; native scrolling on touch)
    ------------------------------------------------------------ */
 let lenis = null;
-if (!reduceMotion) {
+if (!reduceMotion && finePointer) {
   lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -113,19 +113,23 @@ function getTargetElement(hash) {
 
 function scrollToTarget(hash) {
   if (hash === '#top') {
-    lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0 });
+    lenis ? lenis.scrollTo(0) : window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
   const el = getTargetElement(hash);
   if (!el) return;
   // About pins the page while its text fills in; land right where that begins.
-  if (hash === '#about' && aboutST && lenis) {
-    lenis.scrollTo(aboutST.start, { duration: 1.2 });
-    return;
+  if (hash === '#about') {
+    if (typeof initAbout === 'function') initAbout();
+    if (aboutST) {
+      if (lenis) lenis.scrollTo(aboutST.start, { duration: 1.2 });
+      else window.scrollTo({ top: aboutST.start, behavior: 'smooth' });
+      return;
+    }
   }
   const offset = 0;
   if (lenis) lenis.scrollTo(el, { offset, duration: 1.0 });
-  else el.scrollIntoView({ block: 'start' });
+  else el.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 document.addEventListener('click', (e) => {
@@ -483,37 +487,40 @@ document.addEventListener('click', (e) => {
     clearTimeout(leaveTimeoutTimer);
   });
 
-  // Prefetch on pointer/focus enter (desktop only, skip saveData)
+  // Prefetch on pointer/focus enter (desktop fine pointer only, skip saveData, defer to idle)
+  const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
   if (finePointer && !navigator.connection?.saveData) {
-    const prefetched = new Set();
-    const maybePrefetch = (a) => {
-      const href = a?.getAttribute('href');
-      if (!href || prefetched.has(href)) return;
-      if (a.target && a.target !== '_self') return;
-      if (a.hasAttribute('download')) return;
-      if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
-      try {
-        const dest = new URL(href, window.location.href);
-        if (dest.origin !== window.location.origin) return;
-        if (dest.pathname === window.location.pathname) return;
-        const ext = dest.pathname.match(/\.([^./]+)$/);
-        if (ext && ext[1].toLowerCase() !== 'html') return;
+    scheduleIdle(() => {
+      const prefetched = new Set();
+      const maybePrefetch = (a) => {
+        const href = a?.getAttribute('href');
+        if (!href || prefetched.has(href)) return;
+        if (a.target && a.target !== '_self') return;
+        if (a.hasAttribute('download')) return;
+        if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) return;
+        try {
+          const dest = new URL(href, window.location.href);
+          if (dest.origin !== window.location.origin) return;
+          if (dest.pathname === window.location.pathname) return;
+          const ext = dest.pathname.match(/\.([^./]+)$/);
+          if (ext && ext[1].toLowerCase() !== 'html') return;
 
-        prefetched.add(href);
-        const link = document.createElement('link');
-        link.rel  = 'prefetch';
-        link.href = dest.href;
-        document.head.appendChild(link);
-      } catch (e) { /* */ }
-    };
-    document.addEventListener('pointerenter', (e) => {
-      const a = e.target?.closest ? e.target.closest('a[href]') : null;
-      if (a) maybePrefetch(a);
-    }, true);
-    document.addEventListener('focusin', (e) => {
-      const a = e.target?.closest ? e.target.closest('a[href]') : null;
-      if (a) maybePrefetch(a);
-    }, true);
+          prefetched.add(href);
+          const link = document.createElement('link');
+          link.rel  = 'prefetch';
+          link.href = dest.href;
+          document.head.appendChild(link);
+        } catch (e) { /* */ }
+      };
+      document.addEventListener('pointerenter', (e) => {
+        const a = e.target?.closest ? e.target.closest('a[href]') : null;
+        if (a) maybePrefetch(a);
+      }, true);
+      document.addEventListener('focusin', (e) => {
+        const a = e.target?.closest ? e.target.closest('a[href]') : null;
+        if (a) maybePrefetch(a);
+      }, true);
+    });
   }
 })();
 
@@ -774,35 +781,33 @@ if (isHome) {
   if (document.documentElement.classList.contains('pt-enter')) {
     gsap.set(targets, { opacity: 0, y: 20 });
     document.addEventListener('pt:reveal', playEntrance, { once: true });
-  } else {
-    gsap.fromTo(targets,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.7, stagger: 0.08, ease: 'power3.out' }
-    );
   }
 })();
 
 /* ------------------------------------------------------------
    Ticker: loops forever, speeds up and reverses with scroll
    ------------------------------------------------------------ */
-const track = $('.ticker__track');
-if (track && !reduceMotion) {
+let tickerInitialized = false;
+function setupTicker() {
+  if (tickerInitialized || reduceMotion) return;
+  tickerInitialized = true;
+  const track = $('.ticker__track');
+  if (!track) return;
   const group = $('.ticker__group', track);
-  if (group) {
-    const unit = group.innerHTML;
-    while (group.scrollWidth < window.innerWidth) group.insertAdjacentHTML('beforeend', unit);
-    track.appendChild(group.cloneNode(true));
+  if (!group) return;
+  const unit = group.innerHTML;
+  while (group.scrollWidth < window.innerWidth) group.insertAdjacentHTML('beforeend', unit);
+  track.appendChild(group.cloneNode(true));
 
-    const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 40, repeat: -1 });
-    ScrollTrigger.create({
-      onUpdate: (self) => {
-        const v   = self.getVelocity();
-        const dir = self.direction;
-        gsap.to(loop, { timeScale: dir * (1 + Math.min(Math.abs(v) / 250, 5)), duration: 0.2, overwrite: true });
-        gsap.to(loop, { timeScale: dir, duration: 0.8, delay: 0.2, overwrite: false });
-      },
-    });
-  }
+  const loop = gsap.to(track, { xPercent: -50, ease: 'none', duration: 40, repeat: -1 });
+  ScrollTrigger.create({
+    onUpdate: (self) => {
+      const v   = self.getVelocity();
+      const dir = self.direction;
+      gsap.to(loop, { timeScale: dir * (1 + Math.min(Math.abs(v) / 250, 5)), duration: 0.2, overwrite: true });
+      gsap.to(loop, { timeScale: dir, duration: 0.8, delay: 0.2, overwrite: false });
+    },
+  });
 }
 
 /* ------------------------------------------------------------
@@ -812,6 +817,8 @@ if (track && !reduceMotion) {
    Pointer leave keeps last active.
    ------------------------------------------------------------ */
 (function setupWorkPanel() {
+  if (!finePointer) return; // Desktop fine pointer only
+
   const workIndex = $('.work-index');
   const rows = $$('.wrow');
   const panelImgs = $$('.wpanel__img');
@@ -830,14 +837,20 @@ if (track && !reduceMotion) {
     activate(rows[0].dataset.slug);
   }
 
-  // Bind desktop interaction only for fine pointer
-  if (finePointer) {
-    rows.forEach((row) => {
-      const slug = row.dataset.slug;
-      row.addEventListener('pointerenter', () => activate(slug));
-      row.addEventListener('focusin', () => activate(slug));
+  rows.forEach((row) => {
+    const slug = row.dataset.slug;
+    row.addEventListener('pointerenter', () => activate(slug));
+    row.addEventListener('focusin', () => activate(slug));
+  });
+
+  const scheduleIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1000));
+  scheduleIdle(() => {
+    panelImgs.slice(1).forEach((img) => {
+      if (img.loading === 'lazy') {
+        img.loading = 'eager';
+      }
     });
-  }
+  });
 })();
 
 /* ------------------------------------------------------------
@@ -884,8 +897,12 @@ if (track && !reduceMotion) {
 const aboutLead = $('.about__lead');
 const statement  = $('[data-scrub]');
 let aboutST      = null;
+let aboutInitialized = false;
 
-if (aboutLead && statement && !reduceMotion) {
+function initAbout() {
+  if (aboutInitialized || !aboutLead || !statement || reduceMotion) return;
+  aboutInitialized = true;
+
   const split  = SplitText.create(statement, { type: 'words,chars', charsClass: 'char', aria: 'none' });
   let aboutTL  = null;
   let aboutW   = 0;
@@ -951,6 +968,42 @@ if (aboutLead && statement && !reduceMotion) {
   const resetAbout = () => { setupAbout(); ScrollTrigger.refresh(); };
   document.fonts && document.fonts.ready.then(resetAbout);
   window.addEventListener('load', resetAbout);
+}
+
+/* ------------------------------------------------------------
+   Below-the-fold setup deferral (Home only)
+   IntersectionObserver with 600px margin initializes About & Ticker
+   only when they approach the viewport.
+   ------------------------------------------------------------ */
+if (isHome && !reduceMotion) {
+  if (typeof IntersectionObserver !== 'undefined') {
+    const btfObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const target = entry.target;
+        if (target.classList.contains('ticker') || target.querySelector('.ticker__track')) {
+          setupTicker();
+          btfObserver.unobserve(target);
+        }
+        if (target.id === 'about' || target.classList.contains('about')) {
+          initAbout();
+          btfObserver.unobserve(target);
+        }
+      });
+    }, { rootMargin: '600px 0px' });
+
+    const tickerEl = $('.ticker');
+    if (tickerEl) btfObserver.observe(tickerEl);
+    const aboutEl = $('#about');
+    if (aboutEl) btfObserver.observe(aboutEl);
+
+    if (window.location.hash === '#about') {
+      initAbout();
+    }
+  } else {
+    setupTicker();
+    initAbout();
+  }
 }
 
 /* ------------------------------------------------------------

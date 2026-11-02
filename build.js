@@ -111,13 +111,22 @@ const STATIC_ROOT_FILES = [
 
 function copyStaticAssets() {
   ensureDir(DIST);
-  // 1. styles.css
-  fs.copyFileSync(path.join(ROOT, 'styles.css'), path.join(DIST, 'styles.css'));
+  // 1. styles.css (minified)
+  const esbuild = require('esbuild');
+  const rawCss = fs.readFileSync(path.join(ROOT, 'styles.css'), 'utf8');
+  const minCss = esbuild.transformSync(rawCss, { loader: 'css', minify: true }).code;
+  fs.writeFileSync(path.join(DIST, 'styles.css'), minCss, 'utf8');
 
   // 2. img/ directory
   const imgDir = path.join(ROOT, 'img');
   if (fs.existsSync(imgDir)) {
     copyDir(imgDir, path.join(DIST, 'img'));
+  }
+
+  // 2b. fonts/ directory
+  const fontsDir = path.join(ROOT, 'fonts');
+  if (fs.existsSync(fontsDir)) {
+    copyDir(fontsDir, path.join(DIST, 'fonts'));
   }
 
   // 3. Static root assets
@@ -246,7 +255,8 @@ function generatePanelPreviews(projects) {
     const pv = p.preview;
     if (!pv) return '';
     const isActive = idx === 0 ? ' is-active' : '';
-    return `<img class="wpanel__img${isActive}" data-slug="${esc(p.slug)}" src="${esc(pv.src)}" alt="${esc(p.title)} preview" width="${pv.width}" height="${pv.height}" decoding="async">`;
+    const loading = idx === 0 ? 'loading="eager"' : 'loading="lazy"';
+    return `<img class="wpanel__img${isActive}" data-slug="${esc(p.slug)}" src="${esc(pv.src)}" alt="${esc(p.title)} preview" width="${pv.width}" height="${pv.height}" ${loading} decoding="async">`;
   }).join('\n          ');
 }
 
@@ -326,6 +336,10 @@ function buildCasePages(projects) {
     const desc       = project.page?.description || project.summary || '';
     const bodyHtml   = fs.readFileSync(bodyPath, 'utf8');
 
+    const pagePreload = slug === 'pcgo'
+      ? '<link rel="preload" as="image" imagesrcset="/img/work/pcgo/home-800.webp 800w, /img/work/pcgo/home-1600.webp 1600w" imagesizes="(max-width: 600px) 300px, (max-width: 1200px) 100vw, 1200px" fetchpriority="high">'
+      : '';
+
     const vars = {
       home:             '/',
       base:             '/',
@@ -337,6 +351,7 @@ function buildCasePages(projects) {
       page_slug:        slug,
       page_body:        bodyHtml,
       page_jsonld:      '',
+      page_preload:     pagePreload,
       css_version:      versionOf('styles.css'),
       js_version:       versionOf('animation.bundle.js'),
     };
