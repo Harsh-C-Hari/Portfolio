@@ -3617,7 +3617,7 @@ html.pt-enter .loader {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 60;
+  z-index: 80;
   background: var(--paper);
   border-top: 2px solid var(--ink);
   padding-bottom: env(safe-area-inset-bottom);
@@ -3749,22 +3749,24 @@ html.pt-enter .loader {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom));
   z-index: 75;
   max-height: min(72dvh, 560px);
   background: var(--paper);
   border-top: 2px solid var(--ink);
   border-radius: 16px 16px 0 0;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  padding-bottom: 16px;
   display: flex;
   flex-direction: column;
-  transform: translateY(100%);
+  transform: translateY(calc(100% + 56px + env(safe-area-inset-bottom)));
   transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
 }
 
 .doc-sheet.is-open {
   transform: translateY(0);
+  pointer-events: auto;
 }
 
 .doc-sheet[hidden] {
